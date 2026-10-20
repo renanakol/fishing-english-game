@@ -71,7 +71,7 @@ export const services: Service[] = [
 ];
 
 export const outro = {
-  words: ["בואי", "ניצור", "יחד"],
+  words: ["בואו", "ניצור", "יחד"],
   website: "www.reni.co.il",
   instagram: "@reniart8",
 };
