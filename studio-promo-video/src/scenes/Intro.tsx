@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Media, RevealWord, Wipe, accentAt, fitSize } from "../components";
-import { BEAT, allMedia, brand, intro, timing } from "../config";
+import { BEAT, allMedia, brand, intro, sec, timing } from "../config";
 
 // One work per beat under a word per beat, then the studio name and slogan.
 export const Intro: React.FC = () => {
@@ -46,14 +46,14 @@ export const Intro: React.FC = () => {
             <RevealWord text={brand.studioName} delay={0} size={fitSize(brand.studioName, width, 220)} />
           )}
         </AbsoluteFill>
-        <Wipe at={0} length={10} color={accentAt(0)} mode="out" />
+        <Wipe at={0} length={sec(0.33)} color={accentAt(0)} mode="out" />
       </Sequence>
       {/* Covers the montage just before the slogan; the panel then sweeps away inside the sequence above. */}
-      <Sequence from={montageEnd - 10} durationInFrames={10}>
-        <Wipe at={0} length={10} color={accentAt(0)} mode="in" />
+      <Sequence from={montageEnd - sec(0.33)} durationInFrames={sec(0.33)}>
+        <Wipe at={0} length={sec(0.33)} color={accentAt(0)} mode="in" />
       </Sequence>
 
-      <Wipe at={timing.intro - 12} length={12} color={accentAt(1)} mode="in" />
+      <Wipe at={timing.intro - sec(0.4)} length={sec(0.4)} color={accentAt(1)} mode="in" />
     </AbsoluteFill>
   );
 };

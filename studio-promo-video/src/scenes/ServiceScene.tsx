@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { LineWord, Media, RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
-import { BEAT, Service, brand, services } from "../config";
+import { BEAT, Service, brand, sec, services } from "../config";
 
 // Full-screen works cut on the beat, with a big title and supporting lines that rise in on the beat.
 export const ServiceScene: React.FC<{ service: Service; index: number; duration: number }> = ({
@@ -16,10 +16,10 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
   // Two beats per work, or one beat when there are more works than fit — every cut lands on the beat.
   const shot = Math.max(1, Math.min(2, Math.floor(duration / BEAT / service.media.length))) * BEAT;
   const shots = Math.ceil(duration / shot);
-  const titleAt = 8;
+  const titleAt = sec(0.27);
   const titleSize = fitSize(service.title, width, Math.min(width, height) * 0.38, 0.9);
   const lineSize = Math.min(width, height) * 0.1;
-  const counterOpacity = interpolate(frame, [6, 16], [0, 1], { extrapolateRight: "clamp" });
+  const counterOpacity = interpolate(frame, [sec(0.2), sec(0.53)], [0, 1], { extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill style={{ background: brand.colors.ink }}>
@@ -68,8 +68,8 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
         <span style={{ opacity: 0.6 }}> / {String(services.length).padStart(2, "0")}</span>
       </div>
 
-      <Wipe at={0} length={12} color={accent} mode="out" />
-      <Wipe at={duration - 12} length={12} color={nextAccent} mode="in" />
+      <Wipe at={0} length={sec(0.4)} color={accent} mode="out" />
+      <Wipe at={duration - sec(0.4)} length={sec(0.4)} color={nextAccent} mode="in" />
     </AbsoluteFill>
   );
 };

@@ -11,7 +11,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { brand } from "./config";
+import { brand, sec } from "./config";
 
 // Heebo (variable weight) is bundled in public/fonts so rendering works offline.
 export const fontFamily = "Heebo";
@@ -124,7 +124,7 @@ export const RevealWord: React.FC<{
   color?: string;
   outline?: boolean;
   stagger?: number;
-}> = ({ text, delay, size, color = brand.colors.paper, outline = false, stagger = 1.2 }) => {
+}> = ({ text, delay, size, color = brand.colors.paper, outline = false, stagger = sec(0.04) }) => {
   const frame = useCurrentFrame();
   return (
     <div
@@ -145,7 +145,7 @@ export const RevealWord: React.FC<{
       }}
     >
       {Array.from(text).map((ch, i) => {
-        const p = progress(frame, delay + i * stagger, 16);
+        const p = progress(frame, delay + i * stagger, sec(0.53));
         return (
           <span
             key={i}
@@ -173,8 +173,8 @@ export const LineWord: React.FC<{
   background?: string;
 }> = ({ text, delay, size, color = brand.colors.paper, background }) => {
   const frame = useCurrentFrame();
-  const p = progress(frame, delay, 14);
-  const box = progress(frame, delay - 3, 14);
+  const p = progress(frame, delay, sec(0.47));
+  const box = progress(frame, delay - sec(0.1), sec(0.47));
   return (
     <div style={{ position: "relative", overflow: "hidden", padding: `0 ${size * 0.22}px`, direction: "rtl" }}>
       {background ? (

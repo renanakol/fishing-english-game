@@ -78,9 +78,11 @@ export const outro = {
 
 export const music: string | null = null; // e.g. "audio/music.mp3"
 
-export const FPS = 30;
-// Everything is cut to a 120 BPM grid: one beat = 15 frames.
-export const BEAT = 15;
+export const FPS = 60;
+// Everything is cut to a 120 BPM grid: one beat = half a second.
+export const BEAT = FPS / 2;
+// Seconds -> frames, so motion timing stays the same at any frame rate.
+export const sec = (seconds: number) => Math.round(seconds * FPS);
 export const timing = {
   intro: 8 * BEAT,
   service: 9 * BEAT,

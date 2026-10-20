@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Img, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
-import { BEAT, brand, outro, services } from "../config";
+import { BEAT, brand, outro, sec, services } from "../config";
 
 // Call to action words rise in one per beat, then the logo and contact details settle in.
 export const Outro: React.FC = () => {
@@ -43,7 +43,7 @@ export const Outro: React.FC = () => {
           <div style={{ fontWeight: 400, fontSize: unit * 0.045, color: accentAt(0) }}>{outro.instagram}</div>
         </div>
       </div>
-      <Wipe at={0} length={12} color={bg} mode="out" />
+      <Wipe at={0} length={sec(0.4)} color={bg} mode="out" />
     </AbsoluteFill>
   );
 };
