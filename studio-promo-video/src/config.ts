@@ -72,8 +72,8 @@ export const services: Service[] = [
 
 export const outro = {
   words: ["בואי", "ניצור", "יחד"],
-  website: "www.your-studio.co.il",
-  instagram: "@your.studio",
+  website: "www.reni.co.il",
+  instagram: "@reniart8",
 };
 
 export const music: string | null = null; // e.g. "audio/music.mp3"

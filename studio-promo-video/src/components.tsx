@@ -1,12 +1,12 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Easing,
   Img,
   OffthreadVideo,
   continueRender,
   delayRender,
   interpolate,
-  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
@@ -95,8 +95,8 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number }> = 
       </AbsoluteFill>
     );
   }
-  const zoom = interpolate(frame, [0, duration], [1.18, 1.02], clamp);
-  const drift = interpolate(frame, [0, duration], [-1.5, 1.5], clamp);
+  const zoom = interpolate(frame, [0, duration], [1.08, 1], clamp);
+  const drift = interpolate(frame, [0, duration], [-0.8, 0.8], clamp);
   const style: React.CSSProperties = {
     width: "100%",
     height: "100%",
@@ -111,39 +111,31 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number }> = 
   );
 };
 
-// White flash that decays over a few frames — punctuates hard cuts.
-export const Flash: React.FC<{ at: number; strength?: number }> = ({ at, strength = 0.7 }) => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(frame - at, [0, 5], [strength, 0], clamp);
-  return <AbsoluteFill style={{ background: "#fff", opacity, pointerEvents: "none" }} />;
-};
+// Smooth "expo out" curve used by every text entrance: fast start, long gentle settle.
+const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
+const progress = (frame: number, at: number, length: number) =>
+  interpolate(frame - at, [0, length], [0, 1], { ...clamp, easing: easeOut });
 
-// Decaying camera shake kicked off at frame `at`.
-export const useShake = (at: number, amount: number) => {
-  const frame = useCurrentFrame();
-  const t = frame - at;
-  if (t < 0 || t > 12) return "none";
-  const decay = 1 - t / 12;
-  return `translate(${Math.sin(t * 2.1) * amount * decay}px, ${Math.cos(t * 2.9) * amount * decay}px)`;
-};
-
-// A word whose letters slam in from huge and blurred, one after another (right to left).
-export const SlamWord: React.FC<{
+// A headline whose letters rise out of a mask one after another (right to left).
+export const RevealWord: React.FC<{
   text: string;
   delay: number;
   size: number;
   color?: string;
   outline?: boolean;
   stagger?: number;
-}> = ({ text, delay, size, color = brand.colors.paper, outline = false, stagger = 2 }) => {
+}> = ({ text, delay, size, color = brand.colors.paper, outline = false, stagger = 1.2 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
   return (
     <div
       style={{
         direction: "rtl",
         display: "flex",
         justifyContent: "center",
+        overflow: "hidden",
+        // Room for descenders (ק ך ן ף ץ) inside the mask.
+        padding: `${size * 0.05}px ${size * 0.05}px ${size * 0.2}px`,
+        marginBottom: -size * 0.15,
         fontFamily,
         fontWeight: 900,
         fontSize: size,
@@ -153,18 +145,15 @@ export const SlamWord: React.FC<{
       }}
     >
       {Array.from(text).map((ch, i) => {
-        const p = spring({ frame: frame - delay - i * stagger, fps, config: { damping: 14, stiffness: 220 } });
-        const appear = interpolate(frame - delay - i * stagger, [0, 3], [0, 1], clamp);
+        const p = progress(frame, delay + i * stagger, 16);
         return (
           <span
             key={i}
             style={{
               display: "inline-block",
-              opacity: appear,
-              transform: `scale(${interpolate(p, [0, 1], [2.6, 1])}) translateY(${(1 - p) * -30}%)`,
-              filter: `blur(${Math.max(0, (1 - appear) * 12)}px)`,
+              transform: `translateY(${(1 - p) * 120}%)`,
               color: outline ? "transparent" : color,
-              WebkitTextStroke: outline ? `${Math.max(2, size * 0.025)}px ${color}` : undefined,
+              WebkitTextStroke: outline ? `${Math.max(2, size * 0.02)}px ${color}` : undefined,
             }}
           >
             {ch}
@@ -175,8 +164,8 @@ export const SlamWord: React.FC<{
   );
 };
 
-// A word that shoots up from behind a mask.
-export const RiseWord: React.FC<{
+// A supporting line that slides up from behind a mask, optionally on a highlight bar that draws in.
+export const LineWord: React.FC<{
   text: string;
   delay: number;
   size: number;
@@ -184,16 +173,15 @@ export const RiseWord: React.FC<{
   background?: string;
 }> = ({ text, delay, size, color = brand.colors.paper, background }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = spring({ frame: frame - delay, fps, config: { damping: 16, stiffness: 180 } });
-  const box = spring({ frame: frame - delay + 2, fps, config: { damping: 200 } });
+  const p = progress(frame, delay, 14);
+  const box = progress(frame, delay - 3, 14);
   return (
-    <div style={{ position: "relative", overflow: "hidden", padding: `0 ${size * 0.18}px`, direction: "rtl" }}>
+    <div style={{ position: "relative", overflow: "hidden", padding: `0 ${size * 0.22}px`, direction: "rtl" }}>
       {background ? (
         <div
           style={{
             position: "absolute",
-            inset: `${size * 0.08}px 0`,
+            inset: `${size * 0.1}px 0`,
             background,
             transform: `scaleX(${box})`,
             transformOrigin: "right",
@@ -204,12 +192,12 @@ export const RiseWord: React.FC<{
         style={{
           position: "relative",
           fontFamily,
-          fontWeight: 900,
+          fontWeight: 700,
           fontSize: size,
-          lineHeight: 1.05,
+          lineHeight: 1.1,
           color,
           whiteSpace: "pre",
-          transform: `translateY(${(1 - p) * 110}%) rotate(${(1 - p) * -6}deg)`,
+          transform: `translateY(${(1 - p) * 110}%)`,
         }}
       >
         {text}
@@ -226,7 +214,7 @@ export const Wipe: React.FC<{ at: number; length: number; color: string; mode: "
   mode,
 }) => {
   const frame = useCurrentFrame();
-  const t = interpolate(frame - at, [0, length], [0, 1], { ...clamp, easing: (x) => 1 - Math.pow(1 - x, 3) });
+  const t = interpolate(frame - at, [0, length], [0, 1], { ...clamp, easing: Easing.bezier(0.65, 0, 0.35, 1) });
   // Panel travels right-to-left, matching Hebrew reading direction.
   const left = mode === "in" ? 100 - t * 100 : 0;
   const right = mode === "in" ? 0 : t * 100;

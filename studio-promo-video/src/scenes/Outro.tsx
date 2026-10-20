@@ -1,55 +1,49 @@
 import React from "react";
 import { AbsoluteFill, Img, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { SlamWord, Wipe, accentAt, fitSize, fontFamily, useShake } from "../components";
+import { RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
 import { BEAT, brand, outro, services } from "../config";
 
-// Call to action words hit one per beat, then logo and contact details pop in.
+// Call to action words rise in one per beat, then the logo and contact details settle in.
 export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const bg = accentAt(services.length + 1);
   const unit = Math.min(width, height);
-  const wordsDone = outro.words.length * BEAT;
-  const lastWord = Math.min(outro.words.length - 1, Math.floor(frame / BEAT));
-  const shake = useShake(lastWord * BEAT + 2, 16);
-  const pop = spring({ frame: frame - wordsDone, fps, config: { damping: 11 } });
-  const size = Math.min(...outro.words.map((w) => fitSize(w, width, unit * 0.3)));
+  const settle = spring({ frame: frame - outro.words.length * BEAT, fps, config: { damping: 200 } });
+  const size = Math.min(...outro.words.map((w) => fitSize(w, width, unit * 0.26)));
 
   return (
-    <AbsoluteFill style={{ background: bg, justifyContent: "center", alignItems: "center", gap: unit * 0.05 }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", transform: shake }}>
+    <AbsoluteFill style={{ background: bg, justifyContent: "center", alignItems: "center", gap: unit * 0.06 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         {outro.words.map((w, i) => (
-          <SlamWord key={w} text={w} delay={i * BEAT} size={size} color={i === 1 ? accentAt(0) : brand.colors.ink} />
+          <RevealWord key={w} text={w} delay={i * BEAT} size={size} color={i === 1 ? accentAt(0) : brand.colors.ink} />
         ))}
       </div>
       <div
         style={{
-          transform: `scale(${pop})`,
+          opacity: settle,
+          transform: `translateY(${(1 - settle) * 60}px)`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: unit * 0.025,
+          gap: unit * 0.03,
         }}
       >
-        {brand.logo ? <Img src={staticFile(brand.logo)} style={{ width: unit * 0.5 }} /> : null}
+        {brand.logo ? <Img src={staticFile(brand.logo)} style={{ width: unit * 0.42 }} /> : null}
         <div
           style={{
-            background: brand.colors.ink,
-            color: brand.colors.paper,
             fontFamily,
-            fontWeight: 700,
-            fontSize: unit * 0.045,
-            padding: `${unit * 0.02}px ${unit * 0.06}px`,
-            borderRadius: 999,
-            direction: "ltr",
+            color: brand.colors.ink,
             textAlign: "center",
+            direction: "ltr",
+            lineHeight: 1.35,
           }}
         >
-          {outro.website}
-          <div style={{ fontSize: unit * 0.034, fontWeight: 400, opacity: 0.8 }}>{outro.instagram}</div>
+          <div style={{ fontWeight: 700, fontSize: unit * 0.06 }}>{outro.website}</div>
+          <div style={{ fontWeight: 400, fontSize: unit * 0.045, color: accentAt(0) }}>{outro.instagram}</div>
         </div>
       </div>
-      <Wipe at={0} length={8} color={bg} mode="out" />
+      <Wipe at={0} length={12} color={bg} mode="out" />
     </AbsoluteFill>
   );
 };

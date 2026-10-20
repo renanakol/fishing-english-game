@@ -1,9 +1,9 @@
 import React from "react";
 import { AbsoluteFill, Sequence, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { Flash, Media, RiseWord, SlamWord, Wipe, accentAt, fitSize, fontFamily, useShake } from "../components";
+import { LineWord, Media, RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
 import { BEAT, Service, brand, services } from "../config";
 
-// Full-screen works cut on every other beat, with a giant title and lines that hit on the beat.
+// Full-screen works cut on the beat, with a big title and supporting lines that rise in on the beat.
 export const ServiceScene: React.FC<{ service: Service; index: number; duration: number }> = ({
   service,
   index,
@@ -16,39 +16,30 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
   // Two beats per work, or one beat when there are more works than fit — every cut lands on the beat.
   const shot = Math.max(1, Math.min(2, Math.floor(duration / BEAT / service.media.length))) * BEAT;
   const shots = Math.ceil(duration / shot);
-  const titleAt = 6;
-  const shake = useShake(titleAt + 4, 22);
-  const titleSize = fitSize(service.title, width, Math.min(width, height) * 0.42, 0.92);
-  const lineSize = Math.min(width, height) * 0.13;
-  const exitAt = duration - 8;
-  const counterOpacity = interpolate(frame, [4, 12], [0, 1], { extrapolateRight: "clamp" });
+  const titleAt = 8;
+  const titleSize = fitSize(service.title, width, Math.min(width, height) * 0.38, 0.9);
+  const lineSize = Math.min(width, height) * 0.1;
+  const counterOpacity = interpolate(frame, [6, 16], [0, 1], { extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill style={{ background: brand.colors.ink }}>
       {Array.from({ length: shots }, (_, i) => (
         <Sequence key={i} from={i * shot} durationInFrames={shot}>
           <Media src={service.media[i % service.media.length]} duration={shot} />
-          {i > 0 ? <Flash at={0} strength={0.5} /> : null}
         </Sequence>
       ))}
 
       {/* Legibility: darken toward where the text sits. */}
       <AbsoluteFill
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.15) 100%)" }}
+        style={{ background: "linear-gradient(to top, rgba(0,8,24,0.88) 0%, rgba(0,8,24,0.35) 50%, rgba(0,8,24,0) 75%)" }}
       />
 
       <AbsoluteFill
-        style={{
-          justifyContent: "flex-end",
-          alignItems: "center",
-          paddingBottom: height * 0.1,
-          gap: lineSize * 0.05,
-          transform: shake,
-        }}
+        style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: height * 0.1, gap: lineSize * 0.1 }}
       >
-        <SlamWord text={service.title} delay={titleAt} size={titleSize} color={accent} />
+        <RevealWord text={service.title} delay={titleAt} size={titleSize} color={accent} />
         {service.lines.map((line, i) => (
-          <RiseWord
+          <LineWord
             key={line}
             text={line}
             delay={(i + 2) * BEAT}
@@ -65,8 +56,9 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
           top: height * 0.05,
           right: width * 0.07,
           fontFamily,
-          fontWeight: 900,
-          fontSize: Math.min(width, height) * 0.05,
+          fontWeight: 700,
+          fontSize: Math.min(width, height) * 0.04,
+          letterSpacing: 2,
           color: brand.colors.paper,
           opacity: counterOpacity,
           direction: "ltr",
@@ -76,8 +68,8 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
         <span style={{ opacity: 0.6 }}> / {String(services.length).padStart(2, "0")}</span>
       </div>
 
-      <Wipe at={0} length={8} color={accent} mode="out" />
-      <Wipe at={exitAt} length={8} color={nextAccent} mode="in" />
+      <Wipe at={0} length={12} color={accent} mode="out" />
+      <Wipe at={duration - 12} length={12} color={nextAccent} mode="in" />
     </AbsoluteFill>
   );
 };
