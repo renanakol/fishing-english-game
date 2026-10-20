@@ -26,6 +26,8 @@ export type Service = {
   ghost: string;
   // Beats each work stays on screen (default: 2, or 1 when there are many works).
   beatsPerShot?: number;
+  // Scene length in beats (default: timing.service).
+  beats?: number;
   // Each line slams in on its own beat after the title.
   lines: string[];
   media: string[];
@@ -53,12 +55,15 @@ export const services: Service[] = [
     title: "אתרים",
     ghost: "WEBSITES",
     lines: ["עיצוב", "ובנייה", "מא' ועד ת'"],
-    // Website screen recordings, one second each.
+    // Website screen recordings, one second each; the scene runs longer to fit them all.
     beatsPerShot: 2,
+    beats: 14,
     media: [
+      "works/web/gohar-1.mp4",
       "works/web/agamon-hula-1.mp4",
       "works/web/reni-site-1.mp4",
       "works/web/in-your-own-time-1.mp4",
+      "works/web/gohar-2.mp4",
       "works/web/agamon-hula-2.mp4",
       "works/web/in-your-own-time-2.mp4",
     ],
@@ -121,7 +126,10 @@ export const timing = {
   outro: 10 * BEAT,
 };
 
-export const totalDuration = timing.intro + services.length * timing.service + timing.compare + timing.outro;
+export const serviceDuration = (s: Service) => (s.beats ? s.beats * BEAT : timing.service);
+
+export const totalDuration =
+  timing.intro + services.reduce((sum, s) => sum + serviceDuration(s), 0) + timing.compare + timing.outro;
 
 // Every work, in order — used by the opening montage.
 export const allMedia = services.flatMap((s) => s.media);

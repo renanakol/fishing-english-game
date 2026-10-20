@@ -31,7 +31,7 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
 
       {/* Legibility: darken toward where the text sits. */}
       <AbsoluteFill
-        style={{ background: "linear-gradient(to top, rgba(0,8,24,0.88) 0%, rgba(0,8,24,0.35) 50%, rgba(0,8,24,0) 75%)" }}
+        style={{ background: "linear-gradient(to top, rgba(20,18,32,0.94) 0%, rgba(20,18,32,0.75) 40%, rgba(20,18,32,0.25) 62%, rgba(20,18,32,0) 78%)" }}
       />
 
       <AbsoluteFill
