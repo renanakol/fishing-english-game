@@ -1,0 +1,25 @@
+{
+  "name": "studio-promo-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Motion-graphics promo video for the design studio",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render StudioPromo out/studio-promo.mp4",
+    "render:square": "remotion render StudioPromoSquare out/studio-promo-square.mp4",
+    "render:wide": "remotion render StudioPromoWide out/studio-promo-wide.mp4",
+    "still": "remotion still StudioPromo out/preview.png --frame=60",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.537",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.537"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "playwright": "^1.56.1",
+    "typescript": "5.8.3"
+  }
+}
