@@ -45,21 +45,40 @@ export const fitSize = (text: string, width: number, max: number, share = 0.9) =
 
 const isVideo = (src: string) => /\.(mp4|mov|webm)$/i.test(src);
 // Full-page website captures (see scripts/record-site.mjs) are named *-scroll.png and scroll top to bottom.
-// Logo files (*-logo.*) are shown whole instead of cropped to fill the frame.
-const isLogo = (src: string) => /-logo\.(png|jpe?g|webp)$/i.test(src);
 const isScroll = (src: string) => /-scroll\.(png|jpe?g)$/i.test(src);
+// Logos (*-logo.*) and landscape footage (*-wide.*) are shown whole instead of cropped to fill the frame.
+const isLogo = (src: string) => /-logo\.(png|jpe?g|webp)$/i.test(src);
+const isWide = (src: string) => /-wide\.(mp4|mov|webm|png|jpe?g)$/i.test(src);
+
+const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, style }) =>
+  isVideo(src) ? <OffthreadVideo src={staticFile(src)} muted style={style} /> : <Img src={staticFile(src)} style={style} />;
 
 // A work filling the whole frame, slowly pushing in.
 export const Media: React.FC<{ src: string; duration: number; dim?: number }> = ({ src, duration, dim = 0 }) => {
   const frame = useCurrentFrame();
   const { height } = useVideoConfig();
-  if (isLogo(src)) {
-    // Logos must never be cropped: show the whole image, backed by a blurred copy of itself.
-    const zoom = interpolate(frame, [0, duration], [1.08, 0.98], clamp);
+  if (isLogo(src) || isWide(src)) {
+    const zoom = interpolate(frame, [0, duration], [1.06, 0.98], clamp);
+    // Logos sit on their own background color (their top-left pixel, stretched); footage on a blurred copy of itself.
+    const backdrop: React.CSSProperties = isLogo(src)
+      ? { position: "absolute", left: 0, top: 0, width: "100%", height: "100%", objectFit: "fill", transform: "scale(300)", transformOrigin: "0 0" }
+      : { position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(36px) brightness(0.8)", transform: "scale(1.2)" };
     return (
-      <AbsoluteFill style={{ overflow: "hidden", justifyContent: "center", alignItems: "center" }}>
-        <Img src={staticFile(src)} style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px)", transform: "scale(1.3)" }} />
-        <Img src={staticFile(src)} style={{ width: "100%", height: "100%", objectFit: "contain", transform: `scale(${zoom})` }} />
+      <AbsoluteFill style={{ overflow: "hidden", background: brand.colors.ink }}>
+        <Source src={src} style={backdrop} />
+        {/* Kept in the upper half, clear of the titles at the bottom. */}
+        <AbsoluteFill style={{ top: "8%", height: "46%", justifyContent: "center", alignItems: "center" }}>
+          <Source
+            src={src}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+              transform: `scale(${zoom})`,
+              boxShadow: isWide(src) ? "0 30px 80px rgba(0,0,0,0.5)" : undefined,
+            }}
+          />
+        </AbsoluteFill>
         {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
       </AbsoluteFill>
     );
@@ -86,7 +105,7 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number }> = 
   };
   return (
     <AbsoluteFill style={{ background: brand.colors.ink, overflow: "hidden" }}>
-      {isVideo(src) ? <OffthreadVideo src={staticFile(src)} muted style={style} /> : <Img src={staticFile(src)} style={style} />}
+      <Source src={src} style={style} />
       {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
     </AbsoluteFill>
   );

@@ -56,7 +56,12 @@ export const services: Service[] = [
   {
     title: "וידאו",
     lines: ["ואנימציה", "שזזה", "קדימה"],
-    media: ["works/video/1.jpg", "works/video/2.jpg", "works/video/3.jpg", "works/video/4.jpg"],
+    media: [
+      "works/video/bar-mitzva-1-wide.mp4",
+      "works/video/bar-mitzva-2-wide.mp4",
+      "works/video/bar-mitzva-3-wide.mp4",
+      "works/video/bar-mitzva-4-wide.mp4",
+    ],
   },
 ];
 
