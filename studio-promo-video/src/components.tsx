@@ -45,12 +45,25 @@ export const fitSize = (text: string, width: number, max: number, share = 0.9) =
 
 const isVideo = (src: string) => /\.(mp4|mov|webm)$/i.test(src);
 // Full-page website captures (see scripts/record-site.mjs) are named *-scroll.png and scroll top to bottom.
+// Logo files (*-logo.*) are shown whole instead of cropped to fill the frame.
+const isLogo = (src: string) => /-logo\.(png|jpe?g|webp)$/i.test(src);
 const isScroll = (src: string) => /-scroll\.(png|jpe?g)$/i.test(src);
 
 // A work filling the whole frame, slowly pushing in.
 export const Media: React.FC<{ src: string; duration: number; dim?: number }> = ({ src, duration, dim = 0 }) => {
   const frame = useCurrentFrame();
   const { height } = useVideoConfig();
+  if (isLogo(src)) {
+    // Logos must never be cropped: show the whole image, backed by a blurred copy of itself.
+    const zoom = interpolate(frame, [0, duration], [1.08, 0.98], clamp);
+    return (
+      <AbsoluteFill style={{ overflow: "hidden", justifyContent: "center", alignItems: "center" }}>
+        <Img src={staticFile(src)} style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px)", transform: "scale(1.3)" }} />
+        <Img src={staticFile(src)} style={{ width: "100%", height: "100%", objectFit: "contain", transform: `scale(${zoom})` }} />
+        {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+      </AbsoluteFill>
+    );
+  }
   if (isScroll(src)) {
     const p = interpolate(frame, [0, duration], [0, 1], { ...clamp, easing: (x) => x * x * (3 - 2 * x) });
     return (
