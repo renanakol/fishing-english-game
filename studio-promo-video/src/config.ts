@@ -30,7 +30,13 @@ export const services: Service[] = [
   {
     title: "מיתוג",
     lines: ["זהות", "שאי אפשר", "לפספס"],
-    media: ["works/branding/1.jpg", "works/branding/2.jpg", "works/branding/3.jpg", "works/branding/4.jpg"],
+    media: [
+      "works/branding/smash-eat-bag.jpg",
+      "works/branding/stargazing-logo.jpg",
+      "works/branding/live-jar.jpg",
+      "works/branding/unity-logo.jpg",
+      "works/branding/live-logo.jpg",
+    ],
   },
   {
     title: "אתרים",
