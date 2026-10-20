@@ -278,6 +278,8 @@ export const NumberBadge: React.FC<{ index: number; size: number; color: string;
           inset: 0,
           borderRadius: "50%",
           border: `${size * 0.03}px solid ${color}`,
+          // Keeps the white number readable over light website screens.
+          background: "rgba(20,18,32,0.55)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
