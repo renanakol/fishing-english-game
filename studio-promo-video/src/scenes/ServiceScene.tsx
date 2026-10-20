@@ -13,7 +13,8 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
   const { width, height } = useVideoConfig();
   const accent = accentAt(index + 1);
   const nextAccent = accentAt(index + 2);
-  const shot = 2 * BEAT;
+  // Two beats per work, or one beat when there are more works than fit — every cut lands on the beat.
+  const shot = Math.max(1, Math.min(2, Math.floor(duration / BEAT / service.media.length))) * BEAT;
   const shots = Math.ceil(duration / shot);
   const titleAt = 6;
   const shake = useShake(titleAt + 4, 22);
