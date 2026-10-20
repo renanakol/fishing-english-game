@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { Media, RevealWord, Wipe, accentAt, fitSize } from "../components";
-import { BEAT, allMedia, brand, intro, sec, timing } from "../config";
+import { Media, RevealWord, Sticker, Wipe, accentAt, fitSize } from "../components";
+import { BEAT, allMedia, brand, intro, sec, ticker, timing } from "../config";
 
 // One work per beat under a word per beat, then the studio name and slogan.
 export const Intro: React.FC = () => {
@@ -46,6 +46,26 @@ export const Intro: React.FC = () => {
             <RevealWord text={brand.studioName} delay={0} size={fitSize(brand.studioName, width, 220)} />
           )}
         </AbsoluteFill>
+        {ticker.map((label, i) => {
+          const spots = [
+            { top: "18%", right: "8%", rotate: -8 },
+            { top: "24%", left: "6%", rotate: 7 },
+            { bottom: "24%", right: "10%", rotate: 6 },
+            { bottom: "18%", left: "8%", rotate: -6 },
+          ];
+          const { rotate, ...pos } = spots[i % spots.length];
+          const colors = [
+            { background: accentAt(0), color: brand.colors.paper },
+            { background: accentAt(1), color: brand.colors.ink },
+            { background: brand.colors.paper, color: brand.colors.ink },
+            { background: accentAt(1), color: brand.colors.ink },
+          ][i % 4];
+          return (
+            <div key={label} style={{ position: "absolute", ...pos }}>
+              <Sticker text={label} delay={sec(0.6) + (i * BEAT) / 2} size={width * 0.045} rotate={rotate} {...colors} />
+            </div>
+          );
+        })}
         <Wipe at={0} length={sec(0.33)} color={accentAt(0)} mode="out" />
       </Sequence>
       {/* Covers the montage just before the slogan; the panel then sweeps away inside the sequence above. */}

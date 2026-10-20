@@ -1,13 +1,13 @@
 import React from "react";
 import { AbsoluteFill, Img, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
-import { BEAT, brand, outro, sec, services } from "../config";
+import { PillButton, RevealWord, Ticker, Wipe, accentAt, fitSize, fontFamily } from "../components";
+import { BEAT, brand, outro, sec, ticker } from "../config";
 
 // Call to action words rise in one per beat, then the logo and contact details settle in.
 export const Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const bg = accentAt(services.length + 1);
+  const bg = brand.colors.paper;
   const unit = Math.min(width, height);
   const settle = spring({ frame: frame - outro.words.length * BEAT, fps, config: { damping: 200 } });
   const size = Math.min(...outro.words.map((w) => fitSize(w, width, unit * 0.26)));
@@ -39,9 +39,14 @@ export const Outro: React.FC = () => {
             lineHeight: 1.35,
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: unit * 0.06 }}>{outro.website}</div>
-          <div style={{ fontWeight: 400, fontSize: unit * 0.045, color: accentAt(0) }}>{outro.instagram}</div>
+          <PillButton text={outro.website} size={unit * 0.05} background={brand.colors.ink} color={brand.colors.paper} />
+          <div style={{ fontWeight: 400, fontSize: unit * 0.045, color: accentAt(0), marginTop: unit * 0.02 }}>
+            {outro.instagram}
+          </div>
         </div>
+      </div>
+      <div style={{ position: "absolute", bottom: height * 0.06, left: -width * 0.1, width: width * 1.2, transform: "rotate(-3deg)" }}>
+        <Ticker items={ticker} size={unit * 0.045} background={accentAt(1)} color={brand.colors.ink} />
       </div>
       <Wipe at={0} length={sec(0.4)} color={bg} mode="out" />
     </AbsoluteFill>

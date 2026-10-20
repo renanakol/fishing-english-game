@@ -7,10 +7,11 @@ export const brand = {
   // Studio name + "עיצוב עם קריצה ;)" lockup (white + yellow, for dark backgrounds).
   slogan: "logo/slogan.png" as string | null,
   colors: {
-    ink: "#000E2A",
+    // Sampled from reni.co.il.
+    ink: "#202030",
     paper: "#FFFFFF",
-    // Each scene's wipe/highlight color, cycled. Taken from the logo and slogan.
-    accents: ["#C64B4C", "#EBDE17", "#FFFFFF"],
+    // Each scene's wipe/highlight color, cycled: red, yellow, turquoise.
+    accents: ["#C83C3C", "#F8E800", "#60C0C8"],
   },
 };
 
@@ -21,6 +22,10 @@ export const intro = {
 
 export type Service = {
   title: string;
+  // Giant English word drifting behind the title.
+  ghost: string;
+  // Beats each work stays on screen (default: 2, or 1 when there are many works).
+  beatsPerShot?: number;
   // Each line slams in on its own beat after the title.
   lines: string[];
   media: string[];
@@ -29,6 +34,7 @@ export type Service = {
 export const services: Service[] = [
   {
     title: "מיתוג",
+    ghost: "BRANDING",
     lines: ["זהות", "שאי אפשר", "לפספס"],
     media: [
       "works/branding/smash-eat-bag.jpg",
@@ -45,11 +51,21 @@ export const services: Service[] = [
   },
   {
     title: "אתרים",
+    ghost: "WEBSITES",
     lines: ["עיצוב", "ובנייה", "מא' ועד ת'"],
-    media: ["works/web/1.jpg", "works/web/2.jpg", "works/web/3.jpg"],
+    // Website screen recordings, one second each.
+    beatsPerShot: 2,
+    media: [
+      "works/web/agamon-hula-1.mp4",
+      "works/web/reni-site-1.mp4",
+      "works/web/in-your-own-time-1.mp4",
+      "works/web/agamon-hula-2.mp4",
+      "works/web/in-your-own-time-2.mp4",
+    ],
   },
   {
     title: "איור",
+    ghost: "ILLUSTRATION",
     lines: ["עולמות", "שלמים", "ביד"],
     media: [
       "works/illustration/wizard-of-oz.jpg",
@@ -60,6 +76,7 @@ export const services: Service[] = [
   },
   {
     title: "וידאו",
+    ghost: "MOTION",
     lines: ["ואנימציה", "שזזה", "קדימה"],
     media: [
       "works/video/bar-mitzva-1-wide.mp4",
@@ -69,6 +86,20 @@ export const services: Service[] = [
     ],
   },
 ];
+
+// "Without / with" card: a toggle flips and each generic line is crossed out and replaced.
+export const compare = {
+  off: "בלי",
+  on: "עם רני סטודיו",
+  rows: [
+    { before: "עיצוב גנרי", after: "עיצוב עם קריצה" },
+    { before: "לוגו שאף אחד לא זוכר", after: "זהות שזוכרים" },
+    { before: "אתר שעומד במקום", after: "אתר שעובד בשבילך" },
+  ],
+};
+
+// Running strip on the final screen.
+export const ticker = ["מיתוג", "בניית ועיצוב אתרים", "איור", "וידאו ואנימציה"];
 
 export const outro = {
   words: ["בואו", "ניצור", "יחד"],
@@ -86,10 +117,11 @@ export const sec = (seconds: number) => Math.round(seconds * FPS);
 export const timing = {
   intro: 8 * BEAT,
   service: 9 * BEAT,
+  compare: 8 * BEAT,
   outro: 10 * BEAT,
 };
 
-export const totalDuration = timing.intro + services.length * timing.service + timing.outro;
+export const totalDuration = timing.intro + services.length * timing.service + timing.compare + timing.outro;
 
 // Every work, in order — used by the opening montage.
 export const allMedia = services.flatMap((s) => s.media);
