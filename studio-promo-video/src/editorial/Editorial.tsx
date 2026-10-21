@@ -22,8 +22,9 @@ const palette = {
 type Frame = { width: number; height: number };
 type Chapter = {
   title: string;
-  // Heavy line set above the big colored title.
-  kicker: string;
+  // Heavy line set above the big colored title, and/or one set below it.
+  kicker?: string;
+  tail?: string;
   // Scene background, title color and text color.
   bg: string;
   titleColor: string;
@@ -70,14 +71,16 @@ const chapters: Chapter[] = [
     aspect: 1,
     fit: "cover",
     media: [
-      { src: "works/illustration/beach-dancer.jpg", beats: 4 },
-      { src: "works/illustration/swim-ring.jpg", beats: 4 },
-      { src: "works/illustration/moon.jpg", beats: 4 },
+      { src: "works/illustration/beach-dancer.jpg", beats: 2 },
+      { src: "works/illustration/swim-ring.jpg", beats: 2 },
+      { src: "works/illustration/sunbather.jpg", beats: 2 },
+      { src: "works/illustration/moon.jpg", beats: 2 },
+      { src: "works/illustration/bouquet.jpg", beats: 2 },
     ],
   },
   {
-    title: "וידאו",
-    kicker: "אנימציה שמושכת את העין",
+    title: "וידאו ואנימציה",
+    tail: "שמושכים את העין",
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
@@ -147,7 +150,8 @@ const Rise: React.FC<{ at: number; children: React.ReactNode; style?: React.CSSP
 };
 
 // A stacked headline: heavy lines set tight, the last line huge in an accent color with a small sparkle beside it.
-type HeadLine = { text: string; color: string };
+// `big` marks the oversized line (by default the last one).
+type HeadLine = { text: string; color: string; big?: boolean };
 // `bigScale` sets how much larger the last line is than the others.
 const Headline: React.FC<{
   lines: HeadLine[];
@@ -158,7 +162,8 @@ const Headline: React.FC<{
   align?: "right" | "center";
 }> = ({ lines, size, at, maxWidth, bigScale = 1.45, align = "right" }) => {
   const frame = useCurrentFrame();
-  const last = lines.length - 1;
+  const bigIndex = Math.max(0, lines.findIndex((l) => l.big));
+  const last = lines.some((l) => l.big) ? bigIndex : lines.length - 1;
   const spark = interpolate(frame - at - last * sec(0.12), [sec(0.2), sec(0.6)], [0, 1], { ...clamp, easing: ease });
   return (
     <div style={{ direction: "rtl", textAlign: align, letterSpacing: -size * 0.02 }}>
@@ -207,7 +212,7 @@ const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
   { label: "איור", src: "works/illustration/beach-dancer.jpg" },
-  { label: "וידאו", src: "works/video/shop-now.mp4" },
+  { label: "וידאו ואנימציה", src: "works/video/shop-now.mp4" },
 ];
 
 const Opening: React.FC = () => {
@@ -225,7 +230,17 @@ const Opening: React.FC = () => {
             <AbsoluteFill style={{ background: "rgba(13,13,16,0.6)" }} />
             <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", direction: "rtl" }}>
               <Rise at={0}>
-                <div style={{ fontSize: unit * 0.26, fontWeight: 900, color: [yellow, turquoise, red, yellow][i] }}>{h.label}</div>
+                <div
+                  style={{
+                    // Long labels shrink to fit the width.
+                    fontSize: Math.min(unit * 0.26, (width * 0.9) / (Array.from(h.label).length * 0.68)),
+                    fontWeight: 900,
+                    color: [yellow, turquoise, red, yellow][i],
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {h.label}
+                </div>
               </Rise>
             </AbsoluteFill>
           </Sequence>
@@ -271,8 +286,9 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
             bigScale={2.4}
             maxWidth={width - margin * 2}
             lines={[
-              { text: chapter.kicker, color: fg },
-              { text: chapter.title, color: chapter.titleColor },
+              ...(chapter.kicker ? [{ text: chapter.kicker, color: fg }] : []),
+              { text: chapter.title, color: chapter.titleColor, big: true },
+              ...(chapter.tail ? [{ text: chapter.tail, color: fg }] : []),
             ]}
           />
         </div>
@@ -380,16 +396,16 @@ const Closing: React.FC = () => {
   );
 };
 
-// Logo and contact details on black.
+// Logo and contact details on white.
 const EndCard: React.FC = () => {
   const { width, height } = useVideoConfig();
   const unit = Math.min(width, height);
   const logo = useIn(sec(0.15), sec(1));
 
   return (
-    <AbsoluteFill style={{ background: black, alignItems: "center", justifyContent: "center", direction: "rtl" }}>
+    <AbsoluteFill style={{ background: palette.cream, alignItems: "center", justifyContent: "center", direction: "rtl" }}>
       <div style={{ opacity: logo, transform: `translateY(${(1 - logo) * 30}px)` }}>
-        <LogoOnDark width={unit * 0.6} />
+        <Logo width={unit * 0.62} />
       </div>
       <div style={{ height: height * 0.05 }} />
       <Rise at={sec(0.9)} style={{ marginTop: unit * 0.045 }}>
@@ -397,8 +413,8 @@ const EndCard: React.FC = () => {
           style={{
             fontSize: unit * 0.05,
             fontWeight: 700,
-            color: black,
-            background: yellow,
+            color: palette.cream,
+            background: brand.colors.ink,
             padding: `${unit * 0.02}px ${unit * 0.06}px`,
             borderRadius: 999,
             direction: "ltr",
@@ -413,19 +429,19 @@ const EndCard: React.FC = () => {
         </div>
       </Rise>
       <Rise at={sec(1.3)} style={{ position: "absolute", bottom: height * 0.07 }}>
-        <div style={{ fontFamily: handFont, fontSize: unit * 0.05, color: palette.cream }}>מיתוג · אתרים · איור · וידאו ואנימציה</div>
+        <div style={{ fontFamily: handFont, fontSize: unit * 0.05, color: brand.colors.ink }}>מיתוג · אתרים · איור · וידאו ואנימציה</div>
       </Rise>
     </AbsoluteFill>
   );
 };
 
-// The vector logo recolored for a dark background: navy lines turn white, the red stays.
-const LogoOnDark: React.FC<{ width: number }> = ({ width }) => {
+// The vector logo in its own colors.
+const Logo: React.FC<{ width: number }> = ({ width }) => {
   const [x, y, w, h] = logoViewBox;
   return (
     <svg viewBox={`${x} ${y} ${w} ${h}`} width={width} height={(width * h) / w}>
       {logoParts.map((p, i) => (
-        <path key={i} d={p.d} fillRule={p.rule as "nonzero" | "evenodd"} fill={p.kind === "text" || p.kind === "thread" ? p.color : palette.cream} />
+        <path key={i} d={p.d} fillRule={p.rule as "nonzero" | "evenodd"} fill={p.color} />
       ))}
     </svg>
   );
