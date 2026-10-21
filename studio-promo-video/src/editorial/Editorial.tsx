@@ -49,6 +49,8 @@ const chapters: Chapter[] = [
       { src: "works/branding/wine-and-beard.jpg", beats: 2 },
       { src: "works/branding/unity-logo.jpg", beats: 2 },
       { src: "works/branding/live-jar.jpg", beats: 2 },
+      { src: "works/branding/shawarma-bag-wide.jpg", beats: 2 },
+      { src: "works/branding/kurtsch-burger-wide.jpg", beats: 2 },
     ],
   },
   {
@@ -318,19 +320,23 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
             boxShadow: "0 30px 90px rgba(0,0,0,0.6)",
           }}
         >
-          {chapter.media.map((shot, i) => (
+          {chapter.media.map((shot, i) => {
+            // Landscape works (*-wide.*) are shown whole over a blurred copy, whatever the chapter's fit.
+            const fit = /-wide\./.test(shotSrc(shot)) ? "contain" : chapter.fit;
+            return (
             <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
               <PunchIn length={shotDuration(shot)}>
-                {chapter.fit === "contain" ? (
+                {fit === "contain" ? (
                   <Source
                     src={shotSrc(shot)}
                     style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(30px) brightness(0.55)", transform: "scale(1.2)" }}
                   />
                 ) : null}
-                <Source src={shotSrc(shot)} style={{ position: "absolute", width: "100%", height: "100%", objectFit: chapter.fit }} />
+                <Source src={shotSrc(shot)} style={{ position: "absolute", width: "100%", height: "100%", objectFit: fit }} />
               </PunchIn>
             </Sequence>
-          ))}
+            );
+          })}
         </div>
 
         {/* Progress ticks under the frame, one per work. */}
