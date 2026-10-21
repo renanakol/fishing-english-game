@@ -194,7 +194,7 @@ export const TvShowcase: React.FC<{ media: Shot[]; color: string; knobColor: str
   );
 };
 
-// The picture tube: each shot whole (letterboxed), a static burst at every cut, glass glare and scanlines.
+// The picture tube: each shot whole, a static burst at every cut, glass glare and scanlines.
 const Screen: React.FC<{
   width: number;
   height: number;
@@ -230,7 +230,12 @@ const Screen: React.FC<{
         {media.map((shot, i) => (
           <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
             <AbsoluteFill>
-              <Source src={shotSrc(shot)} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              {/* Shots that are not 16:9 sit on a blurred copy of themselves instead of black bars. */}
+              <Source
+                src={shotSrc(shot)}
+                style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(24px) brightness(0.75)", transform: "scale(1.15)" }}
+              />
+              <Source src={shotSrc(shot)} style={{ position: "absolute", width: "100%", height: "100%", objectFit: "contain" }} />
             </AbsoluteFill>
           </Sequence>
         ))}

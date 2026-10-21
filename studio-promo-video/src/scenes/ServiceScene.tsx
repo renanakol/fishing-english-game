@@ -28,7 +28,7 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
       ) : service.display === "phone" ? (
         <PhoneShowcase media={service.media} wall={accentAt(1)} body={accentAt(0)} />
       ) : service.display === "easel" ? (
-        <EaselShowcase media={service.media} wall={accentAt(2)} wood="#E8C48A" paints={[accentAt(1), accentAt(0), brand.colors.paper]} />
+        <EaselShowcase media={service.media} wall={accentAt(2)} wood="#E8C48A" />
       ) : (
         service.media.map((shot, i) => (
           <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>

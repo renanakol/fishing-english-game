@@ -179,13 +179,8 @@ export const PhoneShowcase: React.FC<{ media: Shot[]; wall: string; body: string
   );
 };
 
-// Illustration: works on a canvas on a wooden easel. A paintbrush paints each one in, row by row.
-export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string; paints: string[] }> = ({
-  media,
-  wall,
-  wood,
-  paints,
-}) => {
+// Illustration: works on a canvas on a wooden easel, each one painted in with wide strokes, row by row.
+export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string }> = ({ media, wall, wood }) => {
   const frame = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const starts = startsOf(media);
@@ -203,13 +198,7 @@ export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string
     interpolate(frame - paintStart(i), [0, paintLength], [0, 1], { ...clamp, easing: Easing.bezier(0.45, 0, 0.55, 1) });
   const p = paintP(current);
   const stroke = makeStroke(side);
-  const brushAt = stroke.at(p * stroke.length);
-  // Lean the brush against its direction of travel, smoothed over a short stretch of the path.
-  const ahead = stroke.at(Math.min(stroke.length, p * stroke.length + side * 0.15));
-  const behind = stroke.at(Math.max(0, p * stroke.length - side * 0.15));
-  const lean = interpolate(ahead.x - behind.x, [-side * 0.3, side * 0.3], [28, -28], clamp);
-  const brushVisible = interpolate(frame - paintStart(current), [-sec(0.15), 0, paintLength, paintLength + sec(0.2)], [0, 1, 1, 0], clamp);
-  // The canvas nudges a little under the brush.
+  // The canvas nudges a little while it is being painted.
   const wobble = p > 0 && p < 1 ? Math.sin(frame * 0.9) * 0.4 : 0;
   const woodStyle: React.CSSProperties = {
     position: "absolute",
@@ -267,19 +256,6 @@ export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string
               return <PaintedImage key={i} src={shotSrc(shot)} side={side} stroke={stroke} p={i === current ? p : 1} />;
             })}
           </div>
-          {/* The brush, its tip on the paint front. */}
-          <div
-            style={{
-              position: "absolute",
-              left: brushAt.x,
-              top: brushAt.y,
-              opacity: brushVisible,
-              transform: `rotate(${lean}deg)`,
-              transformOrigin: "0 0",
-            }}
-          >
-            <Paintbrush size={side * 0.6} paint={paints[current % paints.length]} wood={wood} line={line} />
-          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
@@ -334,32 +310,6 @@ const PaintedImage: React.FC<{ src: string; side: number; stroke: ReturnType<typ
         </mask>
       </defs>
       <image href={staticFile(src)} width={side} height={side} preserveAspectRatio="xMidYMid slice" mask={`url(#paint-${id})`} />
-    </svg>
-  );
-};
-
-// A flat paintbrush drawn with its bristle tip at (0, 0) and the handle rising up and away.
-const Paintbrush: React.FC<{ size: number; paint: string; wood: string; line: number }> = ({ size, paint, wood, line }) => {
-  const w = size * 0.13;
-  return (
-    <svg
-      width={w * 2}
-      height={size}
-      viewBox={`${-w} ${-size} ${w * 2} ${size}`}
-      style={{ position: "absolute", left: -w, top: -size, overflow: "visible" }}
-    >
-      <g stroke={ink} strokeWidth={line * 0.7} strokeLinejoin="round">
-        {/* Handle */}
-        <path d={`M ${-w * 0.32} ${-size * 0.4} L ${-w * 0.2} ${-size} L ${w * 0.2} ${-size} L ${w * 0.32} ${-size * 0.4} Z`} fill={wood} />
-        {/* Metal ferrule */}
-        <rect x={-w * 0.45} y={-size * 0.42} width={w * 0.9} height={size * 0.14} rx={line * 0.4} fill="#C9CCD6" />
-        {/* Bristles dipped in paint */}
-        <path
-          d={`M ${-w * 0.45} ${-size * 0.28} L ${w * 0.45} ${-size * 0.28} L ${w * 0.4} ${-size * 0.08} Q 0 ${size * 0.02} ${-w * 0.4} ${-size * 0.08} Z`}
-          fill="#E7D3B0"
-        />
-        <path d={`M ${-w * 0.42} ${-size * 0.14} L ${w * 0.42} ${-size * 0.14} L ${w * 0.4} ${-size * 0.08} Q 0 ${size * 0.02} ${-w * 0.4} ${-size * 0.08} Z`} fill={paint} />
-      </g>
     </svg>
   );
 };

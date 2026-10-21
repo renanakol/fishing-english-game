@@ -85,9 +85,7 @@ export const services: Service[] = [
     display: "tv",
     line: "ואנימציה שזזה קדימה",
     media: [
-      "works/video/boots-ad-1-wide.mp4",
-      // The two bar mitzva moments joined into one continuous clip.
-      { src: "works/video/bar-mitzva-wide.mp4", beats: 8 },
+      { src: "works/video/boots-ad-1-wide.mp4", beats: 9 },
       { src: "works/video/princess-frog.mp4", beats: 5 },
       "works/video/boots-ad-2-wide.mp4",
     ],
@@ -104,9 +102,6 @@ export const compare = {
     { before: "אתר שעומד במקום", after: "אתר שעובד בשבילך" },
   ],
 };
-
-// Running strip on the final screen.
-export const ticker = intro.services.map((s) => s.label);
 
 export const outro = {
   // First the call to action over a photo of the studio, then the logo and contact details.

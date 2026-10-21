@@ -1,8 +1,7 @@
 import React from "react";
-import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { Media, PillButton, RevealWord, Ticker, Wipe, accentAt, fitSize, fontFamily } from "../components";
-import { BEAT, brand, outro, sec, ticker } from "../config";
-import { LogoReveal } from "./LogoReveal";
+import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { Media, PillButton, RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
+import { BEAT, brand, outro, sec } from "../config";
 
 // Two clean screens: the call to action over a photo of the studio, then the logo and contact details.
 export const Outro: React.FC = () => {
@@ -36,12 +35,11 @@ export const Outro: React.FC = () => {
       <Sequence from={photoPart}>
         <ContactCard />
       </Sequence>
-
     </AbsoluteFill>
   );
 };
 
-// The logo draws itself on, then the website button and Instagram handle settle in under it.
+// The logo settles in, then the website button and Instagram handle under it.
 const ContactCard: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
@@ -50,7 +48,16 @@ const ContactCard: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", gap: unit * 0.06 }}>
-      <LogoReveal width={unit * 0.72} delay={sec(0.2)} />
+      {brand.logo ? (
+        <Img
+          src={staticFile(brand.logo)}
+          style={{
+            width: unit * 0.72,
+            opacity: settle(sec(0.2)),
+            transform: `scale(${interpolate(settle(sec(0.2)), [0, 1], [0.9, 1])})`,
+          }}
+        />
+      ) : null}
       <div
         style={{
           display: "flex",
@@ -58,17 +65,12 @@ const ContactCard: React.FC = () => {
           alignItems: "center",
           gap: unit * 0.03,
           fontFamily,
-          opacity: settle(sec(2.3)),
-          transform: `translateY(${(1 - settle(sec(2.3))) * 50}px)`,
+          opacity: settle(sec(0.9)),
+          transform: `translateY(${(1 - settle(sec(0.9))) * 50}px)`,
         }}
       >
         <PillButton text={outro.website} size={unit * 0.055} background={brand.colors.ink} color={brand.colors.paper} />
         <div style={{ fontWeight: 400, fontSize: unit * 0.05, color: accentAt(0), direction: "ltr" }}>{outro.instagram}</div>
-      </div>
-      <div
-        style={{ position: "absolute", bottom: height * 0.06, left: -width * 0.1, width: width * 1.2, transform: "rotate(-3deg)" }}
-      >
-        <Ticker items={ticker} size={unit * 0.045} background={accentAt(1)} color={brand.colors.ink} />
       </div>
     </AbsoluteFill>
   );

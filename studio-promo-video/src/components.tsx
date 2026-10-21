@@ -282,42 +282,6 @@ export const Wipe: React.FC<{ at: number; length: number; color: string; mode: "
   );
 };
 
-// Endless strip of words separated by dots, scrolling right to left.
-export const Ticker: React.FC<{ items: string[]; size: number; background: string; color: string; speed?: number }> = ({
-  items,
-  size,
-  background,
-  color,
-  speed = 4,
-}) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const run = [...items, ...items, ...items, ...items];
-  return (
-    <div style={{ background, overflow: "hidden", padding: `${size * 0.35}px 0`, direction: "rtl" }}>
-      <div
-        style={{
-          display: "flex",
-          gap: size * 0.6,
-          whiteSpace: "nowrap",
-          fontFamily,
-          fontWeight: 800,
-          fontSize: size,
-          color,
-          transform: `translateX(${(frame / fps) * speed * size}px)`,
-        }}
-      >
-        {run.map((item, i) => (
-          <React.Fragment key={i}>
-            <span>{item}</span>
-            <span style={{ opacity: 0.6 }}>•</span>
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 // Rounded "pill" button with an arrow bubble, like a website CTA.
 export const PillButton: React.FC<{ text: string; size: number; background: string; color: string }> = ({
   text,
