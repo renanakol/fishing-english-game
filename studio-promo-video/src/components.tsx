@@ -54,9 +54,44 @@ const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, st
   isVideo(src) ? <OffthreadVideo src={staticFile(src)} muted style={style} /> : <Img src={staticFile(src)} style={style} />;
 
 // A work filling the whole frame, slowly pushing in.
-export const Media: React.FC<{ src: string; duration: number; dim?: number }> = ({ src, duration, dim = 0 }) => {
+export const Media: React.FC<{ src: string; duration: number; dim?: number; square?: boolean }> = ({
+  src,
+  duration,
+  dim = 0,
+  square = false,
+}) => {
   const frame = useCurrentFrame();
-  const { height } = useVideoConfig();
+  const { width, height } = useVideoConfig();
+  if (square) {
+    // The whole work as a square card near the top, over a blurred copy of itself.
+    const zoom = interpolate(frame, [0, duration], [1, 1.04], clamp);
+    const enter = interpolate(frame, [0, sec(0.5)], [0, 1], { ...clamp, easing: Easing.bezier(0.16, 1, 0.3, 1) });
+    const side = Math.min(width * 0.88, height * 0.6);
+    return (
+      <AbsoluteFill style={{ overflow: "hidden", background: brand.colors.ink, alignItems: "center" }}>
+        <Source
+          src={src}
+          style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px) brightness(0.6)", transform: "scale(1.2)" }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: height * 0.09,
+            width: side,
+            height: side,
+            borderRadius: side * 0.04,
+            overflow: "hidden",
+            boxShadow: "0 40px 90px rgba(0,0,0,0.45)",
+            opacity: enter,
+            transform: `translateY(${(1 - enter) * 60}px) scale(${0.96 + 0.04 * enter})`,
+          }}
+        >
+          <Source src={src} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom})` }} />
+        </div>
+        {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+      </AbsoluteFill>
+    );
+  }
   if (isLogo(src) || isWide(src)) {
     const zoom = interpolate(frame, [0, duration], [1.06, 0.98], clamp);
     // Logos sit on their own background color (their top-left pixel, stretched); footage on a blurred copy of itself.

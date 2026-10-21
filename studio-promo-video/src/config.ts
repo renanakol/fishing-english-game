@@ -30,6 +30,8 @@ export type Shot = string | { src: string; beats: number };
 
 export type Service = {
   title: string;
+  // Show each work whole, as a square card, instead of filling the frame.
+  square?: boolean;
   // One supporting line under the title, on a highlight bar.
   line: string;
   media: Shot[];
@@ -63,15 +65,16 @@ export const services: Service[] = [
   },
   {
     title: "איור",
+    square: true,
     line: "עולמות שלמים ביד",
-    // More in works/illustration/: beach, balloons, vessel, air-mattress, sunbather, helmet, leap, kitchen-knight, storm.
+    // More in works/illustration/: wizard-of-oz, peter-pan, party, beach, vessel, helmet, leap, kitchen-knight, storm.
     media: [
-      "works/illustration/wizard-of-oz.jpg",
       "works/illustration/beach-dancer.jpg",
-      "works/illustration/party.jpg",
       "works/illustration/swim-ring.jpg",
+      "works/illustration/air-mattress.jpg",
+      "works/illustration/sunbather.jpg",
+      "works/illustration/balloons.jpg",
       "works/illustration/armadillo.jpg",
-      "works/illustration/peter-pan.jpg",
       "works/illustration/moon.jpg",
       "works/illustration/bouquet.jpg",
     ],
