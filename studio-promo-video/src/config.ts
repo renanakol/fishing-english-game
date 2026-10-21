@@ -83,7 +83,7 @@ export const services: Service[] = [
     title: "וידאו",
     // Played whole inside an illustrated retro TV.
     display: "tv",
-    line: "ואנימציה שזזה קדימה",
+    line: "ואנימציה שמושכת את העין",
     media: [
       { src: "works/video/boots-ad-1-wide.mp4", beats: 9 },
       { src: "works/video/princess-frog.mp4", beats: 5 },
