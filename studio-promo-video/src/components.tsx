@@ -230,10 +230,11 @@ export const LineWord: React.FC<{
   background?: string;
 }> = ({ text, delay, size, color = brand.colors.paper, background }) => {
   const frame = useCurrentFrame();
-  const p = progress(frame, delay, sec(0.47));
   const box = progress(frame, delay - sec(0.1), sec(0.47));
+  const letters = Array.from(text);
+  const perLetter = sec(0.05);
   return (
-    <div style={{ position: "relative", overflow: "hidden", padding: `0 ${size * 0.22}px`, direction: "rtl" }}>
+    <div style={{ position: "relative", padding: `0 ${size * 0.22}px`, direction: "rtl" }}>
       {background ? (
         <div
           style={{
@@ -251,13 +252,23 @@ export const LineWord: React.FC<{
           fontFamily: handFont,
           fontWeight: 400,
           fontSize: size,
-          lineHeight: 1.1,
+          lineHeight: 1.25,
           color,
           whiteSpace: "pre",
-          transform: `translateY(${(1 - p) * 110}%)`,
+          // The handwritten font's contextual alternates swap some letters (ז) in the browser; keep the plain forms.
+          fontVariantLigatures: "none",
+          fontFeatureSettings: '"calt" 0, "liga" 0, "clig" 0',
         }}
       >
-        {text}
+        {/* Written out letter by letter, each one inked in right to left like a pen stroke. */}
+        {letters.map((ch, i) => {
+          const t = interpolate(frame - delay - i * perLetter, [0, sec(0.12)], [0, 1], clamp);
+          return (
+            <span key={i} style={{ display: "inline-block", clipPath: `inset(0 0 0 ${(1 - t) * 100}%)` }}>
+              {ch}
+            </span>
+          );
+        })}
       </div>
     </div>
   );

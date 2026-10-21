@@ -49,7 +49,7 @@ export const services: Service[] = [
     title: "מיתוג",
     // Taped polaroids dropping onto a pile.
     display: "polaroid",
-    line: "זהות שאי אפשר לפספס",
+    line: "מותג שאי אפשר לפספס",
     // Logos and mockups, alternating; one polaroid per second.
     media: [
       { src: "works/branding/smash-eat-bag.jpg", beats: 2 },
