@@ -8,6 +8,7 @@
     "render": "remotion render StudioPromo out/studio-promo.mp4",
     "render:square": "remotion render StudioPromoSquare out/studio-promo-square.mp4",
     "render:wide": "remotion render StudioPromoWide out/studio-promo-wide.mp4",
+    "render:editorial": "remotion render StudioPromoEditorial out/studio-promo-editorial.mp4",
     "still": "remotion still StudioPromo out/preview.png --frame=60",
     "typecheck": "tsc --noEmit"
   },

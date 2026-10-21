@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { FPS, totalDuration } from "./config";
 import { StudioPromo } from "./StudioPromo";
+import { Editorial, editorialDuration } from "./editorial/Editorial";
 
 const formats = [
   { id: "StudioPromo", width: 1080, height: 1920 }, // 9:16 — Reels / Stories / TikTok
@@ -22,5 +23,14 @@ export const RemotionRoot: React.FC = () => (
         height={f.height}
       />
     ))}
+    {/* The calmer, editorial cut. */}
+    <Composition
+      id="StudioPromoEditorial"
+      component={Editorial}
+      durationInFrames={editorialDuration}
+      fps={FPS}
+      width={1080}
+      height={1920}
+    />
   </>
 );

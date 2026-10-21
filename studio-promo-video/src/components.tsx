@@ -17,11 +17,17 @@ import { brand, sec } from "./config";
 export const fontFamily = "Heebo"; // Hebrew + Latin, variable weight: small UI text
 export const titleFont = "buDrakonit"; // the studio's headline font: big titles
 export const handFont = "Lia Michal-Kasov"; // the studio's handwritten font: supporting lines
+export const editorialFont = "FbMatritsa"; // headline family of the editorial cut (Hebrew only; Latin falls back to Heebo)
 const fontFaces: { family: string; file: string; weight: string; range?: string }[] = [
   { family: fontFamily, file: "fonts/heebo-hebrew.woff2", weight: "100 900", range: "U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F" },
   { family: fontFamily, file: "fonts/heebo-latin.woff2", weight: "100 900", range: "U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122" },
   { family: titleFont, file: "fonts/budrakonit-bold.otf", weight: "700" },
   { family: handFont, file: "fonts/liamichal-kasov.ttf", weight: "400" },
+  ...(["extralight:200", "light:300", "medium:500", "bold:700", "black:900"] as const).map((w) => ({
+    family: editorialFont,
+    file: `fonts/fbmatritsa-${w.split(":")[0]}.otf`,
+    weight: w.split(":")[1],
+  })),
 ];
 const fontHandle = delayRender("Loading fonts");
 Promise.all(
