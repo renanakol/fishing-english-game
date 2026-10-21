@@ -212,7 +212,7 @@ const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
   { label: "איור", src: "works/illustration/beach-dancer.jpg" },
-  { label: "וידאו ואנימציה", src: "works/video/shop-now.mp4" },
+  { label: "וידאו ואנימציה", src: "works/video/minecraft-uri.mp4" },
 ];
 
 const Opening: React.FC = () => {
