@@ -1,4 +1,5 @@
 import type { Display } from "./components";
+import type { IconName } from "./scenes/Icons";
 
 // Everything you'd want to change lives here: studio name, colors, texts, works.
 // Media paths are relative to the `public/` folder. Videos (.mp4/.mov/.webm) play full screen, muted.
@@ -20,11 +21,11 @@ export const brand = {
 // Opening screen: the slogan, then each service pops in under it with a round thumbnail of a work.
 export const intro = {
   services: [
-    { label: "מיתוג", thumb: "works/branding/smash-eat-bag.jpg" },
-    { label: "בניית ועיצוב אתרים", thumb: "works/thumbs/web.jpg" },
-    { label: "איור", thumb: "works/illustration/wizard-of-oz.jpg" },
-    { label: "וידאו ואנימציה", thumb: "works/thumbs/video.jpg" },
-  ],
+    { label: "מיתוג", icon: "branding" },
+    { label: "בניית ועיצוב אתרים", icon: "web" },
+    { label: "איור", icon: "illustration" },
+    { label: "וידאו ואנימציה", icon: "video" },
+  ] as { label: string; icon: IconName }[],
 };
 
 // A work on screen: a path, or a path with its own length in beats and/or the point to keep in view when
@@ -46,7 +47,8 @@ export const BEATS_PER_SHOT = 3;
 export const services: Service[] = [
   {
     title: "מיתוג",
-    display: "fit",
+    // Taped polaroids dropping onto a pile.
+    display: "polaroid",
     line: "זהות שאי אפשר לפספס",
     media: [
       "works/branding/smash-eat-bag.jpg",
@@ -59,6 +61,8 @@ export const services: Service[] = [
   },
   {
     title: "אתרים",
+    // Screen recordings inside an illustrated phone.
+    display: "phone",
     line: "עיצוב ובנייה מא' ועד ת'",
     media: [
       // Agamon Hula gets a long, unhurried scroll; then two more sites.
@@ -69,7 +73,8 @@ export const services: Service[] = [
   },
   {
     title: "איור",
-    display: "card",
+    // Painted onto a canvas on an easel.
+    display: "easel",
     line: "עולמות שלמים ביד",
     // More in works/illustration/: wizard-of-oz, peter-pan, party, beach, vessel, helmet, leap, kitchen-knight, storm.
     media: [

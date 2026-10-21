@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
 import { LineWord, Media, RevealWord, Wipe, accentAt, fitSize } from "../components";
+import { EaselShowcase, PhoneShowcase, PolaroidPile } from "./Props";
 import { TvShowcase } from "./TvShowcase";
 import { BEAT, Service, brand, sec, services, shotDuration, shotFocus, shotSrc } from "../config";
 
@@ -22,6 +23,12 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
     <AbsoluteFill style={{ background: brand.colors.ink }}>
       {service.display === "tv" ? (
         <TvShowcase media={service.media} color={accentAt(0)} knobColor={accent} wall={accentAt(2)} />
+      ) : service.display === "polaroid" ? (
+        <PolaroidPile media={service.media} wall={accentAt(0)} tape={accentAt(1)} />
+      ) : service.display === "phone" ? (
+        <PhoneShowcase media={service.media} wall={accentAt(1)} body={accentAt(0)} />
+      ) : service.display === "easel" ? (
+        <EaselShowcase media={service.media} wall={accentAt(2)} wood="#E8C48A" paint={accentAt(0)} />
       ) : (
         service.media.map((shot, i) => (
           <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>

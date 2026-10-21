@@ -57,7 +57,7 @@ export const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ 
 // "fill" covers the whole frame (cropping the edges); "fit" shows it whole and as large as possible above the
 // titles; "card" shows it whole as a square card near the top. Left unset, logos and *-wide files fit and
 // everything else fills.
-export type Display = "fill" | "fit" | "card" | "tv";
+export type Display = "fill" | "fit" | "card" | "tv" | "phone" | "easel" | "polaroid";
 
 export const Media: React.FC<{ src: string; duration: number; dim?: number; display?: Display; focus?: string }> = ({
   src,

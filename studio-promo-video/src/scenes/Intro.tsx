@@ -1,9 +1,10 @@
 import React from "react";
 import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { LineWord, Wipe, accentAt } from "../components";
+import { Icon, IconName } from "./Icons";
 import { BEAT, brand, intro, sec, timing } from "../config";
 
-// Opening screen: the slogan settles in, then each service pops in on the beat with a round work thumbnail.
+// Opening screen: the slogan settles in, then each service pops in on the beat with a round illustrated icon.
 export const Intro: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
@@ -31,7 +32,7 @@ export const Intro: React.FC = () => {
           <ServiceRow
             key={s.label}
             label={s.label}
-            thumb={s.thumb}
+            icon={s.icon}
             color={accentAt(i)}
             delay={firstRow + i * BEAT}
             size={unit * 0.17}
@@ -44,10 +45,10 @@ export const Intro: React.FC = () => {
   );
 };
 
-// A round thumbnail that pops in with a ring pulse, and the service name rising beside it.
-const ServiceRow: React.FC<{ label: string; thumb: string; color: string; delay: number; size: number }> = ({
+// A round icon badge that pops in with a ring pulse, and the service name rising beside it.
+const ServiceRow: React.FC<{ label: string; icon: IconName; color: string; delay: number; size: number }> = ({
   label,
-  thumb,
+  icon,
   color,
   delay,
   size,
@@ -82,7 +83,9 @@ const ServiceRow: React.FC<{ label: string; thumb: string; color: string; delay:
             transform: `scale(${pop}) rotate(${(1 - pop) * -40}deg)`,
           }}
         >
-          <Img src={staticFile(thumb)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <div style={{ width: "100%", height: "100%", background: brand.colors.paper, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Icon name={icon} size={size * 0.72} />
+          </div>
         </div>
       </div>
       <LineWord text={label} delay={delay + sec(0.12)} size={size * 0.46} color={brand.colors.paper} />
