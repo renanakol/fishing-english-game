@@ -49,8 +49,7 @@ const chapters: Chapter[] = [
       { src: "works/branding/wine-and-beard.jpg", beats: 2 },
       { src: "works/branding/unity-logo.jpg", beats: 2 },
       { src: "works/branding/live-jar.jpg", beats: 2 },
-      { src: "works/branding/shawarma-bag-wide.jpg", beats: 2 },
-      { src: "works/branding/kurtsch-burger-wide.jpg", beats: 2 },
+      { src: "works/branding/galilion-hotel.jpg", beats: 2 },
     ],
   },
   {
@@ -80,14 +79,14 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    title: "וידאו\nאנימציה",
+    title: "וידאו\nואנימציה",
     tail: "שמושכים את העין",
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
     aspect: 9 / 16,
     fit: "cover",
-    media: [{ src: "works/video/minecraft-uri.mp4", beats: 10 }],
+    media: [{ src: "works/video/minecraft-uri.mp4", beats: 6 }],
   },
 ];
 
@@ -218,7 +217,7 @@ const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
   { label: "איור", src: "works/illustration/beach-dancer.jpg" },
-  { label: "וידאו\nאנימציה", src: "works/video/shop-now.mp4" },
+  { label: "וידאו\nואנימציה", src: "works/video/shop-now.mp4" },
 ];
 
 const Opening: React.FC = () => {
