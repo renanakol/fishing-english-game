@@ -37,7 +37,7 @@ type Chapter = {
 const chapters: Chapter[] = [
   {
     title: "מיתוג",
-    kicker: "זהות שזוכרים של",
+    kicker: "מותג שאי אפשר לפספס",
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
@@ -49,12 +49,11 @@ const chapters: Chapter[] = [
       { src: "works/branding/wine-and-beard.jpg", beats: 2 },
       { src: "works/branding/unity-logo.jpg", beats: 2 },
       { src: "works/branding/live-jar.jpg", beats: 2 },
-      { src: "works/branding/live-logo.jpg", beats: 2 },
     ],
   },
   {
     title: "אתרים",
-    kicker: "עיצוב ובנייה של",
+    kicker: "עיצוב ובנייה מא' ועד ת'",
     bg: black,
     titleColor: turquoise,
     fg: brand.colors.paper,
@@ -64,7 +63,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "איור",
-    kicker: "עולמות שלמים ב",
+    kicker: "עולמות שלמים ביד",
     bg: black,
     titleColor: red,
     fg: brand.colors.paper,
@@ -78,7 +77,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "וידאו",
-    kicker: "אנימציה ותנועה ב",
+    kicker: "אנימציה שמושכת את העין",
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
@@ -95,7 +94,7 @@ const chapters: Chapter[] = [
 const studioPhotos = ["works/studio/studio.jpg", "works/studio/studio-boots.jpg", "works/studio/studio-owl.jpg"];
 
 const editorialTiming = {
-  opening: 11 * BEAT,
+  opening: 6 * BEAT,
   closing: studioPhotos.length * 2 * BEAT,
   endCard: 8 * BEAT,
 };
@@ -154,13 +153,14 @@ const Rise: React.FC<{ at: number; children: React.ReactNode; style?: React.CSSP
 // A stacked headline: heavy lines set tight, the last line huge in an accent color with a small sparkle beside it.
 type HeadLine = { text: string; color: string };
 // `bigScale` sets how much larger the last line is than the others.
-const Headline: React.FC<{ lines: HeadLine[]; size: number; at: number; bigScale?: number; align?: "right" | "center" }> = ({
-  lines,
-  size,
-  at,
-  bigScale = 1.45,
-  align = "right",
-}) => {
+const Headline: React.FC<{
+  lines: HeadLine[];
+  size: number;
+  at: number;
+  maxWidth: number;
+  bigScale?: number;
+  align?: "right" | "center";
+}> = ({ lines, size, at, maxWidth, bigScale = 1.45, align = "right" }) => {
   const frame = useCurrentFrame();
   const last = lines.length - 1;
   const spark = interpolate(frame - at - last * sec(0.12), [sec(0.2), sec(0.6)], [0, 1], { ...clamp, easing: ease });
@@ -168,9 +168,11 @@ const Headline: React.FC<{ lines: HeadLine[]; size: number; at: number; bigScale
     <div style={{ direction: "rtl", textAlign: align, letterSpacing: -size * 0.02 }}>
       {lines.map((l, i) => {
         const big = i === last;
+        // About two thirds of an em per character (letters and spaces) in this face.
+        const fontSize = Math.min(big ? size * bigScale : size, maxWidth / (Array.from(l.text).length * 0.68));
         return (
           <Rise key={i} at={at + i * sec(0.12)}>
-            <div style={{ position: "relative", display: "inline-block", fontSize: big ? size * bigScale : size, fontWeight: big ? 900 : 700, lineHeight: 1.02, color: l.color }}>
+            <div style={{ position: "relative", display: "inline-block", fontSize, fontWeight: big ? 900 : 700, lineHeight: 1.02, color: l.color, whiteSpace: "nowrap" }}>
               {l.text}
               {big ? (
                 <span
@@ -204,7 +206,7 @@ const SceneOut: React.FC<{ duration: number; children: React.ReactNode }> = ({ d
 
 // ---------- scenes ----------
 
-// Opening: a headline, then one service per beat in big type over a full-bleed work, then the logo.
+// Opening: the services, one per beat, in big type over a full-bleed work.
 const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
@@ -213,52 +215,25 @@ const hook = [
 ];
 
 const Opening: React.FC = () => {
-  const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
   const unit = Math.min(width, height);
-  const headlineEnd = 3 * BEAT;
-  const hookEnd = headlineEnd + hook.length * BEAT;
-  const logo = useIn(hookEnd + sec(0.1), sec(0.8));
 
   return (
     <SceneOut duration={editorialTiming.opening}>
       <AbsoluteFill style={{ background: palette.charcoal }}>
-        <Sequence durationInFrames={headlineEnd}>
-          <AbsoluteFill style={{ justifyContent: "center", padding: `0 ${width * 0.08}px` }}>
-            <Headline
-              at={sec(0.1)}
-              size={unit * 0.15}
-              bigScale={1.7}
-              lines={[
-                { text: "עיצוב שמספר", color: palette.cream },
-                { text: "את הסיפור", color: palette.cream },
-                { text: "שלך", color: yellow },
-              ]}
-            />
-          </AbsoluteFill>
-        </Sequence>
         {hook.map((h, i) => (
-          <Sequence key={h.label} from={headlineEnd + i * BEAT} durationInFrames={BEAT}>
+          <Sequence key={h.label} from={i * BEAT * 1.5} durationInFrames={BEAT * 1.5}>
             <PunchIn>
               <Source src={h.src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </PunchIn>
-            <AbsoluteFill style={{ background: "rgba(20,19,26,0.55)" }} />
+            <AbsoluteFill style={{ background: "rgba(13,13,16,0.6)" }} />
             <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", direction: "rtl" }}>
               <Rise at={0}>
-                <div style={{ fontSize: unit * 0.24, fontWeight: 900, letterSpacing: -unit * 0.006, color: [yellow, turquoise, red, yellow][i] }}>
-                  {h.label}
-                </div>
+                <div style={{ fontSize: unit * 0.26, fontWeight: 900, color: [yellow, turquoise, red, yellow][i] }}>{h.label}</div>
               </Rise>
             </AbsoluteFill>
           </Sequence>
         ))}
-        {frame >= hookEnd ? (
-          <AbsoluteFill style={{ background: black, alignItems: "center", justifyContent: "center" }}>
-            <div style={{ opacity: logo, transform: `scale(${1.08 - 0.08 * logo})` }}>
-              <LogoOnDark width={unit * 0.66} />
-            </div>
-          </AbsoluteFill>
-        ) : null}
       </AbsoluteFill>
     </SceneOut>
   );
@@ -298,6 +273,7 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
             at={sec(0.15)}
             size={unit * 0.08}
             bigScale={2.4}
+            maxWidth={width - margin * 2}
             lines={[
               { text: chapter.kicker, color: fg },
               { text: chapter.title, color: chapter.titleColor },
@@ -395,6 +371,7 @@ const Closing: React.FC = () => {
               at={sec(0.45)}
               size={unit * 0.15}
               bigScale={1.9}
+              maxWidth={width * 0.84}
               lines={[
                 { text: outro.words.slice(0, -1).join(" "), color: palette.cream },
                 { text: outro.words[outro.words.length - 1], color: yellow },
