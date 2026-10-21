@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Audio, Easing, Img, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Source, editorialFont, fontFamily, handFont } from "../components";
-import { BEAT, Shot, brand, music, outro, sec, shotDuration, shotSrc } from "../config";
+import { BEAT, Shot, brand, music, musicOffset, outro, sec, shotDuration, shotSrc } from "../config";
 import { logoParts, logoViewBox } from "../logoParts";
 
 // A grown-up cut of the promo: a fast hook, big gallery frames, clean bold type, hairlines and punch-in cuts
@@ -128,7 +128,14 @@ export const Editorial: React.FC = () => {
       <Sequence from={closingStart + editorialTiming.closing} durationInFrames={editorialTiming.endCard}>
         <EndCard />
       </Sequence>
-      {music ? <Audio src={staticFile(music)} /> : null}
+      {music ? (
+        <Audio
+          src={staticFile(music)}
+          trimBefore={sec(musicOffset)}
+          // Fade out over the last second.
+          volume={(f) => interpolate(f, [editorialDuration - sec(1), editorialDuration], [1, 0], clamp)}
+        />
+      ) : null}
     </AbsoluteFill>
   );
 };

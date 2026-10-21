@@ -111,7 +111,10 @@ export const outro = {
   instagram: "@reniart8",
 };
 
-export const music: string | null = null; // e.g. "audio/music.mp3"
+// "Studio Vibes at Sunset" (Magnific, 120 BPM). Its first downbeat falls 0.04 s in; trimming that lines the
+// music's beat grid up with the video's.
+export const music: string | null = "audio/music.mp3";
+export const musicOffset = 0.04; // seconds trimmed from the start of the track
 
 export const FPS = 60;
 // Everything is cut to a 120 BPM grid: one beat = half a second.
