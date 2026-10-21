@@ -1,3 +1,5 @@
+import type { Display } from "./components";
+
 // Everything you'd want to change lives here: studio name, colors, texts, works.
 // Media paths are relative to the `public/` folder. Videos (.mp4/.mov/.webm) play full screen, muted.
 
@@ -30,8 +32,8 @@ export type Shot = string | { src: string; beats: number };
 
 export type Service = {
   title: string;
-  // Show each work whole, as a square card, instead of filling the frame.
-  square?: boolean;
+  // How the works sit in the frame (default "fill"): see Display in components.tsx.
+  display?: Display;
   // One supporting line under the title, on a highlight bar.
   line: string;
   media: Shot[];
@@ -43,6 +45,7 @@ export const BEATS_PER_SHOT = 3;
 export const services: Service[] = [
   {
     title: "מיתוג",
+    display: "fit",
     line: "זהות שאי אפשר לפספס",
     media: [
       "works/branding/smash-eat-bag.jpg",
@@ -65,7 +68,7 @@ export const services: Service[] = [
   },
   {
     title: "איור",
-    square: true,
+    display: "card",
     line: "עולמות שלמים ביד",
     // More in works/illustration/: wizard-of-oz, peter-pan, party, beach, vessel, helmet, leap, kitchen-knight, storm.
     media: [
@@ -81,11 +84,14 @@ export const services: Service[] = [
   },
   {
     title: "וידאו",
+    display: "fit",
     line: "ואנימציה שזזה קדימה",
     media: [
+      "works/video/boots-ad-1-wide.mp4",
       "works/video/bar-mitzva-1-wide.mp4",
+      { src: "works/video/princess-frog.mp4", beats: 5 },
       "works/video/bar-mitzva-2-wide.mp4",
-      "works/video/bar-mitzva-3-wide.mp4",
+      "works/video/boots-ad-2-wide.mp4",
       "works/video/bar-mitzva-4-wide.mp4",
     ],
   },

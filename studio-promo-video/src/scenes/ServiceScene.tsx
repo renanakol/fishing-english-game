@@ -21,7 +21,7 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
     <AbsoluteFill style={{ background: brand.colors.ink }}>
       {service.media.map((shot, i) => (
         <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
-          <Media src={shotSrc(shot)} duration={shotDuration(shot)} square={service.square} />
+          <Media src={shotSrc(shot)} duration={shotDuration(shot)} display={service.display} />
         </Sequence>
       ))}
 

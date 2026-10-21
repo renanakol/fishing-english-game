@@ -46,33 +46,46 @@ export const fitSize = (text: string, width: number, max: number, share = 0.9) =
 const isVideo = (src: string) => /\.(mp4|mov|webm)$/i.test(src);
 // Full-page website captures (see scripts/record-site.mjs) are named *-scroll.png and scroll top to bottom.
 const isScroll = (src: string) => /-scroll\.(png|jpe?g)$/i.test(src);
-// Logos (*-logo.*) and landscape footage (*-wide.*) are shown whole instead of cropped to fill the frame.
+// Logos (*-logo.*) and landscape footage (*-wide.*) are always shown whole, never cropped.
 const isLogo = (src: string) => /-logo\.(png|jpe?g|webp)$/i.test(src);
 const isWide = (src: string) => /-wide\.(mp4|mov|webm|png|jpe?g)$/i.test(src);
 
 const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, style }) =>
   isVideo(src) ? <OffthreadVideo src={staticFile(src)} muted style={style} /> : <Img src={staticFile(src)} style={style} />;
 
-// A work filling the whole frame, slowly pushing in.
-export const Media: React.FC<{ src: string; duration: number; dim?: number; square?: boolean }> = ({
+// How a work sits in the frame:
+// "fill" covers the whole frame (cropping the edges); "fit" shows it whole and as large as possible above the
+// titles; "card" shows it whole as a square card near the top.
+export type Display = "fill" | "fit" | "card";
+
+export const Media: React.FC<{ src: string; duration: number; dim?: number; display?: Display }> = ({
   src,
   duration,
   dim = 0,
-  square = false,
+  display = "fill",
 }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
-  if (square) {
-    // The whole work as a square card near the top, over a blurred copy of itself.
+  const shade = dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null;
+  // Logos sit on their own background color (their top-left pixel, stretched); everything else on a blurred copy.
+  const backdrop = (
+    <Source
+      src={src}
+      style={
+        isLogo(src)
+          ? { position: "absolute", left: 0, top: 0, width: "100%", height: "100%", objectFit: "fill", transform: "scale(300)", transformOrigin: "0 0" }
+          : { position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px) brightness(0.6)", transform: "scale(1.2)" }
+      }
+    />
+  );
+  const enter = interpolate(frame, [0, sec(0.5)], [0, 1], { ...clamp, easing: Easing.bezier(0.16, 1, 0.3, 1) });
+
+  if (display === "card") {
     const zoom = interpolate(frame, [0, duration], [1, 1.04], clamp);
-    const enter = interpolate(frame, [0, sec(0.5)], [0, 1], { ...clamp, easing: Easing.bezier(0.16, 1, 0.3, 1) });
     const side = Math.min(width * 0.88, height * 0.6);
     return (
       <AbsoluteFill style={{ overflow: "hidden", background: brand.colors.ink, alignItems: "center" }}>
-        <Source
-          src={src}
-          style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(40px) brightness(0.6)", transform: "scale(1.2)" }}
-        />
+        {backdrop}
         <div
           style={{
             position: "absolute",
@@ -88,36 +101,38 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number; squa
         >
           <Source src={src} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom})` }} />
         </div>
-        {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+        {shade}
       </AbsoluteFill>
     );
   }
-  if (isLogo(src) || isWide(src)) {
-    const zoom = interpolate(frame, [0, duration], [1.06, 0.98], clamp);
-    // Logos sit on their own background color (their top-left pixel, stretched); footage on a blurred copy of itself.
-    const backdrop: React.CSSProperties = isLogo(src)
-      ? { position: "absolute", left: 0, top: 0, width: "100%", height: "100%", objectFit: "fill", transform: "scale(300)", transformOrigin: "0 0" }
-      : { position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: "blur(36px) brightness(0.8)", transform: "scale(1.2)" };
+
+  if (display === "fit" || isLogo(src) || isWide(src)) {
+    const zoom = interpolate(frame, [0, duration], [1, 1.04], clamp);
     return (
       <AbsoluteFill style={{ overflow: "hidden", background: brand.colors.ink }}>
-        <Source src={src} style={backdrop} />
-        {/* Kept in the upper half, clear of the titles at the bottom. */}
-        <AbsoluteFill style={{ top: "8%", height: "46%", justifyContent: "center", alignItems: "center" }}>
+        {backdrop}
+        {/* The upper ~70% of the frame, clear of the titles at the bottom. */}
+        <AbsoluteFill
+          style={{ top: "4%", height: "68%", padding: `0 ${width * 0.03}px`, justifyContent: "center", alignItems: "center" }}
+        >
           <Source
             src={src}
             style={{
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
-              transform: `scale(${zoom})`,
-              boxShadow: isWide(src) ? "0 30px 80px rgba(0,0,0,0.5)" : undefined,
+              borderRadius: isLogo(src) ? 0 : width * 0.02,
+              boxShadow: isLogo(src) ? undefined : "0 30px 80px rgba(0,0,0,0.45)",
+              opacity: enter,
+              transform: `scale(${(0.96 + 0.04 * enter) * zoom})`,
             }}
           />
         </AbsoluteFill>
-        {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+        {shade}
       </AbsoluteFill>
     );
   }
+
   if (isScroll(src)) {
     const p = interpolate(frame, [0, duration], [0, 1], { ...clamp, easing: (x) => x * x * (3 - 2 * x) });
     return (
@@ -126,22 +141,20 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number; squa
           src={staticFile(src)}
           style={{ position: "absolute", top: 0, width: "100%", transform: `translateY(calc(${-p * 100}% + ${p * height}px))` }}
         />
-        {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+        {shade}
       </AbsoluteFill>
     );
   }
+
   const zoom = interpolate(frame, [0, duration], [1.08, 1], clamp);
   const drift = interpolate(frame, [0, duration], [-0.8, 0.8], clamp);
-  const style: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    transform: `scale(${zoom}) translateX(${drift}%)`,
-  };
   return (
     <AbsoluteFill style={{ background: brand.colors.ink, overflow: "hidden" }}>
-      <Source src={src} style={style} />
-      {dim > 0 ? <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} /> : null}
+      <Source
+        src={src}
+        style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom}) translateX(${drift}%)` }}
+      />
+      {shade}
     </AbsoluteFill>
   );
 };
