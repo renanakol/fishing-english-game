@@ -50,14 +50,14 @@ const isScroll = (src: string) => /-scroll\.(png|jpe?g)$/i.test(src);
 const isLogo = (src: string) => /-logo\.(png|jpe?g|webp)$/i.test(src);
 const isWide = (src: string) => /-wide\.(mp4|mov|webm|png|jpe?g)$/i.test(src);
 
-const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, style }) =>
+export const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, style }) =>
   isVideo(src) ? <OffthreadVideo src={staticFile(src)} muted style={style} /> : <Img src={staticFile(src)} style={style} />;
 
 // How a work sits in the frame:
 // "fill" covers the whole frame (cropping the edges); "fit" shows it whole and as large as possible above the
 // titles; "card" shows it whole as a square card near the top. Left unset, logos and *-wide files fit and
 // everything else fills.
-export type Display = "fill" | "fit" | "card";
+export type Display = "fill" | "fit" | "card" | "tv";
 
 export const Media: React.FC<{ src: string; duration: number; dim?: number; display?: Display; focus?: string }> = ({
   src,

@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
 import { LineWord, Media, RevealWord, Wipe, accentAt, fitSize } from "../components";
+import { TvShowcase } from "./TvShowcase";
 import { BEAT, Service, brand, sec, services, shotDuration, shotFocus, shotSrc } from "../config";
 
 // Works shown full screen one after another, with a title and a single line at the bottom.
@@ -19,11 +20,15 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
 
   return (
     <AbsoluteFill style={{ background: brand.colors.ink }}>
-      {service.media.map((shot, i) => (
-        <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
-          <Media src={shotSrc(shot)} duration={shotDuration(shot)} display={service.display} focus={shotFocus(shot)} />
-        </Sequence>
-      ))}
+      {service.display === "tv" ? (
+        <TvShowcase media={service.media} color={accentAt(0)} knobColor={accent} wall={accentAt(2)} />
+      ) : (
+        service.media.map((shot, i) => (
+          <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
+            <Media src={shotSrc(shot)} duration={shotDuration(shot)} display={service.display} focus={shotFocus(shot)} />
+          </Sequence>
+        ))
+      )}
 
       {/* Legibility: a short, soft shade only behind the text, so the works stay visible. */}
       <AbsoluteFill

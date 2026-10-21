@@ -85,14 +85,14 @@ export const services: Service[] = [
   },
   {
     title: "וידאו",
-    // Full screen even for landscape footage: the sides are cropped.
-    display: "fill",
+    // Played whole inside an illustrated retro TV.
+    display: "tv",
     line: "ואנימציה שזזה קדימה",
     media: [
-      { src: "works/video/boots-ad-1-wide.mp4", focus: "45% 50%" },
+      "works/video/boots-ad-1-wide.mp4",
       "works/video/bar-mitzva-1-wide.mp4",
       { src: "works/video/princess-frog.mp4", beats: 5 },
-      { src: "works/video/bar-mitzva-2-wide.mp4", focus: "22% 50%" },
+      "works/video/bar-mitzva-2-wide.mp4",
       "works/video/boots-ad-2-wide.mp4",
       "works/video/bar-mitzva-4-wide.mp4",
     ],
