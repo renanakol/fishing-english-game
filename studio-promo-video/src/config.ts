@@ -27,8 +27,9 @@ export const intro = {
   ],
 };
 
-// A work on screen: a path (shown for the default number of beats) or a path with its own length.
-export type Shot = string | { src: string; beats: number };
+// A work on screen: a path, or a path with its own length in beats and/or the point to keep in view when
+// the frame crops it (a CSS object-position such as "30% 50%").
+export type Shot = string | { src: string; beats?: number; focus?: string };
 
 export type Service = {
   title: string;
@@ -84,13 +85,14 @@ export const services: Service[] = [
   },
   {
     title: "וידאו",
-    display: "fit",
+    // Full screen even for landscape footage: the sides are cropped.
+    display: "fill",
     line: "ואנימציה שזזה קדימה",
     media: [
-      "works/video/boots-ad-1-wide.mp4",
+      { src: "works/video/boots-ad-1-wide.mp4", focus: "45% 50%" },
       "works/video/bar-mitzva-1-wide.mp4",
       { src: "works/video/princess-frog.mp4", beats: 5 },
-      "works/video/bar-mitzva-2-wide.mp4",
+      { src: "works/video/bar-mitzva-2-wide.mp4", focus: "22% 50%" },
       "works/video/boots-ad-2-wide.mp4",
       "works/video/bar-mitzva-4-wide.mp4",
     ],
@@ -133,7 +135,8 @@ export const timing = {
 };
 
 export const shotSrc = (shot: Shot) => (typeof shot === "string" ? shot : shot.src);
-export const shotDuration = (shot: Shot) => (typeof shot === "string" ? BEATS_PER_SHOT : shot.beats) * BEAT;
+export const shotDuration = (shot: Shot) => ((typeof shot === "string" ? undefined : shot.beats) ?? BEATS_PER_SHOT) * BEAT;
+export const shotFocus = (shot: Shot) => (typeof shot === "string" ? undefined : shot.focus);
 export const serviceDuration = (s: Service) => s.media.reduce((sum, shot) => sum + shotDuration(shot), 0);
 
 export const totalDuration =

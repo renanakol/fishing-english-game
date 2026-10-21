@@ -55,14 +55,16 @@ const Source: React.FC<{ src: string; style: React.CSSProperties }> = ({ src, st
 
 // How a work sits in the frame:
 // "fill" covers the whole frame (cropping the edges); "fit" shows it whole and as large as possible above the
-// titles; "card" shows it whole as a square card near the top.
+// titles; "card" shows it whole as a square card near the top. Left unset, logos and *-wide files fit and
+// everything else fills.
 export type Display = "fill" | "fit" | "card";
 
-export const Media: React.FC<{ src: string; duration: number; dim?: number; display?: Display }> = ({
+export const Media: React.FC<{ src: string; duration: number; dim?: number; display?: Display; focus?: string }> = ({
   src,
   duration,
   dim = 0,
-  display = "fill",
+  display,
+  focus = "50% 50%",
 }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
@@ -106,7 +108,7 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number; disp
     );
   }
 
-  if (display === "fit" || isLogo(src) || isWide(src)) {
+  if (display === "fit" || (display === undefined && (isLogo(src) || isWide(src)))) {
     const zoom = interpolate(frame, [0, duration], [1, 1.04], clamp);
     return (
       <AbsoluteFill style={{ overflow: "hidden", background: brand.colors.ink }}>
@@ -152,7 +154,13 @@ export const Media: React.FC<{ src: string; duration: number; dim?: number; disp
     <AbsoluteFill style={{ background: brand.colors.ink, overflow: "hidden" }}>
       <Source
         src={src}
-        style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${zoom}) translateX(${drift}%)` }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: focus,
+          transform: `scale(${zoom}) translateX(${drift}%)`,
+        }}
       />
       {shade}
     </AbsoluteFill>

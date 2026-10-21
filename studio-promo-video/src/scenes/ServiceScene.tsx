@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
 import { LineWord, Media, RevealWord, Wipe, accentAt, fitSize } from "../components";
-import { BEAT, Service, brand, sec, services, shotDuration, shotSrc } from "../config";
+import { BEAT, Service, brand, sec, services, shotDuration, shotFocus, shotSrc } from "../config";
 
 // Works shown full screen one after another, with a title and a single line at the bottom.
 export const ServiceScene: React.FC<{ service: Service; index: number; duration: number }> = ({
@@ -21,7 +21,7 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
     <AbsoluteFill style={{ background: brand.colors.ink }}>
       {service.media.map((shot, i) => (
         <Sequence key={i} from={starts[i]} durationInFrames={shotDuration(shot)}>
-          <Media src={shotSrc(shot)} duration={shotDuration(shot)} display={service.display} />
+          <Media src={shotSrc(shot)} duration={shotDuration(shot)} display={service.display} focus={shotFocus(shot)} />
         </Sequence>
       ))}
 
