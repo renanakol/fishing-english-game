@@ -1,79 +1,91 @@
 import React from "react";
-import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { Media, RevealWord, Sticker, Wipe, accentAt, fitSize } from "../components";
-import { BEAT, allMedia, brand, intro, sec, ticker, timing } from "../config";
+import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { LineWord, Wipe, accentAt } from "../components";
+import { BEAT, brand, intro, sec, timing } from "../config";
 
-// One work per beat under a word per beat, then the studio name and slogan.
+// Opening screen: the slogan settles in, then each service pops in on the beat with a round work thumbnail.
 export const Intro: React.FC = () => {
   const frame = useCurrentFrame();
-  const { width, fps } = useVideoConfig();
-  const montageEnd = intro.words.length * BEAT;
-  const wordIndex = Math.min(intro.words.length - 1, Math.floor(frame / BEAT));
-  const logoIn = spring({ frame: frame - montageEnd, fps, config: { damping: 200 } });
+  const { width, height, fps } = useVideoConfig();
+  const unit = Math.min(width, height);
+  const sloganIn = spring({ frame: frame - sec(0.1), fps, config: { damping: 200 } });
+  const firstRow = 2 * BEAT;
 
   return (
-    <AbsoluteFill style={{ background: brand.colors.ink }}>
-      {intro.words.map((_, i) => (
-        <Sequence key={i} from={i * BEAT} durationInFrames={BEAT}>
-          <Media src={allMedia[(i * 3) % allMedia.length]} duration={BEAT} dim={0.5} />
-        </Sequence>
-      ))}
-
-      {frame < montageEnd ? (
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-          <RevealWord
-            key={wordIndex}
-            text={intro.words[wordIndex]}
-            delay={wordIndex * BEAT}
-            size={fitSize(intro.words[wordIndex], width, 300)}
-            outline={wordIndex === intro.words.length - 1}
-          />
-        </AbsoluteFill>
+    <AbsoluteFill
+      style={{ background: brand.colors.ink, alignItems: "center", justifyContent: "center", gap: height * 0.05 }}
+    >
+      {brand.slogan ? (
+        <Img
+          src={staticFile(brand.slogan)}
+          style={{
+            width: width * 0.86,
+            opacity: sloganIn,
+            transform: `scale(${interpolate(sloganIn, [0, 1], [1.08, 1])}) translateY(${(1 - sloganIn) * 40}px)`,
+          }}
+        />
       ) : null}
 
-      <Sequence from={montageEnd}>
-        <AbsoluteFill style={{ background: brand.colors.ink, justifyContent: "center", alignItems: "center" }}>
-          {brand.slogan ? (
-            <Img
-              src={staticFile(brand.slogan)}
-              style={{
-                width: width * 0.86,
-                opacity: logoIn,
-                transform: `scale(${interpolate(logoIn, [0, 1], [1.08, 1])}) translateY(${(1 - logoIn) * 40}px)`,
-              }}
-            />
-          ) : (
-            <RevealWord text={brand.studioName} delay={0} size={fitSize(brand.studioName, width, 220)} />
-          )}
-        </AbsoluteFill>
-        {ticker.map((label, i) => {
-          const spots = [
-            { top: "18%", right: "8%", rotate: -8 },
-            { top: "24%", left: "6%", rotate: 7 },
-            { bottom: "24%", right: "10%", rotate: 6 },
-            { bottom: "18%", left: "8%", rotate: -6 },
-          ];
-          const { rotate, ...pos } = spots[i % spots.length];
-          const colors = [
-            { background: accentAt(0), color: brand.colors.paper },
-            { background: accentAt(1), color: brand.colors.ink },
-            { background: brand.colors.paper, color: brand.colors.ink },
-            { background: accentAt(1), color: brand.colors.ink },
-          ][i % 4];
-          return (
-            <div key={label} style={{ position: "absolute", ...pos }}>
-              <Sticker text={label} delay={sec(0.6) + (i * BEAT) / 2} size={width * 0.045} rotate={rotate} {...colors} />
-            </div>
-          );
-        })}
-        <Wipe at={0} length={sec(0.33)} color={accentAt(0)} mode="out" />
-      </Sequence>
-      {/* Covers the montage just before the slogan; the panel then sweeps away inside the sequence above. */}
-      <Sequence from={montageEnd - sec(0.33)} durationInFrames={sec(0.33)}>
-        <Wipe at={0} length={sec(0.33)} color={accentAt(0)} mode="in" />
-      </Sequence>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: unit * 0.045, direction: "rtl" }}>
+        {intro.services.map((s, i) => (
+          <ServiceRow
+            key={s.label}
+            label={s.label}
+            thumb={s.thumb}
+            color={accentAt(i)}
+            delay={firstRow + i * BEAT}
+            size={unit * 0.17}
+          />
+        ))}
+      </div>
 
       <Wipe at={timing.intro - sec(0.4)} length={sec(0.4)} color={accentAt(1)} mode="in" />
     </AbsoluteFill>
+  );
+};
+
+// A round thumbnail that pops in with a ring pulse, and the service name rising beside it.
+const ServiceRow: React.FC<{ label: string; thumb: string; color: string; delay: number; size: number }> = ({
+  label,
+  thumb,
+  color,
+  delay,
+  size,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const pop = spring({ frame: frame - delay, fps, config: { damping: 12, stiffness: 140 } });
+  const pulse = interpolate(frame - delay, [sec(0.1), sec(0.7)], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: size * 0.3, direction: "rtl" }}>
+      <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            border: `${size * 0.04}px solid ${color}`,
+            transform: `scale(${1 + pulse * 0.6})`,
+            opacity: pulse > 0 ? 1 - pulse : 0,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            overflow: "hidden",
+            border: `${size * 0.045}px solid ${color}`,
+            transform: `scale(${pop}) rotate(${(1 - pop) * -40}deg)`,
+          }}
+        >
+          <Img src={staticFile(thumb)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+      </div>
+      <LineWord text={label} delay={delay + sec(0.12)} size={size * 0.46} color={brand.colors.paper} />
+    </div>
   );
 };

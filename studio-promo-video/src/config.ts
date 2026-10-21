@@ -15,74 +15,70 @@ export const brand = {
   },
 };
 
-// Words that slam in one per beat over the opening montage.
+// Opening screen: the slogan, then each service pops in under it with a round thumbnail of a work.
 export const intro = {
-  words: ["עיצוב", "עם", "קריצה", ";)"],
+  services: [
+    { label: "מיתוג", thumb: "works/branding/smash-eat-bag.jpg" },
+    { label: "בניית ועיצוב אתרים", thumb: "works/thumbs/web.jpg" },
+    { label: "איור", thumb: "works/illustration/wizard-of-oz.jpg" },
+    { label: "וידאו ואנימציה", thumb: "works/thumbs/video.jpg" },
+  ],
 };
+
+// A work on screen: a path (shown for the default number of beats) or a path with its own length.
+export type Shot = string | { src: string; beats: number };
 
 export type Service = {
   title: string;
-  // Giant English word drifting behind the title.
-  ghost: string;
-  // Beats each work stays on screen (default: 2, or 1 when there are many works).
-  beatsPerShot?: number;
-  // Scene length in beats (default: timing.service).
-  beats?: number;
-  // Each line slams in on its own beat after the title.
-  lines: string[];
-  media: string[];
+  // One supporting line under the title, on a highlight bar.
+  line: string;
+  media: Shot[];
 };
+
+// Beats each work stays on screen unless it says otherwise (3 beats = 1.5 seconds).
+export const BEATS_PER_SHOT = 3;
 
 export const services: Service[] = [
   {
     title: "מיתוג",
-    ghost: "BRANDING",
-    lines: ["זהות", "שאי אפשר", "לפספס"],
+    line: "זהות שאי אפשר לפספס",
     media: [
       "works/branding/smash-eat-bag.jpg",
       "works/branding/wine-and-beard.jpg",
-      "works/branding/unity-sign-wide.jpg",
-      "works/branding/live-jar.jpg",
       "works/branding/shawarma-wide.jpg",
-      "works/branding/stargazing-logo.jpg",
+      "works/branding/live-jar.jpg",
       "works/branding/solano-booth.jpg",
-      "works/branding/foraging-poster.jpg",
-      "works/branding/unity-logo.jpg",
-      "works/branding/live-logo.jpg",
+      "works/branding/stargazing-logo.jpg",
     ],
   },
   {
     title: "אתרים",
-    ghost: "WEBSITES",
-    lines: ["עיצוב", "ובנייה", "מא' ועד ת'"],
-    // Website screen recordings, one second each; the scene runs longer to fit them all.
-    beatsPerShot: 2,
-    beats: 14,
+    line: "עיצוב ובנייה מא' ועד ת'",
     media: [
-      "works/web/gohar-1.mp4",
-      "works/web/agamon-hula-1.mp4",
-      "works/web/reni-site-1.mp4",
-      "works/web/in-your-own-time-1.mp4",
-      "works/web/gohar-2.mp4",
-      "works/web/agamon-hula-2.mp4",
-      "works/web/in-your-own-time-2.mp4",
+      // Agamon Hula gets a long, unhurried scroll; then two more sites.
+      { src: "works/web/agamon-hula-long.mp4", beats: 9 },
+      { src: "works/web/in-your-own-time-long.mp4", beats: 4 },
+      { src: "works/web/gohar-long.mp4", beats: 4 },
     ],
   },
   {
     title: "איור",
-    ghost: "ILLUSTRATION",
-    lines: ["עולמות", "שלמים", "ביד"],
+    line: "עולמות שלמים ביד",
+    // More in works/illustration/: beach, balloons, vessel, air-mattress, sunbather, helmet, leap, kitchen-knight, storm.
     media: [
       "works/illustration/wizard-of-oz.jpg",
+      "works/illustration/beach-dancer.jpg",
       "works/illustration/party.jpg",
+      "works/illustration/swim-ring.jpg",
+      "works/illustration/armadillo.jpg",
       "works/illustration/peter-pan.jpg",
-      "works/illustration/beach.jpg",
+      "works/illustration/moon.jpg",
+      "works/illustration/bouquet.jpg",
     ],
   },
   {
     title: "וידאו",
-    ghost: "MOTION",
-    lines: ["ואנימציה", "שזזה", "קדימה"],
+    line: "ואנימציה שזזה קדימה",
     media: [
       "works/video/bar-mitzva-1-wide.mp4",
       "works/video/bar-mitzva-2-wide.mp4",
@@ -104,9 +100,11 @@ export const compare = {
 };
 
 // Running strip on the final screen.
-export const ticker = ["מיתוג", "בניית ועיצוב אתרים", "איור", "וידאו ואנימציה"];
+export const ticker = intro.services.map((s) => s.label);
 
 export const outro = {
+  // First the call to action over a photo of the studio, then the logo and contact details.
+  photo: "works/studio/studio.jpg",
   words: ["בואו", "ניצור", "יחד"],
   website: "www.reni.co.il",
   instagram: "@reniart8",
@@ -120,16 +118,14 @@ export const BEAT = FPS / 2;
 // Seconds -> frames, so motion timing stays the same at any frame rate.
 export const sec = (seconds: number) => Math.round(seconds * FPS);
 export const timing = {
-  intro: 8 * BEAT,
-  service: 9 * BEAT,
+  intro: 10 * BEAT,
   compare: 8 * BEAT,
-  outro: 10 * BEAT,
+  outro: 12 * BEAT,
 };
 
-export const serviceDuration = (s: Service) => (s.beats ? s.beats * BEAT : timing.service);
+export const shotSrc = (shot: Shot) => (typeof shot === "string" ? shot : shot.src);
+export const shotDuration = (shot: Shot) => (typeof shot === "string" ? BEATS_PER_SHOT : shot.beats) * BEAT;
+export const serviceDuration = (s: Service) => s.media.reduce((sum, shot) => sum + shotDuration(shot), 0);
 
 export const totalDuration =
   timing.intro + services.reduce((sum, s) => sum + serviceDuration(s), 0) + timing.compare + timing.outro;
-
-// Every work, in order — used by the opening montage.
-export const allMedia = services.flatMap((s) => s.media);

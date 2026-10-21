@@ -7,7 +7,6 @@ import {
   continueRender,
   delayRender,
   interpolate,
-  spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
@@ -16,20 +15,16 @@ import { brand, sec } from "./config";
 
 // Fonts are bundled in public/fonts so rendering works offline.
 export const fontFamily = "Heebo"; // Hebrew + Latin, variable weight
-export const displayFont = "Bebas Neue"; // tall condensed caps for the giant background words
-export const scriptFont = "Caveat"; // handwritten accents
 const fontFaces = [
   { family: fontFamily, file: "fonts/heebo-hebrew.woff2", weight: "100 900", range: "U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F" },
   { family: fontFamily, file: "fonts/heebo-latin.woff2", weight: "100 900", range: "U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122" },
-  { family: displayFont, file: "fonts/bebas-neue.woff2", weight: "400" },
-  { family: scriptFont, file: "fonts/caveat.woff2", weight: "700" },
 ];
 const fontHandle = delayRender("Loading fonts");
 Promise.all(
   fontFaces.map(async ({ family, file, weight, range }) => {
     const face = new FontFace(family, `url(${staticFile(file)}) format("woff2")`, {
       weight,
-      ...(range ? { unicodeRange: range } : {}),
+      unicodeRange: range,
     });
     document.fonts.add(await face.load());
   }),
@@ -228,122 +223,6 @@ export const Wipe: React.FC<{ at: number; length: number; color: string; mode: "
     <AbsoluteFill
       style={{ background: color, clipPath: `polygon(${left}% 0, ${100 - right}% 0, ${100 - right}% 100%, ${left}% 100%)` }}
     />
-  );
-};
-
-// Huge condensed outline word drifting slowly behind a title.
-export const GhostWord: React.FC<{ text: string; duration: number; size: number; color?: string }> = ({
-  text,
-  duration,
-  size,
-  color = brand.colors.paper,
-}) => {
-  const frame = useCurrentFrame();
-  const drift = interpolate(frame, [0, duration], [6, -6]);
-  const opacity = interpolate(frame, [0, sec(0.5)], [0, 0.22], clamp);
-  return (
-    <div
-      style={{
-        fontFamily: displayFont,
-        fontSize: size,
-        lineHeight: 0.85,
-        whiteSpace: "nowrap",
-        color: "transparent",
-        WebkitTextStroke: `${Math.max(2, size * 0.008)}px ${color}`,
-        opacity,
-        transform: `translateX(${drift}%)`,
-      }}
-    >
-      {text}
-    </div>
-  );
-};
-
-// Circled number with a handwritten word across it ("01" + "One").
-export const NumberBadge: React.FC<{ index: number; size: number; color: string; delay: number }> = ({
-  index,
-  size,
-  color,
-  delay,
-}) => {
-  const frame = useCurrentFrame();
-  const p = progress(frame, delay, sec(0.6));
-  const write = progress(frame, delay + sec(0.2), sec(0.6));
-  const words = ["One", "Two", "Three", "Four", "Five", "Six"];
-  return (
-    <div style={{ position: "relative", width: size, height: size, opacity: p, transform: `scale(${0.85 + 0.15 * p})` }}>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: "50%",
-          border: `${size * 0.03}px solid ${color}`,
-          // Keeps the white number readable over light website screens.
-          background: "rgba(20,18,32,0.55)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontFamily: displayFont,
-          fontSize: size * 0.5,
-          color: brand.colors.paper,
-          paddingTop: size * 0.05,
-        }}
-      >
-        {String(index + 1).padStart(2, "0")}
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: -size * 0.35,
-          bottom: -size * 0.12,
-          fontFamily: scriptFont,
-          fontSize: size * 0.42,
-          color,
-          transform: "rotate(-12deg)",
-          // Handwriting "draws" in from left to right.
-          clipPath: `inset(0 ${(1 - write) * 100}% 0 0)`,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {words[index % words.length]}
-      </div>
-    </div>
-  );
-};
-
-// A tilted sticker label that pops onto the frame.
-export const Sticker: React.FC<{
-  text: string;
-  delay: number;
-  size: number;
-  rotate: number;
-  background: string;
-  color: string;
-}> = ({ text, delay, size, rotate, background, color }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const p = spring({ frame: frame - delay, fps, config: { damping: 14, stiffness: 160 } });
-  return (
-    <div
-      style={{
-        display: "inline-block",
-        background,
-        color,
-        fontFamily,
-        fontWeight: 800,
-        fontSize: size,
-        padding: `${size * 0.22}px ${size * 0.6}px`,
-        borderRadius: 999,
-        border: `${Math.max(2, size * 0.06)}px solid ${brand.colors.ink}`,
-        boxShadow: `${size * 0.1}px ${size * 0.12}px 0 ${brand.colors.ink}`,
-        direction: "rtl",
-        whiteSpace: "nowrap",
-        opacity: Math.min(1, p * 2),
-        transform: `rotate(${rotate}deg) scale(${p})`,
-      }}
-    >
-      {text}
-    </div>
   );
 };
 
