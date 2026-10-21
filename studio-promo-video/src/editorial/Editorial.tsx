@@ -92,7 +92,8 @@ const chapters: Chapter[] = [
 const studioPhotos = ["works/studio/studio.jpg", "works/studio/studio-boots.jpg", "works/studio/studio-owl.jpg"];
 
 const editorialTiming = {
-  opening: 6 * BEAT,
+  // Each service in the opening holds for 2.5 beats (1.25 s).
+  opening: 10 * BEAT,
   closing: studioPhotos.length * 2 * BEAT,
   endCard: 8 * BEAT,
 };
@@ -209,7 +210,8 @@ const SceneOut: React.FC<{ duration: number; children: React.ReactNode }> = ({ d
 
 // ---------- scenes ----------
 
-// Opening: the services, one per beat, in big type over a full-bleed work.
+// Opening: the services one after another, in big type over a full-bleed work.
+const hookShot = BEAT * 2.5;
 const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
@@ -225,7 +227,7 @@ const Opening: React.FC = () => {
     <SceneOut duration={editorialTiming.opening}>
       <AbsoluteFill style={{ background: palette.charcoal }}>
         {hook.map((h, i) => (
-          <Sequence key={h.label} from={i * BEAT * 1.5} durationInFrames={BEAT * 1.5}>
+          <Sequence key={h.label} from={i * hookShot} durationInFrames={hookShot}>
             <PunchIn>
               <Source src={h.src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </PunchIn>
