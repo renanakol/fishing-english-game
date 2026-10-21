@@ -24,6 +24,8 @@ type Chapter = {
   title: string;
   // Line set under the big colored title. A "\n" in the title stacks it on two big lines.
   tail: string;
+  // Thin, see-through English word drifting behind the title.
+  ghost: string;
   // Scene background, title color and text color.
   bg: string;
   titleColor: string;
@@ -37,6 +39,7 @@ type Chapter = {
 const chapters: Chapter[] = [
   {
     title: "מיתוג",
+    ghost: "BRANDING",
     tail: "שאי אפשר לפספס",
     bg: black,
     titleColor: yellow,
@@ -54,6 +57,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "אתרים",
+    ghost: "WEBSITES",
     tail: "עיצוב ובנייה מא' עד ת'",
     bg: black,
     titleColor: turquoise,
@@ -64,6 +68,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "איור",
+    ghost: "ILLUSTRATION",
     tail: "עולמות שלמים ביד",
     bg: black,
     titleColor: red,
@@ -80,6 +85,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "וידאו\nואנימציה",
+    ghost: "MOTION",
     tail: "שמושכים את העין",
     bg: black,
     titleColor: yellow,
@@ -209,6 +215,43 @@ const Headline: React.FC<{
   );
 };
 
+// A huge, thin outline word that drifts slowly sideways behind the headline.
+const Ghost: React.FC<{ text: string; duration: number; top: number; size: number }> = ({ text, duration, top, size }) => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [0, sec(0.6)], [0, 0.4], clamp);
+  const drift = interpolate(frame, [0, duration], [8, -14]);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top,
+        left: 0,
+        right: 0,
+        overflow: "hidden",
+        direction: "ltr",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          fontFamily,
+          fontWeight: 300,
+          fontSize: size,
+          lineHeight: 1,
+          letterSpacing: size * 0.02,
+          whiteSpace: "nowrap",
+          color: "transparent",
+          WebkitTextStroke: `${Math.max(2, size * 0.008)}px ${palette.cream}`,
+          opacity,
+          transform: `translateX(${drift}%)`,
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+};
+
 // Fades a whole scene out over its last few frames.
 const SceneOut: React.FC<{ duration: number; children: React.ReactNode }> = ({ duration, children }) => {
   const frame = useCurrentFrame();
@@ -292,12 +335,8 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
   return (
     <SceneOut duration={duration}>
       <AbsoluteFill style={{ background: bg, direction: "rtl", padding: `${height * 0.07}px ${margin}px 0` }}>
-        <Rise at={sec(0.05)}>
-          <span style={{ fontSize: unit * 0.032, fontWeight: 700, letterSpacing: 3, color: fg, direction: "ltr", display: "inline-block" }}>
-            {String(index + 1).padStart(2, "0")}/{String(chapters.length).padStart(2, "0")}
-          </span>
-        </Rise>
-        <div style={{ marginTop: unit * 0.025 }}>
+        <Ghost text={chapter.ghost} duration={duration} top={height * 0.075} size={unit * 0.3} />
+        <div style={{ position: "relative", marginTop: unit * 0.045 }}>
           <Headline
             at={sec(0.15)}
             size={unit * 0.08}
