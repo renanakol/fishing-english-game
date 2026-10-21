@@ -81,13 +81,9 @@ const chapters: Chapter[] = [
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
-    aspect: 16 / 9,
-    fit: "contain",
-    media: [
-      { src: "works/video/boots-ad-1-wide.mp4", beats: 9 },
-      { src: "works/video/princess-frog.mp4", beats: 5 },
-      { src: "works/video/boots-ad-2-wide.mp4", beats: 4 },
-    ],
+    aspect: 9 / 16,
+    fit: "cover",
+    media: [{ src: "works/video/shop-now.mp4", beats: 17 }],
   },
 ];
 
@@ -211,7 +207,7 @@ const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
   { label: "איור", src: "works/illustration/beach-dancer.jpg" },
-  { label: "וידאו", src: "works/video/boots-ad-1-wide.mp4" },
+  { label: "וידאו", src: "works/video/shop-now.mp4" },
 ];
 
 const Opening: React.FC = () => {
