@@ -50,14 +50,14 @@ export const services: Service[] = [
     // Taped polaroids dropping onto a pile.
     display: "polaroid",
     line: "זהות שאי אפשר לפספס",
-    // Logos and mockups, alternating.
+    // Logos and mockups, alternating; one polaroid per second.
     media: [
-      "works/branding/smash-eat-bag.jpg",
-      "works/branding/stargazing-logo.jpg",
-      "works/branding/wine-and-beard.jpg",
-      "works/branding/unity-logo.jpg",
-      "works/branding/live-jar.jpg",
-      "works/branding/live-logo.jpg",
+      { src: "works/branding/smash-eat-bag.jpg", beats: 2 },
+      { src: "works/branding/stargazing-logo.jpg", beats: 2 },
+      { src: "works/branding/wine-and-beard.jpg", beats: 2 },
+      { src: "works/branding/unity-logo.jpg", beats: 2 },
+      { src: "works/branding/live-jar.jpg", beats: 2 },
+      { src: "works/branding/live-logo.jpg", beats: 2 },
     ],
   },
   {

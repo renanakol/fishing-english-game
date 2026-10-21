@@ -49,7 +49,7 @@ export const PolaroidPile: React.FC<{ media: Shot[]; wall: string; tape: string 
         {media.map((shot, i) => {
           // Only the newest few stay on the pile.
           if (i > current || i < current - 2) return null;
-          const drop = spring({ frame: frame - starts[i], fps, config: { damping: 13, stiffness: 120 } });
+          const drop = spring({ frame: frame - starts[i], fps, config: { damping: 14, stiffness: 220 } });
           const tilt = tilts[i % tilts.length];
           return (
             <div
