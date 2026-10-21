@@ -22,9 +22,8 @@ const palette = {
 type Frame = { width: number; height: number };
 type Chapter = {
   title: string;
-  // Heavy line set above the big colored title, and/or one set below it.
-  kicker?: string;
-  tail?: string;
+  // Line set under the big colored title. A "\n" in the title stacks it on two big lines.
+  tail: string;
   // Scene background, title color and text color.
   bg: string;
   titleColor: string;
@@ -38,7 +37,7 @@ type Chapter = {
 const chapters: Chapter[] = [
   {
     title: "מיתוג",
-    kicker: "מותג שאי אפשר לפספס",
+    tail: "שאי אפשר לפספס",
     bg: black,
     titleColor: yellow,
     fg: brand.colors.paper,
@@ -54,7 +53,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "אתרים",
-    kicker: "עיצוב ובנייה מא' ועד ת'",
+    tail: "עיצוב ובנייה מא' עד ת'",
     bg: black,
     titleColor: turquoise,
     fg: brand.colors.paper,
@@ -64,7 +63,7 @@ const chapters: Chapter[] = [
   },
   {
     title: "איור",
-    kicker: "עולמות שלמים ביד",
+    tail: "עולמות שלמים ביד",
     bg: black,
     titleColor: red,
     fg: brand.colors.paper,
@@ -79,7 +78,7 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    title: "וידאו ואנימציה",
+    title: "וידאו\nאנימציה",
     tail: "שמושכים את העין",
     bg: black,
     titleColor: yellow,
@@ -162,20 +161,23 @@ const Headline: React.FC<{
   align?: "right" | "center";
 }> = ({ lines, size, at, maxWidth, bigScale = 1.45, align = "right" }) => {
   const frame = useCurrentFrame();
-  const bigIndex = Math.max(0, lines.findIndex((l) => l.big));
-  const last = lines.some((l) => l.big) ? bigIndex : lines.length - 1;
+  const anyBig = lines.some((l) => l.big);
+  const isBig = (i: number) => (anyBig ? !!lines[i].big : i === lines.length - 1);
+  const last = lines.map((_, i) => i).filter(isBig).pop() ?? lines.length - 1;
+  // About two thirds of an em per character (letters and spaces) in this face.
+  const fit = (text: string) => maxWidth / (Array.from(text).length * 0.68);
+  const bigSize = Math.min(size * bigScale, ...lines.filter((_, i) => isBig(i)).map((l) => fit(l.text)));
   const spark = interpolate(frame - at - last * sec(0.12), [sec(0.2), sec(0.6)], [0, 1], { ...clamp, easing: ease });
   return (
     <div style={{ direction: "rtl", textAlign: align, letterSpacing: -size * 0.02 }}>
       {lines.map((l, i) => {
-        const big = i === last;
-        // About two thirds of an em per character (letters and spaces) in this face.
-        const fontSize = Math.min(big ? size * bigScale : size, maxWidth / (Array.from(l.text).length * 0.68));
+        const big = isBig(i);
+        const fontSize = big ? bigSize : Math.min(size, fit(l.text));
         return (
           <Rise key={i} at={at + i * sec(0.12)}>
             <div style={{ position: "relative", display: "inline-block", fontSize, fontWeight: big ? 900 : 700, lineHeight: 1.02, color: l.color, whiteSpace: "nowrap" }}>
               {l.text}
-              {big ? (
+              {i === last ? (
                 <span
                   style={{
                     position: "absolute",
@@ -212,7 +214,7 @@ const hook = [
   { label: "מיתוג", src: "works/branding/smash-eat-bag.jpg" },
   { label: "אתרים", src: "works/web/agamon-hula-long.mp4" },
   { label: "איור", src: "works/illustration/beach-dancer.jpg" },
-  { label: "וידאו ואנימציה", src: "works/video/shop-now.mp4" },
+  { label: "וידאו\nאנימציה", src: "works/video/shop-now.mp4" },
 ];
 
 const Opening: React.FC = () => {
@@ -230,17 +232,21 @@ const Opening: React.FC = () => {
             <AbsoluteFill style={{ background: "rgba(13,13,16,0.6)" }} />
             <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", direction: "rtl" }}>
               <Rise at={0}>
-                <div
-                  style={{
-                    // Long labels shrink to fit the width.
-                    fontSize: Math.min(unit * 0.26, (width * 0.9) / (Array.from(h.label).length * 0.68)),
-                    fontWeight: 900,
-                    color: [yellow, turquoise, red, yellow][i],
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {h.label}
-                </div>
+                {h.label.split("\n").map((line) => (
+                  <div
+                    key={line}
+                    style={{
+                      fontSize: Math.min(unit * 0.26, (width * 0.92) / (Math.max(...h.label.split("\n").map((l) => l.length)) * 0.6)),
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      textAlign: "center",
+                      color: [yellow, turquoise, red, yellow][i],
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {line}
+                  </div>
+                ))}
               </Rise>
             </AbsoluteFill>
           </Sequence>
@@ -266,7 +272,9 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
   const unit = Math.min(width, height);
   const { fg, bg } = chapter;
   const margin = width * 0.06;
-  const area = { top: height * 0.32, height: height * 0.62 };
+  // Push the frame down under taller (two-line) titles.
+  const extra = (chapter.title.split("\n").length - 1) * unit * 0.17;
+  const area = { top: height * 0.32 + extra, height: height * 0.62 - extra };
   const box = fitBox(chapter.aspect, { width: width - margin * 1.2, height: area.height });
   const frameIn = useIn(sec(0.35), sec(0.9));
   const starts = chapter.media.map((_, i) => chapter.media.slice(0, i).reduce((sum, s) => sum + shotDuration(s), 0));
@@ -286,9 +294,8 @@ const ChapterScene: React.FC<{ chapter: Chapter; index: number; duration: number
             bigScale={2.4}
             maxWidth={width - margin * 2}
             lines={[
-              ...(chapter.kicker ? [{ text: chapter.kicker, color: fg }] : []),
-              { text: chapter.title, color: chapter.titleColor, big: true },
-              ...(chapter.tail ? [{ text: chapter.tail, color: fg }] : []),
+              ...chapter.title.split("\n").map((text) => ({ text, color: chapter.titleColor, big: true })),
+              { text: chapter.tail, color: fg },
             ]}
           />
         </div>
@@ -375,9 +382,6 @@ const Closing: React.FC = () => {
         })}
         <AbsoluteFill style={{ background: "linear-gradient(to top, rgba(20,19,26,0.85) 0%, rgba(20,19,26,0.2) 55%, rgba(20,19,26,0) 75%)" }} />
         <AbsoluteFill style={{ justifyContent: "flex-end", padding: `0 ${width * 0.08}px ${height * 0.1}px`, direction: "rtl" }}>
-          <Rise at={sec(0.3)}>
-            <div style={{ fontFamily: handFont, fontSize: unit * 0.06, color: palette.cream }}>עיצוב עם קריצה ;)</div>
-          </Rise>
           <div style={{ marginTop: unit * 0.015 }}>
             <Headline
               at={sec(0.45)}
@@ -429,7 +433,7 @@ const EndCard: React.FC = () => {
         </div>
       </Rise>
       <Rise at={sec(1.3)} style={{ position: "absolute", bottom: height * 0.07 }}>
-        <div style={{ fontFamily: handFont, fontSize: unit * 0.05, color: brand.colors.ink }}>מיתוג · אתרים · איור · וידאו ואנימציה</div>
+        <div style={{ fontFamily: handFont, fontSize: unit * 0.075, color: palette.accent }}>עיצוב עם קריצה ;)</div>
       </Rise>
     </AbsoluteFill>
   );
