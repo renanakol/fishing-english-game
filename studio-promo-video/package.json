@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/react": "19.1.8",
     "playwright": "^1.56.1",
+    "potrace": "^2.1.8",
     "typescript": "5.8.3"
   }
 }

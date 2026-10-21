@@ -50,13 +50,14 @@ export const services: Service[] = [
     // Taped polaroids dropping onto a pile.
     display: "polaroid",
     line: "זהות שאי אפשר לפספס",
+    // Logos and mockups, alternating.
     media: [
       "works/branding/smash-eat-bag.jpg",
-      "works/branding/wine-and-beard.jpg",
-      "works/branding/shawarma-wide.jpg",
-      "works/branding/live-jar.jpg",
-      "works/branding/solano-booth.jpg",
       "works/branding/stargazing-logo.jpg",
+      "works/branding/wine-and-beard.jpg",
+      "works/branding/unity-logo.jpg",
+      "works/branding/live-jar.jpg",
+      "works/branding/live-logo.jpg",
     ],
   },
   {
@@ -64,28 +65,18 @@ export const services: Service[] = [
     // Screen recordings inside an illustrated phone.
     display: "phone",
     line: "עיצוב ובנייה מא' ועד ת'",
-    media: [
-      // Agamon Hula gets a long, unhurried scroll; then two more sites.
-      { src: "works/web/agamon-hula-long.mp4", beats: 9 },
-      { src: "works/web/in-your-own-time-long.mp4", beats: 4 },
-      { src: "works/web/gohar-long.mp4", beats: 4 },
-    ],
+    media: [{ src: "works/web/agamon-hula-long.mp4", beats: 9 }],
   },
   {
     title: "איור",
     // Painted onto a canvas on an easel.
     display: "easel",
     line: "עולמות שלמים ביד",
-    // More in works/illustration/: wizard-of-oz, peter-pan, party, beach, vessel, helmet, leap, kitchen-knight, storm.
+    // Each one is painted in, then holds for a moment.
     media: [
-      "works/illustration/beach-dancer.jpg",
-      "works/illustration/swim-ring.jpg",
-      "works/illustration/air-mattress.jpg",
-      "works/illustration/sunbather.jpg",
-      "works/illustration/balloons.jpg",
-      "works/illustration/armadillo.jpg",
-      "works/illustration/moon.jpg",
-      "works/illustration/bouquet.jpg",
+      { src: "works/illustration/beach-dancer.jpg", beats: 5 },
+      { src: "works/illustration/swim-ring.jpg", beats: 5 },
+      { src: "works/illustration/moon.jpg", beats: 5 },
     ],
   },
   {
@@ -95,11 +86,10 @@ export const services: Service[] = [
     line: "ואנימציה שזזה קדימה",
     media: [
       "works/video/boots-ad-1-wide.mp4",
-      "works/video/bar-mitzva-1-wide.mp4",
+      // The two bar mitzva moments joined into one continuous clip.
+      { src: "works/video/bar-mitzva-wide.mp4", beats: 8 },
       { src: "works/video/princess-frog.mp4", beats: 5 },
-      "works/video/bar-mitzva-2-wide.mp4",
       "works/video/boots-ad-2-wide.mp4",
-      "works/video/bar-mitzva-4-wide.mp4",
     ],
   },
 ];
@@ -136,7 +126,7 @@ export const sec = (seconds: number) => Math.round(seconds * FPS);
 export const timing = {
   intro: 10 * BEAT,
   compare: 8 * BEAT,
-  outro: 12 * BEAT,
+  outro: 15 * BEAT,
 };
 
 export const shotSrc = (shot: Shot) => (typeof shot === "string" ? shot : shot.src);

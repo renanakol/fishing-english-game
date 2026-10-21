@@ -1,5 +1,5 @@
-import React from "react";
-import { AbsoluteFill, Easing, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import React, { useId } from "react";
+import { AbsoluteFill, Easing, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { Source } from "../components";
 import { Shot, brand, sec, shotDuration, shotSrc } from "../config";
 
@@ -37,8 +37,8 @@ export const PolaroidPile: React.FC<{ media: Shot[]; wall: string; tape: string 
   const { width, height, fps } = useVideoConfig();
   const starts = startsOf(media);
   const line = width * 0.012;
-  const side = Math.min(width * 0.72, height * 0.42);
-  const border = side * 0.06;
+  const side = Math.min(width * 0.82, height * 0.48);
+  const border = side * 0.05;
   const tilts = [-6, 5, -3, 7, -5, 4];
   const current = starts.filter((s) => s <= frame).length - 1;
 
@@ -65,8 +65,9 @@ export const PolaroidPile: React.FC<{ media: Shot[]; wall: string; tape: string 
                 transform: `translateY(${(1 - drop) * -height * 0.7}px) rotate(${tilt * drop + (1 - drop) * tilt * 3}deg)`,
               }}
             >
-              <div style={{ width: side, height: side, background: "#F3EEE6", border: `${line * 0.6}px solid ${ink}` }}>
-                <Source src={shotSrc(shot)} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              {/* The work fills the whole photo. */}
+              <div style={{ width: side, height: side, overflow: "hidden", border: `${line * 0.6}px solid ${ink}` }}>
+                <Source src={shotSrc(shot)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               {/* Tape */}
               <div
@@ -178,28 +179,38 @@ export const PhoneShowcase: React.FC<{ media: Shot[]; wall: string; body: string
   );
 };
 
-// Illustration: works on a canvas on a wooden easel; each one is painted in with a brush sweep.
-export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string; paint: string }> = ({
+// Illustration: works on a canvas on a wooden easel. A paintbrush paints each one in, row by row.
+export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string; paints: string[] }> = ({
   media,
   wall,
   wood,
-  paint,
+  paints,
 }) => {
   const frame = useCurrentFrame();
   const { width, height, fps } = useVideoConfig();
   const starts = startsOf(media);
   const line = width * 0.012;
-  const side = Math.min(width * 0.74, height * 0.42);
-  const top = height * 0.1;
-  const legLen = height * 0.36;
+  const side = Math.min(width * 0.8, height * 0.45);
+  const top = height * 0.09;
+  const legLen = height * 0.3;
   const floorY = top + side + legLen * 0.62;
   const current = Math.max(0, starts.filter((s) => s <= frame).length - 1);
-  const enter = spring({ frame, fps, config: { damping: 14, stiffness: 110 } });
-  const sweep = (i: number) =>
-    i === 0 && frame < sec(0.6)
-      ? interpolate(frame, [sec(0.15), sec(0.6)], [0, 1], { ...clamp, easing: easeOut })
-      : interpolate(frame - starts[i], [0, sec(0.5)], [0, 1], { ...clamp, easing: easeOut });
-  const brushP = sweep(current);
+  const enter = spring({ frame, fps, config: { damping: 12, stiffness: 100 } });
+  // The first painting waits for the easel to land.
+  const paintStart = (i: number) => (i === 0 ? sec(0.35) : starts[i]);
+  const paintLength = sec(1.2);
+  const paintP = (i: number) =>
+    interpolate(frame - paintStart(i), [0, paintLength], [0, 1], { ...clamp, easing: Easing.bezier(0.45, 0, 0.55, 1) });
+  const p = paintP(current);
+  const stroke = makeStroke(side);
+  const brushAt = stroke.at(p * stroke.length);
+  // Lean the brush against its direction of travel, smoothed over a short stretch of the path.
+  const ahead = stroke.at(Math.min(stroke.length, p * stroke.length + side * 0.15));
+  const behind = stroke.at(Math.max(0, p * stroke.length - side * 0.15));
+  const lean = interpolate(ahead.x - behind.x, [-side * 0.3, side * 0.3], [28, -28], clamp);
+  const brushVisible = interpolate(frame - paintStart(current), [-sec(0.15), 0, paintLength, paintLength + sec(0.2)], [0, 1, 1, 0], clamp);
+  // The canvas nudges a little under the brush.
+  const wobble = p > 0 && p < 1 ? Math.sin(frame * 0.9) * 0.4 : 0;
   const woodStyle: React.CSSProperties = {
     position: "absolute",
     width: line * 3.2,
@@ -212,14 +223,19 @@ export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string
   return (
     <AbsoluteFill>
       <Room wall={wall} floorY={floorY} line={line} />
-      <AbsoluteFill style={{ alignItems: "center", transform: `translateY(${(1 - enter) * height * 0.8}px)` }}>
+      <AbsoluteFill
+        style={{
+          alignItems: "center",
+          transform: `translateY(${(1 - enter) * -height * 0.7}px) scaleY(${1 + (1 - enter) * 0.05})`,
+          transformOrigin: "bottom center",
+        }}
+      >
         <div style={{ position: "absolute", top, width: side, height: side + legLen }}>
           {/* Legs: two in front, one behind, and the top post. */}
           <div style={{ ...woodStyle, left: side * 0.5 - line * 1.6, top: -side * 0.08, height: side * 0.2 }} />
           <div style={{ ...woodStyle, left: side * 0.22, top: side * 0.1, height: side * 0.9 + legLen, transform: "rotate(9deg)" }} />
           <div style={{ ...woodStyle, left: side * 0.74, top: side * 0.1, height: side * 0.9 + legLen, transform: "rotate(-9deg)" }} />
           <div style={{ ...woodStyle, left: side * 0.49, top: side * 0.4, height: side * 0.6 + legLen * 0.8, opacity: 0.85 }} />
-          {/* Ledge the canvas rests on */}
           <div
             style={{
               position: "absolute",
@@ -243,52 +259,107 @@ export const EaselShowcase: React.FC<{ media: Shot[]; wall: string; wood: string
               border: `${line}px solid ${ink}`,
               boxShadow: `${line * 1.6}px ${line * 2}px 0 ${ink}`,
               overflow: "hidden",
+              transform: `rotate(${wobble}deg)`,
             }}
           >
             {media.map((shot, i) => {
               if (i > current || i < current - 1) return null;
-              const p = i === current ? sweep(i) : 1;
-              // Painted in from the right (Hebrew reading direction), with a slanted brush edge.
-              const edge = 100 - p * 130;
-              return (
-                <AbsoluteFill key={i} style={{ clipPath: `polygon(${edge + 30}% 0, 100% 0, 100% 100%, ${edge}% 100%)` }}>
-                  <Source src={shotSrc(shot)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </AbsoluteFill>
-              );
+              return <PaintedImage key={i} src={shotSrc(shot)} side={side} stroke={stroke} p={i === current ? p : 1} />;
             })}
           </div>
-          {/* The brush, riding the paint edge while it sweeps. */}
-          {brushP > 0 && brushP < 1 ? (
-            <div
-              style={{
-                position: "absolute",
-                top: side * 0.35,
-                left: side * ((100 - brushP * 130 + 15) / 100),
-                width: line * 2.4,
-                height: side * 0.55,
-                background: wood,
-                border: `${line * 0.6}px solid ${ink}`,
-                borderRadius: line,
-                transform: "rotate(28deg)",
-                transformOrigin: "bottom center",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: -side * 0.08,
-                  left: -line * 0.8,
-                  width: line * 3.4,
-                  height: side * 0.1,
-                  background: paint,
-                  border: `${line * 0.6}px solid ${ink}`,
-                  borderRadius: `${line}px ${line}px ${line * 3}px ${line * 3}px`,
-                }}
-              />
-            </div>
-          ) : null}
+          {/* The brush, its tip on the paint front. */}
+          <div
+            style={{
+              position: "absolute",
+              left: brushAt.x,
+              top: brushAt.y,
+              opacity: brushVisible,
+              transform: `rotate(${lean}deg)`,
+              transformOrigin: "0 0",
+            }}
+          >
+            <Paintbrush size={side * 0.6} paint={paints[current % paints.length]} wood={wood} line={line} />
+          </div>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
+  );
+};
+
+// The painting path: wide strokes back and forth across the canvas, top to bottom, starting at the right.
+const makeStroke = (side: number) => {
+  const rows = [0.12, 0.37, 0.63, 0.88].map((r) => r * side);
+  const right = side * 1.08;
+  const left = -side * 0.08;
+  const points = rows.flatMap((y, i) => (i % 2 === 0 ? [{ x: right, y }, { x: left, y }] : [{ x: left, y }, { x: right, y }]));
+  const lengths = points.slice(1).map((pt, i) => Math.hypot(pt.x - points[i].x, pt.y - points[i].y));
+  const length = lengths.reduce((a, b) => a + b, 0);
+  const at = (d: number) => {
+    let rest = Math.max(0, Math.min(length, d));
+    for (let i = 0; i < lengths.length; i++) {
+      if (rest <= lengths[i] || i === lengths.length - 1) {
+        const t = lengths[i] === 0 ? 0 : rest / lengths[i];
+        return { x: points[i].x + (points[i + 1].x - points[i].x) * t, y: points[i].y + (points[i + 1].y - points[i].y) * t };
+      }
+      rest -= lengths[i];
+    }
+    return points[points.length - 1];
+  };
+  const d = points.map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`).join(" ");
+  return { d, length, at, width: side * 0.3 };
+};
+
+// An image revealed through a mask of the brush strokes painted so far.
+const PaintedImage: React.FC<{ src: string; side: number; stroke: ReturnType<typeof makeStroke>; p: number }> = ({
+  src,
+  side,
+  stroke,
+  p,
+}) => {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg width={side} height={side} style={{ position: "absolute", inset: 0 }}>
+      <defs>
+        <mask id={`paint-${id}`}>
+          <path
+            d={stroke.d}
+            fill="none"
+            stroke="#fff"
+            strokeWidth={stroke.width}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={stroke.length}
+            strokeDashoffset={stroke.length * (1 - p)}
+          />
+        </mask>
+      </defs>
+      <image href={staticFile(src)} width={side} height={side} preserveAspectRatio="xMidYMid slice" mask={`url(#paint-${id})`} />
+    </svg>
+  );
+};
+
+// A flat paintbrush drawn with its bristle tip at (0, 0) and the handle rising up and away.
+const Paintbrush: React.FC<{ size: number; paint: string; wood: string; line: number }> = ({ size, paint, wood, line }) => {
+  const w = size * 0.13;
+  return (
+    <svg
+      width={w * 2}
+      height={size}
+      viewBox={`${-w} ${-size} ${w * 2} ${size}`}
+      style={{ position: "absolute", left: -w, top: -size, overflow: "visible" }}
+    >
+      <g stroke={ink} strokeWidth={line * 0.7} strokeLinejoin="round">
+        {/* Handle */}
+        <path d={`M ${-w * 0.32} ${-size * 0.4} L ${-w * 0.2} ${-size} L ${w * 0.2} ${-size} L ${w * 0.32} ${-size * 0.4} Z`} fill={wood} />
+        {/* Metal ferrule */}
+        <rect x={-w * 0.45} y={-size * 0.42} width={w * 0.9} height={size * 0.14} rx={line * 0.4} fill="#C9CCD6" />
+        {/* Bristles dipped in paint */}
+        <path
+          d={`M ${-w * 0.45} ${-size * 0.28} L ${w * 0.45} ${-size * 0.28} L ${w * 0.4} ${-size * 0.08} Q 0 ${size * 0.02} ${-w * 0.4} ${-size * 0.08} Z`}
+          fill="#E7D3B0"
+        />
+        <path d={`M ${-w * 0.42} ${-size * 0.14} L ${w * 0.42} ${-size * 0.14} L ${w * 0.4} ${-size * 0.08} Q 0 ${size * 0.02} ${-w * 0.4} ${-size * 0.08} Z`} fill={paint} />
+      </g>
+    </svg>
   );
 };

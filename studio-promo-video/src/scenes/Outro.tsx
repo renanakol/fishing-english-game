@@ -1,7 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Img, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { Media, PillButton, RevealWord, Ticker, Wipe, accentAt, fitSize, fontFamily } from "../components";
 import { BEAT, brand, outro, sec, ticker } from "../config";
+import { LogoReveal } from "./LogoReveal";
 
 // Two clean screens: the call to action over a photo of the studio, then the logo and contact details.
 export const Outro: React.FC = () => {
@@ -40,7 +41,7 @@ export const Outro: React.FC = () => {
   );
 };
 
-// Logo, website button and Instagram handle, with the running strip of services.
+// The logo draws itself on, then the website button and Instagram handle settle in under it.
 const ContactCard: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
@@ -49,12 +50,7 @@ const ContactCard: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", gap: unit * 0.06 }}>
-      {brand.logo ? (
-        <Img
-          src={staticFile(brand.logo)}
-          style={{ width: unit * 0.6, opacity: settle(0), transform: `translateY(${(1 - settle(0)) * 50}px)` }}
-        />
-      ) : null}
+      <LogoReveal width={unit * 0.72} delay={sec(0.2)} />
       <div
         style={{
           display: "flex",
@@ -62,8 +58,8 @@ const ContactCard: React.FC = () => {
           alignItems: "center",
           gap: unit * 0.03,
           fontFamily,
-          opacity: settle(BEAT),
-          transform: `translateY(${(1 - settle(BEAT)) * 50}px)`,
+          opacity: settle(sec(2.3)),
+          transform: `translateY(${(1 - settle(sec(2.3))) * 50}px)`,
         }}
       >
         <PillButton text={outro.website} size={unit * 0.055} background={brand.colors.ink} color={brand.colors.paper} />
