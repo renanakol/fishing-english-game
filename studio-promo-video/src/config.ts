@@ -111,7 +111,7 @@ export const outro = {
   instagram: "@reniart8",
 };
 
-// "Studio Vibes at Sunset" (Magnific, 120 BPM). Its first downbeat falls 0.04 s in; trimming that lines the
+// "Chic Lounge at Sunset" (Magnific, funky deep house, 120 BPM). Its kick lands 0.04 s after each half second; trimming that lines the
 // music's beat grid up with the video's.
 export const music: string | null = "audio/music.mp3";
 export const musicOffset = 0.04; // seconds trimmed from the start of the track
