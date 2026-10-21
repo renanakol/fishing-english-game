@@ -14,18 +14,19 @@ import {
 import { brand, sec } from "./config";
 
 // Fonts are bundled in public/fonts so rendering works offline.
-export const fontFamily = "Heebo"; // Hebrew + Latin, variable weight
-const fontFaces = [
+export const fontFamily = "Heebo"; // Hebrew + Latin, variable weight: small UI text
+export const titleFont = "buDrakonit"; // the studio's headline font: big titles
+export const handFont = "Lia Michal-Kasov"; // the studio's handwritten font: supporting lines
+const fontFaces: { family: string; file: string; weight: string; range?: string }[] = [
   { family: fontFamily, file: "fonts/heebo-hebrew.woff2", weight: "100 900", range: "U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F" },
   { family: fontFamily, file: "fonts/heebo-latin.woff2", weight: "100 900", range: "U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122" },
+  { family: titleFont, file: "fonts/budrakonit-bold.otf", weight: "700" },
+  { family: handFont, file: "fonts/liamichal-kasov.ttf", weight: "400" },
 ];
 const fontHandle = delayRender("Loading fonts");
 Promise.all(
   fontFaces.map(async ({ family, file, weight, range }) => {
-    const face = new FontFace(family, `url(${staticFile(file)}) format("woff2")`, {
-      weight,
-      unicodeRange: range,
-    });
+    const face = new FontFace(family, `url(${staticFile(file)})`, { weight, ...(range ? { unicodeRange: range } : {}) });
     document.fonts.add(await face.load());
   }),
 )
@@ -192,8 +193,8 @@ export const RevealWord: React.FC<{
         // Room for descenders (ק ך ן ף ץ) inside the mask.
         padding: `${size * 0.05}px ${size * 0.05}px ${size * 0.2}px`,
         marginBottom: -size * 0.15,
-        fontFamily,
-        fontWeight: 900,
+        fontFamily: titleFont,
+        fontWeight: 700,
         fontSize: size,
         lineHeight: 0.95,
         letterSpacing: -size * 0.02,
@@ -247,8 +248,8 @@ export const LineWord: React.FC<{
       <div
         style={{
           position: "relative",
-          fontFamily,
-          fontWeight: 700,
+          fontFamily: handFont,
+          fontWeight: 400,
           fontSize: size,
           lineHeight: 1.1,
           color,

@@ -44,7 +44,7 @@ export const ServiceScene: React.FC<{ service: Service; index: number; duration:
 
       <AbsoluteFill style={{ justifyContent: "flex-end", alignItems: "center", paddingBottom: height * 0.07 }}>
         <RevealWord text={service.title} delay={sec(0.27)} size={titleSize} color={accent} />
-        <LineWord text={service.line} delay={BEAT * 2} size={unit * 0.065} color={brand.colors.ink} background={accent} />
+        <LineWord text={service.line} delay={BEAT * 2} size={unit * 0.085} color={brand.colors.ink} background={accent} />
       </AbsoluteFill>
 
       <Wipe at={0} length={sec(0.4)} color={accent} mode="out" />

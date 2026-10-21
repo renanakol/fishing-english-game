@@ -1,7 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { Media, PillButton, RevealWord, Wipe, accentAt, fitSize, fontFamily } from "../components";
 import { BEAT, brand, outro, sec } from "../config";
+import { LogoBuild } from "./LogoBuild";
 
 // Two clean screens: the call to action over a photo of the studio, then the logo and contact details.
 export const Outro: React.FC = () => {
@@ -39,7 +40,7 @@ export const Outro: React.FC = () => {
   );
 };
 
-// The logo settles in, then the website button and Instagram handle under it.
+// The logo builds itself, then the website button and Instagram handle settle in under it.
 const ContactCard: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
@@ -48,16 +49,7 @@ const ContactCard: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", gap: unit * 0.06 }}>
-      {brand.logo ? (
-        <Img
-          src={staticFile(brand.logo)}
-          style={{
-            width: unit * 0.72,
-            opacity: settle(sec(0.2)),
-            transform: `scale(${interpolate(settle(sec(0.2)), [0, 1], [0.9, 1])})`,
-          }}
-        />
-      ) : null}
+      <LogoBuild width={unit * 0.8} delay={sec(0.2)} />
       <div
         style={{
           display: "flex",
@@ -65,8 +57,8 @@ const ContactCard: React.FC = () => {
           alignItems: "center",
           gap: unit * 0.03,
           fontFamily,
-          opacity: settle(sec(0.9)),
-          transform: `translateY(${(1 - settle(sec(0.9))) * 50}px)`,
+          opacity: settle(sec(1.7)),
+          transform: `translateY(${(1 - settle(sec(1.7))) * 50}px)`,
         }}
       >
         <PillButton text={outro.website} size={unit * 0.055} background={brand.colors.ink} color={brand.colors.paper} />
