@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snack Squad English</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;500;700&family=Lilita+One&display=swap">
+<style>
+/* Layout: one phone-width "lunch tray" column; sticker cards with ink outlines and hard shadows on a cafeteria-tablecloth ground. */
+:root{
+  --bg:#BFEBD6;          /* mint tablecloth */
+  --bg2:#AEE3CA;
+  --paper:#FFFDF7;
+  --ink:#211B33;
+  --muted:#5D5670;
+  --tomato:#FF5A3C;
+  --sun:#FFD23F;
+  --bubble:#FF8FD2;
+  --sky:#4F7DFF;
+  --good:#1FAE62;
+  --bad:#E5383B;
+  --f-display:"Secular One","Rubik",system-ui,sans-serif;
+  --f-body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-word:"Lilita One","Secular One",system-ui,sans-serif;
+  --sh:4px 4px 0 var(--ink);
+  --sh-s:2px 2px 0 var(--ink);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;font-family:var(--f-body);font-size:16px;color:var(--ink);line-height:1.45;
+  background-color:var(--bg);
+  background-image:repeating-conic-gradient(var(--bg2) 0 25%, var(--bg) 0 50%);
+  background-size:56px 56px;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.app{max-width:540px;margin:0 auto;min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 96px;display:flex;flex-direction:column;gap:16px}
+.en{direction:ltr;unicode-bidi:isolate;text-align:left}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance;line-height:1.15}
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:var(--sh)}
+.btn{background:var(--sun);border:3px solid var(--ink);border-radius:14px;box-shadow:var(--sh);padding:12px 18px;font-family:var(--f-display);font-size:18px;transition:transform .08s, box-shadow .08s}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn.red{background:var(--tomato);color:#fff}
+.btn.pink{background:var(--bubble)}
+.btn.blue{background:var(--sky);color:#fff}
+.btn.white{background:var(--paper)}
+.btn.small{padding:7px 12px;font-size:15px;box-shadow:var(--sh-s)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border:2px solid var(--ink);border-radius:999px;background:var(--paper)}
+
+/* top brand */
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.logo{font-family:var(--f-word);font-size:28px;line-height:1;direction:ltr;letter-spacing:.01em;color:var(--ink)}
+.logo span{color:var(--tomato);-webkit-text-stroke:0}
+.logo small{display:block;font-family:var(--f-display);font-size:13px;color:var(--muted);letter-spacing:0;direction:rtl;text-align:right;margin-top:3px}
+.stashpill{display:flex;align-items:center;gap:6px;background:var(--paper);border:3px solid var(--ink);border-radius:999px;padding:4px 12px 4px 6px;box-shadow:var(--sh-s);font-weight:700;font-variant-numeric:tabular-nums}
+.stashpill b{font-size:22px}
+
+/* hero character */
+.hero{position:relative;padding:14px;display:grid;grid-template-columns:132px 1fr;gap:12px;align-items:end;overflow:hidden;background:var(--sun)}
+.hero .av{width:132px;height:132px;animation:bob 2.6s ease-in-out infinite}
+.hero .who{font-family:var(--f-display);font-size:22px}
+.hero .who .en{display:inline}
+.bubble{position:relative;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:10px 12px;font-weight:500;min-width:0;margin-bottom:8px}
+.bubble:after{content:"";position:absolute;bottom:14px;right:-12px;border:9px solid transparent;border-left-color:var(--ink)}
+.hero .acts{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5px) rotate(1.5deg)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) scale(1.06)}75%{transform:rotate(8deg) scale(1.06)}}
+.wiggle{animation:wiggle .5s ease 2 !important}
+
+/* levels */
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.sec-h h2{font-size:24px}
+.levels{display:grid;gap:12px}
+.lvl{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:10px 12px;text-align:right;width:100%;position:relative}
+.lvl .num{width:56px;height:56px;border:3px solid var(--ink);border-radius:14px;display:grid;place-items:center;font-family:var(--f-word);font-size:28px;background:var(--bubble)}
+.lvl:nth-child(3n+2) .num{background:var(--sky);color:#fff}
+.lvl:nth-child(3n) .num{background:var(--tomato);color:#fff}
+.lvl .t{min-width:0}
+.lvl .t b{display:block;font-family:var(--f-word);font-weight:400;font-size:20px;line-height:1.1}
+.lvl .t span{font-size:14px;color:var(--muted)}
+.lvl .side{display:flex;flex-direction:column;align-items:center;gap:4px}
+.stars{font-size:15px;letter-spacing:1px;white-space:nowrap}
+.lvl.locked{opacity:.55;filter:grayscale(.6)}
+.lvl.locked .num{background:#ddd;color:var(--ink)}
+.lvl.boss{background:linear-gradient(0deg,var(--paper),var(--paper)) padding-box;}
+.lvl.boss .num{background:var(--ink);color:var(--sun)}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--paper);border-top:3px solid var(--ink)}
+.nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.nav button{background:none;border:0;padding:4px;border-radius:12px;display:flex;flex-direction:column;align-items:center;font-family:var(--f-display);font-size:13px;gap:0}
+.nav button i{font-style:normal;font-size:24px;line-height:1.2}
+.nav button[aria-current="true"]{background:var(--sun);outline:2.5px solid var(--ink)}
+
+/* play */
+.playbar{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center}
+.x{width:44px;height:44px;border-radius:12px;border:3px solid var(--ink);background:var(--paper);font-size:20px;box-shadow:var(--sh-s)}
+.prog{height:18px;border:3px solid var(--ink);border-radius:999px;background:var(--paper);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
+.streak{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.qcard{padding:16px;display:flex;flex-direction:column;gap:14px}
+.qtype{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qtype .tag{background:var(--sun)}
+.say{width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);background:var(--sky);color:#fff;font-size:20px;box-shadow:var(--sh-s);flex:none}
+.prompt{font-size:21px;font-weight:500;line-height:1.4}
+.prompt .blank{display:inline-block;min-width:64px;border-bottom:3px dashed var(--tomato);color:var(--tomato);text-align:center;font-weight:700}
+.hint{font-size:15px;color:var(--muted)}
+.bigemoji{font-size:96px;line-height:1.1;text-align:center;filter:drop-shadow(3px 3px 0 rgba(33,27,51,.18))}
+.bigword{font-family:var(--f-word);font-size:44px;text-align:center;line-height:1.1}
+.opts{display:grid;gap:10px}
+.opts.grid2{grid-template-columns:1fr 1fr}
+.opt{background:var(--paper);border:3px solid var(--ink);border-radius:14px;box-shadow:var(--sh-s);padding:12px 14px;font-size:18px;font-weight:500;text-align:left;direction:ltr;min-height:54px;transition:transform .08s}
+.opt.emo{font-size:46px;text-align:center;padding:6px}
+.opt:active{transform:translate(2px,2px);box-shadow:none}
+.opt.ok{background:var(--good);color:#fff}
+.opt.no{background:var(--bad);color:#fff;text-decoration:line-through}
+.opt[disabled]{pointer-events:none}
+.person{display:flex;gap:12px;align-items:center}
+.ph{width:78px;height:78px;border-radius:50%;border:3px solid var(--ink);overflow:hidden;flex:none;background:var(--bubble);display:grid;place-items:center;box-shadow:var(--sh-s)}
+.ph img,.ph svg{width:100%;height:100%;object-fit:cover;display:block}
+.meme{position:relative;border:3px solid var(--ink);border-radius:14px;overflow:hidden;background:var(--ink);aspect-ratio:1/1;max-width:100%;width:min(100%,300px);align-self:center}
+.meme img,.meme svg{width:100%;height:100%;object-fit:cover;display:block}
+.meme .cap{position:absolute;inset:auto 0 0 0;padding:8px;font-family:var(--f-word);color:#fff;text-align:center;font-size:20px;line-height:1.1;-webkit-text-stroke:1px #000;text-shadow:2px 2px 0 #000;direction:ltr}
+.meme .cap.top{inset:0 0 auto 0}
+.passage{background:#FFF6D6;border:2px solid var(--ink);border-radius:12px;padding:12px;font-size:16px;line-height:1.6;max-height:260px;overflow:auto}
+.slots,.pool{display:flex;flex-wrap:wrap;gap:8px;direction:ltr;min-height:52px;padding:8px;border-radius:12px}
+.slots{border:3px dashed var(--ink);background:#fff}
+.chip{background:var(--sun);border:2.5px solid var(--ink);border-radius:10px;padding:7px 11px;font-size:18px;font-weight:500;box-shadow:var(--sh-s)}
+.chip.used{visibility:hidden}
+.letter{width:46px;height:50px;font-family:var(--f-word);font-size:26px;padding:0;text-transform:lowercase}
+.slots.letters{justify-content:center}
+.slotl{width:38px;height:46px;border-bottom:4px solid var(--ink);font-family:var(--f-word);font-size:28px;display:grid;place-items:center;text-transform:lowercase}
+
+.fb{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-top:3px solid var(--ink);animation:up .22s ease}
+body.playing .app{padding-bottom:300px}
+.result .bubble:after{display:none}
+.fb .in{max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.fb.good{background:#C9F5D9}
+.fb.bad{background:#FFD5CF}
+.fb h3{font-size:22px}
+.fb .ans{font-weight:700}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+
+/* result */
+.result{padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.result .av{width:150px;height:150px}
+.result .score{font-family:var(--f-word);font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.loot{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;font-size:30px}
+
+/* stash / shop */
+.stashgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.snack{padding:10px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.snack .e{font-size:40px;line-height:1.1}
+.snack .n{font-size:13px;direction:ltr}
+.snack .c{font-weight:700;font-variant-numeric:tabular-nums}
+.snack.empty{opacity:.35}
+.chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.ch{padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.ch .av{width:96px;height:96px}
+.ch b{font-family:var(--f-display);font-weight:400;font-size:18px}
+.ch .sub{font-size:13px;color:var(--muted);direction:ltr}
+.ch.sel{background:var(--sun)}
+.ch.lock .av{filter:grayscale(1) brightness(.6)}
+
+/* friends */
+.form{padding:16px;display:flex;flex-direction:column;gap:12px}
+.form label{font-weight:700;font-size:15px;display:flex;flex-direction:column;gap:6px}
+.inp{font:inherit;padding:10px 12px;border:3px solid var(--ink);border-radius:12px;background:#fff;width:100%;min-width:0}
+.steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.preview{display:flex;align-items:center;gap:12px}
+.flist{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.fr{padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.fr .ph{width:90px;height:90px}
+.fr b{font-family:var(--f-word);font-weight:400;font-size:20px;direction:ltr}
+.note{font-size:14px;background:#FFF6D6;border:2px dashed var(--ink);border-radius:12px;padding:10px 12px}
+.filebtn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.fly{position:fixed;z-index:60;font-size:44px;pointer-events:none}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:70;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:500;max-width:90vw;text-align:center}
+.rain{position:fixed;top:-60px;z-index:65;font-size:34px;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:380px){.hero{grid-template-columns:100px 1fr}.hero .av{width:100px;height:100px}.opts.grid2{grid-template-columns:1fr}.opt.emo{font-size:40px}}
+</style>
+</head>
+<body>
+
+<div dir="rtl" lang="he">
+<main class="app" id="app">
+
+  <!-- HOME -->
+  <section id="s-home" style="display:contents">
+    <header class="brand">
+      <div class="logo">Snack<span>Squad</span><small>אנגלית לנוער · מהבסיס ועד הבגרות</small></div>
+      <button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button>
+    </header>
+    <div class="card hero" id="hero">
+      <div class="av" id="heroAv"></div>
+      <div style="min-width:0">
+        <div class="bubble en" id="heroLine">Is there pizza in this lesson?</div>
+        <div class="who" id="heroName"></div>
+      </div>
+      <div class="acts">
+        <button class="btn red small" id="feedBtn">🍪 תאכילו אותי</button>
+        <button class="btn white small" id="talkBtn">💬 עוד שטות</button>
+        <button class="btn white small" data-go="squad">🔄 החליפו דמות</button>
+      </div>
+    </div>
+    <div class="sec-h"><h2>השלבים</h2><span class="muted" id="progTxt"></span></div>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="s-play" hidden>
+    <div class="playbar">
+      <button class="x" id="quit" aria-label="יציאה">✕</button>
+      <div class="prog"><i id="progBar"></i></div>
+      <span class="streak" id="streak">🔥0</span>
+      <span class="stashpill"><b>🍬</b><span id="roundPts">0</span></span>
+    </div>
+    <div class="card qcard" id="q"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="s-result" hidden>
+    <div class="card result" id="res"></div>
+  </section>
+
+  <!-- STASH -->
+  <section id="s-stash" hidden>
+    <div class="sec-h"><h2>הנשנושייה שלי</h2><span class="muted">במקום מטבעות – אוכל!</span></div>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:6px">
+      <div class="row" style="justify-content:space-between"><b>שווי הנשנושים שהרווחתם</b><span class="logo" style="font-size:26px" id="pts2">0</span></div>
+      <div class="muted" style="font-size:14px">🍬 רגיל = 1 · 🍕 נדיר = 3 · 🎂 אפי = 10. תשובה נכונה = נשנוש. רצף של 3 = נשנוש נדיר. סיום שלב = עוגה אפית. הניקוד פותח דמויות חדשות.</div>
+    </div>
+    <div class="stashgrid" id="stashGrid"></div>
+  </section>
+
+  <!-- SQUAD -->
+  <section id="s-squad" hidden>
+    <div class="sec-h"><h2>החבורה</h2><span class="muted">בחרו מי מלווה אתכם</span></div>
+    <div class="chars" id="chars"></div>
+  </section>
+
+  <!-- FRIENDS -->
+  <section id="s-friends" hidden>
+    <div class="sec-h"><h2>החברים שלי במשחק</h2></div>
+    <p class="muted" style="margin:0">החברים שתוסיפו יופיעו בתוך השאלות, במימים ובמשפטים המצחיקים. "{שם} אכל 20 סופגניות" זה הרבה יותר מצחיק כשזה החבר שלכם.</p>
+    <form class="card form" id="fform" autocomplete="off">
+      <h3>הוספת חבר/ה</h3>
+      <label>השם באנגלית
+        <input class="inp en" id="fname" maxlength="16" placeholder="Yoav" required>
+      </label>
+      <label>בן או בת?
+        <select class="inp" id="fgender"><option value="m">בן (he)</option><option value="f">בת (she)</option></select>
+      </label>
+      <div class="note">
+        <b>איך מביאים תמונה מגוגל תמונות בטלפון:</b>
+        <ol class="steps">
+          <li>כתבו מה לחפש ולחצו "חיפוש בגוגל תמונות".</li>
+          <li>בגוגל, לחיצה ארוכה על התמונה ← "הורדת תמונה" / "שמירה בתמונות".</li>
+          <li>חזרו לכאן ולחצו "בחירת תמונה מהגלריה".</li>
+        </ol>
+      </div>
+      <div class="row">
+        <input class="inp" id="gq" placeholder="למשל: funny cat face" style="flex:1 1 180px">
+        <a class="btn blue small" id="gLink" href="https://www.google.com/search?tbm=isch&q=funny+face" target="_blank" rel="noopener">🔎 חיפוש בגוגל תמונות</a>
+      </div>
+      <div class="preview">
+        <div class="ph" id="fprev">🙂</div>
+        <span class="btn pink small filebtn">🖼️ בחירת תמונה מהגלריה<input type="file" id="ffile" accept="image/*" aria-label="בחירת תמונה"></span>
+      </div>
+      <div class="muted" style="font-size:13px">אפשר גם להעתיק תמונה ולהדביק כאן (Ctrl+V). התמונות נשמרות רק במכשיר הזה. העלו רק תמונות של חברים שמסכימים לזה 🙏</div>
+      <button class="btn" type="submit">➕ הוסיפו לחבורה</button>
+    </form>
+    <div class="flist" id="flist"></div>
+  </section>
+
+</main>
+
+<nav class="nav" id="nav">
+  <div class="in">
+    <button data-go="home" aria-current="true"><i>🏠</i>שלבים</button>
+    <button data-go="friends"><i>📸</i>חברים</button>
+    <button data-go="stash"><i>🍩</i>נשנושייה</button>
+    <button data-go="squad"><i>😎</i>דמויות</button>
+  </div>
+</nav>
+<div id="fbWrap"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const INK="#211B33";
+
+/* ---------------- characters (SVG cartoons) ---------------- */
+const CHARS=[
+ {id:"itay",he:"איתי",en:"Itay",title:"The Snack Monster",g:"m",skin:"#C68642",hair:"#1B1B1B",hs:"curly",eyes:"big",mouth:"braces",shirt:"#F4A300",x:["freckles"],price:0,
+  lines:["Is there pizza in this lesson?","I'm not hungry. I'm just bored. And hungry.","Feed me snacks and nobody gets hurt.","I learned English from food labels."]},
+ {id:"maya",he:"מאיה",en:"Maya",title:"The Influencer",g:"f",skin:"#FFDBAC",hair:"#D8962F",hs:"long",eyes:"lashes",mouth:"grin",shirt:"#FF5FA2",x:["blush","earring"],price:0,
+  lines:["OMG, this level is SO aesthetic ✨","Wait, let me take a selfie with this question.","Like and subscribe to my English skills.","My phone battery is 2%. My energy is 100%."]},
+ {id:"noam",he:"נועם",en:"Noam",title:"The Gamer",g:"m",skin:"#F1C27D",hair:"#3B2A1E",hs:"messy",eyes:"sleepy",mouth:"smirk",shirt:"#2D6CDF",x:["headphones"],price:0,
+  lines:["Bro, just one more level.","I'm not addicted. I can stop any time. Probably.","My mom says games rot my brain. My thumbs disagree.","Respawning in 3... 2... 1..."]},
+ {id:"shira",he:"שירה",en:"Shira",title:"The Drama Queen",g:"f",skin:"#E0AC69",hair:"#7A1F3D",hs:"bun",eyes:"normal",mouth:"open",shirt:"#9B5DE5",x:["sunglasses"],price:15,
+  lines:["This is LITERALLY the worst day of my life. Again.","Nobody understands me. Except Google Translate.","I'm not dramatic. I'm EXPRESSIVE.","If I fail this level, I'm moving to Antarctica."]},
+ {id:"dor",he:"דור",en:"Dor",title:"The Lazy Genius",g:"m",skin:"#8D5524",hair:"#111111",hs:"cap",eyes:"sleepy",mouth:"smirk",shirt:"#3A3A4A",x:["glasses","hoodie"],price:35,
+  lines:["I studied for five minutes. New record.","I'm not lazy, I'm in energy-saving mode.","Work smart, not hard. Or don't work. Also fine.","Wake me up when it's the Bagrut."]},
+ {id:"lia",he:"ליה",en:"Lia",title:"The Chaos Queen",g:"f",skin:"#FFE0BD",hair:"#21C7C0",hs:"short",eyes:"big",mouth:"grin",shirt:"#FF5A3C",x:["blush","freckles"],price:70,
+  lines:["Rules? I thought they were suggestions.","I dyed my hair blue by accident. On purpose.","Chaos is my cardio.","I put ketchup on ice cream. Don't judge."]}
+];
+
+function face(c,mood){
+  const s=c.skin,h=c.hair,k=`stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+  let o=`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(c.en)}">`;
+  if(c.x.includes("hoodie")) o+=`<path d="M14 120 Q14 80 30 64 Q60 40 90 64 Q106 80 106 120Z" fill="${c.shirt}" ${k}/>`;
+  if(c.hs==="long"||c.hs==="bun") o+=`<path d="M23 52 Q18 104 38 106 L82 106 Q102 104 97 52Z" fill="${h}" ${k}/>`;
+  o+=`<path d="M16 120 Q18 94 60 92 Q102 94 104 120Z" fill="${c.shirt}" ${k}/>`;
+  o+=`<rect x="50" y="80" width="20" height="16" rx="4" fill="${s}" ${k}/>`;
+  if(c.hs==="bun") o+=`<circle cx="60" cy="13" r="13" fill="${h}" ${k}/>`;
+  o+=`<circle cx="25" cy="59" r="7" fill="${s}" ${k}/><circle cx="95" cy="59" r="7" fill="${s}" ${k}/>`;
+  if(c.x.includes("earring")) o+=`<circle cx="25" cy="69" r="3" fill="#FFD23F" stroke="${INK}" stroke-width="1.5"/><circle cx="95" cy="69" r="3" fill="#FFD23F" stroke="${INK}" stroke-width="1.5"/>`;
+  o+=`<ellipse cx="60" cy="57" rx="35" ry="37" fill="${s}" ${k}/>`;
+  // hair front
+  if(c.hs==="messy") o+=`<path d="M24 52 Q20 18 48 16 Q58 4 72 13 Q99 13 96 50 Q90 34 80 38 Q74 27 63 34 Q52 25 44 36 Q33 31 24 52Z" fill="${h}" ${k}/>`;
+  else if(c.hs==="long"||c.hs==="bun") o+=`<path d="M25 54 Q23 18 60 18 Q97 18 95 54 Q86 34 66 30 Q52 40 25 54Z" fill="${h}" ${k}/>`;
+  else if(c.hs==="short") o+=`<path d="M24 50 Q26 15 60 16 Q94 15 96 50 Q84 30 70 34 L66 24 L58 34 Q38 30 24 50Z" fill="${h}" ${k}/>`;
+  else if(c.hs==="curly"){for(let i=0;i<8;i++){const x=28+i*9.2,y=26-Math.sin(i/7*Math.PI)*10;o+=`<circle cx="${x}" cy="${y}" r="10" fill="${h}" ${k}/>`;} o+=`<path d="M26 34 Q60 20 94 34 L94 40 Q60 30 26 40Z" fill="${h}"/>`;}
+  else if(c.hs==="cap"){o+=`<path d="M25 44 Q26 14 60 14 Q94 14 95 44Z" fill="#FF5A3C" ${k}/><path d="M58 42 Q92 34 112 44 Q92 50 58 46Z" fill="#FF5A3C" ${k}/><circle cx="60" cy="15" r="3" fill="${INK}"/>`;}
+  if(c.x.includes("headphones")) o+=`<path d="M20 58 Q18 10 60 12 Q102 10 100 58" fill="none" stroke="${INK}" stroke-width="7"/><path d="M20 58 Q18 10 60 12 Q102 10 100 58" fill="none" stroke="#FF5A3C" stroke-width="3"/><rect x="12" y="48" width="14" height="24" rx="6" fill="#FF5A3C" ${k}/><rect x="94" y="48" width="14" height="24" rx="6" fill="#FF5A3C" ${k}/>`;
+  // eyes
+  const E=(cx)=>{let e="";
+    if(c.eyes==="big"){e+=`<circle cx="${cx}" cy="56" r="10" fill="#fff" ${k}/><circle cx="${cx+1}" cy="57" r="5.5" fill="${INK}"/><circle cx="${cx+3}" cy="54" r="2" fill="#fff"/>`;}
+    else {e+=`<circle cx="${cx}" cy="56" r="7.5" fill="#fff" ${k}/><circle cx="${cx+1}" cy="57" r="3.6" fill="${INK}"/>`;}
+    if(c.eyes==="sleepy") e+=`<path d="M${cx-9} 56 A9 9 0 0 1 ${cx+9} 56Z" fill="${s}" ${k}/>`;
+    if(c.eyes==="lashes") e+=`<path d="M${cx-7} 49 l-3 -4 M${cx} 47 l0 -5 M${cx+7} 49 l3 -4" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
+    return e;};
+  o+=E(45)+E(75);
+  if(c.x.includes("sunglasses")) o+=`<rect x="32" y="47" width="25" height="17" rx="7" fill="${INK}"/><rect x="63" y="47" width="25" height="17" rx="7" fill="${INK}"/><path d="M57 53 H63" stroke="${INK}" stroke-width="4"/><path d="M36 51 l7 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>`;
+  if(c.x.includes("glasses")) o+=`<circle cx="45" cy="56" r="11" fill="none" stroke="${INK}" stroke-width="3"/><circle cx="75" cy="56" r="11" fill="none" stroke="${INK}" stroke-width="3"/><path d="M56 55 H64" stroke="${INK}" stroke-width="3"/>`;
+  // brows
+  const angry=mood==="sad";
+  o+=angry?`<path d="M36 44 L53 41 M67 41 L84 44" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`:`<path d="M37 41 Q45 36 53 40 M67 40 Q75 36 83 41" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+  if(c.x.includes("freckles")) o+=`<g fill="#8A4B2A" opacity=".6"><circle cx="38" cy="68" r="1.6"/><circle cx="43" cy="71" r="1.6"/><circle cx="34" cy="72" r="1.6"/><circle cx="82" cy="68" r="1.6"/><circle cx="77" cy="71" r="1.6"/><circle cx="86" cy="72" r="1.6"/></g>`;
+  if(c.x.includes("blush")) o+=`<ellipse cx="35" cy="70" rx="6" ry="3.5" fill="#FF8FD2" opacity=".75"/><ellipse cx="85" cy="70" rx="6" ry="3.5" fill="#FF8FD2" opacity=".75"/>`;
+  // mouth
+  let m=c.mouth; if(mood==="happy") m=(m==="braces")?"braces":"grin"; if(mood==="sad") m="sad"; if(mood==="wow") m="open";
+  if(m==="grin") o+=`<path d="M45 73 Q60 92 75 73Z" fill="#fff" ${k}/><path d="M52 82 Q60 87 68 82" fill="#FF7A8A" stroke="none"/>`;
+  else if(m==="braces") o+=`<path d="M44 72 Q60 92 76 72Z" fill="#fff" ${k}/><path d="M47 76 H73" stroke="#9AA3B5" stroke-width="2.5"/><g fill="#9AA3B5"><rect x="50" y="74" width="4" height="4"/><rect x="58" y="74" width="4" height="4"/><rect x="66" y="74" width="4" height="4"/></g>`;
+  else if(m==="smirk") o+=`<path d="M47 77 Q62 84 75 71" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+  else if(m==="open") o+=`<ellipse cx="60" cy="79" rx="9" ry="8" fill="#5A1F2B" ${k}/><ellipse cx="60" cy="83" rx="5" ry="3" fill="#FF7A8A"/>`;
+  else if(m==="sad") o+=`<path d="M47 83 Q60 71 73 83" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/><path d="M38 64 q-3 7 0 9 q3 -2 0 -9Z" fill="#6EC6FF" stroke="${INK}" stroke-width="1.5"/>`;
+  return o+"</svg>";
+}
+
+/* ---------------- snacks (rewards instead of coins) ---------------- */
+const SNACKS={
+ common:[["🍬","candy"],["🍪","cookie"],["🍟","fries"],["🍿","popcorn"],["🍭","lollipop"],["🧃","juice box"]],
+ rare:[["🍕","pizza slice"],["🍩","donut"],["🍦","ice cream"],["🧋","bubble tea"],["🌮","taco"],["🍔","burger"]],
+ epic:[["🎂","birthday cake"],["🍫","giant chocolate"],["🍰","cheesecake"],["🥞","pancake tower"]]
+};
+const VAL={common:1,rare:3,epic:10};
+const ALLSNACKS=[].concat(...Object.entries(SNACKS).map(([t,a])=>a.map(x=>({e:x[0],n:x[1],t}))));
+
+/* ---------------- levels & content ----------------
+ g = gap fill [sentence, [correct, ...wrong], tip]
+ o = put words in order [sentence, hebrew]
+ t = translate [hebrew, [correct, ...wrong]]
+ m = meme caption with a friend [[correct, ...wrong]]
+ i = irregular verb [base, past, [wrong...]]
+ r = reading [title, passage, [[question,[correct,...wrong]],...]]
+*/
+const LEVELS=[
+{n:1,en:"Snack Attack",he:"מתקפת נשנושים",tag:"מתחילים",
+ vocab:[["pizza","🍕","פיצה"],["burger","🍔","המבורגר"],["fries","🍟","צ'יפס"],["ice cream","🍦","גלידה"],["donut","🍩","סופגניה"],["apple","🍎","תפוח"],["banana","🍌","בננה"],["cookie","🍪","עוגייה"],["chocolate","🍫","שוקולד"],["popcorn","🍿","פופקורן"],["cake","🎂","עוגה"],["milk","🥛","חלב"],["egg","🥚","ביצה"],["cheese","🧀","גבינה"],["bread","🍞","לחם"],["cat","🐱","חתול"],["dog","🐶","כלב"],["phone","📱","טלפון"],["ball","⚽","כדור"],["book","📚","ספר"],["shoe","👟","נעל"],["bed","🛏️","מיטה"],["car","🚗","מכונית"],["house","🏠","בית"]],
+ bank:[
+  ["g","I want ___ apple, please.",["an","a","two","many"],"לפני מילה שמתחילה בצליל תנועה (a, e, i, o, u) אומרים an."],
+  ["g","Look! Two ___ are sleeping on my bed.",["cats","cat","cates","a cat"],"ברבים (יותר מאחד) מוסיפים s."],
+  ["g","{F} has a ___ dog. It eats shoes.",["crazy","crazys","a crazy","dog crazy"],"שם תואר בא לפני שם העצם ולא מקבל s."],
+  ["g","I have three ___. Do you want one?",["cookies","cookie","a cookie","cookie's"],"אחרי מספר גדול מאחד – צורת רבים."],
+  ["g","This is ___ phone. Don't touch it!",["my","I","me","mine phone"],"my = שלי, לפני שם עצם."],
+  ["o","I love pizza and chocolate","אני אוהב/ת פיצה ושוקולד"],
+  ["o","My cat is very fat","החתול שלי שמן מאוד"],
+  ["o","This is my new phone","זה הטלפון החדש שלי"],
+  ["t","יש לי כלב מצחיק",["I have a funny dog","I has a funny dog","I have a dog funny","I funny have a dog"]],
+  ["t","אני רעב!",["I am hungry!","I hungry!","I is hungry!","Me am hungry!"]],
+  ["m",["{F} after eating ten donuts 🍩","{F} after eat ten donut 🍩","{F} after eating ten donut 🍩","{F} after eats ten donuts 🍩"]]
+ ]},
+{n:2,en:"Me & My Crew",he:"אני והחבר'ה",tag:"מתחילים +",
+ vocab:[["happy","😀","שמח"],["sad","😢","עצוב"],["angry","😠","כועס"],["tired","😴","עייף"],["scared","😱","מפוחד"],["bored","🥱","משועמם"],["hungry","🤤","רעב"],["cool","😎","מגניב"],["sick","🤒","חולה"],["in love","😍","מאוהב"],["confused","😕","מבולבל"],["surprised","😮","מופתע"],["nervous","😬","לחוץ"],["silly","🤪","מטופש"]],
+ bank:[
+  ["g","{F} ___ my best friend. Sadly.",["is","am","are","be"],"he / she / it / שם של אדם ← is."],
+  ["g","We ___ hungry. Again.",["are","is","am","be"],"we / you / they ← are."],
+  ["g","I ___ not a morning person.",["am","is","are","be"],"I ← am."],
+  ["g","___ you OK? You look scared.",["Are","Is","Am","Do"],"שאלה עם be: הפועל עובר להתחלה – Are you…?"],
+  ["g","This pizza is ___. Don't even think about it.",["mine","my","me","I"],"mine = שלי, כשאין אחריו שם עצם."],
+  ["g","My parents ___ a very old car.",["have","has","haves","is"],"I / you / we / they ← have."],
+  ["g","{F} ___ got a hamster that bites.",["has","have","is","are"],"he / she ← has got."],
+  ["g","They are ___ friends. We love them.",["our","us","we","ours"],"our = שלנו, לפני שם עצם."],
+  ["o","We are the coolest kids in class","אנחנו הילדים הכי מגניבים בכיתה"],
+  ["o","My little brother is so annoying","אח שלי הקטן כל כך מעצבן"],
+  ["t","הם לא בבית",["They are not at home","They is not at home","They not at home","They are at not home"]],
+  ["t","למה את עצובה?",["Why are you sad?","Why you are sad?","Why is you sad?","Why you sad?"]],
+  ["m",["{F} when the Wi-Fi is down 😱","{F} when the Wi-Fi are down 😱","{F} when the Wi-Fi down 😱","{F} when the Wi-Fi be down 😱"]],
+  ["m",["{F}: \"I am not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I is not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I are not hungry.\" Also {F}: 🍕🍔🍟"]]
+ ]},
+{n:3,en:"Daily Chaos",he:"כאוס יומיומי",tag:"חטיבה · הווה פשוט",
+ vocab:[["run","🏃","לרוץ"],["swim","🏊","לשחות"],["dance","💃","לרקוד"],["sing","🎤","לשיר"],["read","📖","לקרוא"],["write","✍️","לכתוב"],["cook","🍳","לבשל"],["sleep","😴","לישון"],["take a shower","🚿","להתקלח"],["play video games","🎮","לשחק במשחקי וידאו"],["go to school","🏫","ללכת לבית הספר"],["do homework","📝","להכין שיעורים"],["wake up","⏰","להתעורר"],["listen to music","🎧","להקשיב למוזיקה"],["ride a bike","🚲","לרכוב על אופניים"]],
+ bank:[
+  ["g","{F} ___ up at noon every Saturday.",["wakes","wake","waking","is wake"],"הווה פשוט עם he / she / it ← מוסיפים s לפועל."],
+  ["g","My mom ___ like my music.",["doesn't","don't","isn't","not"],"שלילה עם he / she / it ← doesn't + פועל בסיסי."],
+  ["g","___ you like spicy food?",["Do","Does","Are","Is"],"שאלה בהווה פשוט עם you ← Do."],
+  ["g","___ {F} play basketball after school?",["Does","Do","Is","Are"],"שאלה עם he / she / שם ← Does."],
+  ["g","Itay never ___ his room. It smells like old socks.",["cleans","clean","cleaning","is clean"],"never לא משנה את הכלל – he ← cleans."],
+  ["g","We ___ to school by bus.",["go","goes","going","are go"],"we ← go, בלי s."],
+  ["g","Cats ___ like water.",["don't","doesn't","isn't","aren't"],"cats = they ← don't."],
+  ["g","I ___ late for school. My teacher hates it.",["am always","always am","always","am alway"],"מילות תדירות (always, never) באות אחרי am / is / are."],
+  ["g","My dad ___ dinner on Fridays. It's usually a disaster.",["cooks","cook","cooking","is cook"],"he ← cooks."],
+  ["o","My sister watches videos all day","אחותי צופה בסרטונים כל היום"],
+  ["o","I never do my homework on time","אני אף פעם לא מכין שיעורים בזמן"],
+  ["t","הוא לא אוהב ברוקולי",["He doesn't like broccoli","He don't like broccoli","He not like broccoli","He doesn't likes broccoli"]],
+  ["t","אנחנו משחקים כדורגל כל יום",["We play soccer every day","We plays soccer every day","We playing soccer every day","We play every day soccer"]],
+  ["m",["When {F} says \"I never eat junk food\" 🍟","When {F} say \"I never eat junk food\" 🍟","When {F} says \"I never eats junk food\" 🍟","When {F} says \"I eat never junk food\" 🍟"]],
+  ["r","Itay's Morning","Itay wakes up at 7:45. School starts at 8:00. He doesn't take a shower. He doesn't brush his hair. He eats three pieces of toast in one minute and runs to the bus. Every day he says the same thing: \"Tomorrow I'm going to wake up early.\" He never does.",
+   [["What time does school start?",["At 8:00","At 7:45","At 7:00","At noon"]],["What does Itay eat for breakfast?",["Toast","Pizza","Nothing","Cereal"]],["\"He never does\" means that Itay never...",["wakes up early","eats toast","goes to school","takes the bus"]]]]
+ ]},
+{n:4,en:"Right Now!",he:"ממש עכשיו!",tag:"חטיבה · הווה מתמשך",
+ vocab:[["laughing","😂","צוחק"],["crying","😭","בוכה"],["sleeping","😴","ישן"],["eating","🍔","אוכל"],["running","🏃","רץ"],["dancing","💃","רוקד"],["singing","🎤","שר"],["swimming","🏊","שוחה"],["surfing","🏄","גולש"],["skateboarding","🛹","גולש בסקייטבורד"],["cooking","🍳","מבשל"],["texting","📱","מסמס"]],
+ bank:[
+  ["g","Shhh! I ___ a movie.",["am watching","watching","watch","is watching"],"משהו שקורה עכשיו: am / is / are + פועל עם ing."],
+  ["g","Look! {F} ___ on the table!",["is dancing","dances","dancing","are dancing"],"Look! ← קורה ממש עכשיו ← is + ing."],
+  ["g","Why ___ you laughing at me?",["are","is","do","am"],"you ← are."],
+  ["g","The students ___ listening to the teacher. They're sleeping.",["aren't","isn't","don't","not"],"שלילה בהווה מתמשך: aren't + ing."],
+  ["g","Every day I eat cereal, but today I ___ pizza for breakfast.",["am eating","eat","eating","eats"],"today / now ← הווה מתמשך."],
+  ["g","Water ___ at 100 degrees.",["boils","is boiling","boiling","boil"],"עובדה קבועה ← הווה פשוט."],
+  ["g","Listen! Somebody ___ in the library.",["is snoring","snores","snoring","are snoring"],"Listen! ← קורה עכשיו."],
+  ["g","I ___ you. I just don't care.",["understand","am understanding","understanding","understands"],"פעלי מצב (know, understand, like, want) לא באים בדרך כלל ב-ing."],
+  ["g","What ___ {F} doing right now?",["is","are","does","do"],"he / she ← is … doing."],
+  ["o","My brother is eating my fries right now","אח שלי אוכל לי את הצ'יפס ממש עכשיו"],
+  ["o","Why are you wearing my hoodie","למה את/ה לובש/ת את הקפוצ'ון שלי?"],
+  ["t","אני לא ישן, אני חושב",["I'm not sleeping, I'm thinking","I don't sleeping, I'm thinking","I'm not sleep, I'm think","I not sleeping, I thinking"]],
+  ["m",["{F} is pretending to study 📚","{F} are pretending to study 📚","{F} pretending study is 📚","{F} is pretend to studying 📚"]],
+  ["m",["POV: {F} is waiting for the pizza guy 🍕","POV: {F} waiting for the pizza guy 🍕","POV: {F} is wait for the pizza guy 🍕","POV: {F} are waiting for the pizza guy 🍕"]]
+ ]},
+{n:5,en:"Yesterday's Disaster",he:"האסון של אתמול",tag:"3 יח״ל · עבר",
+ irr:[["go","went",["goed","gone","goes"]],["buy","bought",["buyed","brought","boughted"]],["eat","ate",["eated","eaten","eat"]],["see","saw",["seed","seen","sawed"]],["take","took",["taked","taken","tooked"]],["think","thought",["thinked","thank","taught"]],["catch","caught",["catched","cought","catch"]],["fall","fell",["falled","fallen","feel"]],["forget","forgot",["forgetted","forgotten","forgat"]],["bring","brought",["bringed","brang","bought"]],["sleep","slept",["sleeped","slep","slipt"]],["drink","drank",["drinked","drunk","drinken"]],["win","won",["winned","wan","wone"]],["lose","lost",["losed","loosed","losted"]],["break","broke",["breaked","broken","brake"]]],
+ bank:[
+  ["g","Yesterday {F} ___ my sandwich!",["ate","eat","eated","eaten"],"eat הוא פועל חריג: eat ← ate."],
+  ["g","We ___ to the beach last weekend.",["went","go","goed","gone"],"go ← went."],
+  ["g","I ___ my homework. The dog ate it.",["didn't do","didn't did","don't did","not did"],"אחרי didn't הפועל חוזר לצורת הבסיס."],
+  ["g","___ you see that video yesterday?",["Did","Do","Were","Was"],"שאלה בעבר פשוט ← Did + פועל בסיסי."],
+  ["g","The teacher ___ very angry yesterday.",["was","were","is","be"],"he / she ← was."],
+  ["g","We ___ so tired after the party.",["were","was","are","did"],"we / you / they ← were."],
+  ["g","{F} ___ a selfie with a camel on the trip.",["took","taked","take","takes"],"take ← took."],
+  ["g","I ___ TV when the lights went out.",["was watching","watched","am watching","were watching"],"פעולה שנמשכה בעבר כשמשהו אחר קרה ← was + ing."],
+  ["g","While we were eating, the cat ___ onto the table.",["jumped","was jump","jumps","jumping"],"הפעולה הקצרה שקטעה ← עבר פשוט."],
+  ["o","I forgot my lunch at home again","שוב שכחתי את האוכל שלי בבית"],
+  ["o","Did you finish all the cookies","גמרת את כל העוגיות?"],
+  ["t","שכחתי את הטלפון שלי באוטובוס",["I forgot my phone on the bus","I forget my phone on the bus","I forgetted my phone on the bus","I did forgot my phone on the bus"]],
+  ["m",["{F} after saying \"just one cookie\" 🍪🍪🍪","{F} after sayed \"just one cookie\" 🍪🍪🍪","{F} after say \"just one cookies\" 🍪🍪🍪","{F} after did said \"just one cookie\" 🍪🍪🍪"]],
+  ["r","The Worst Field Trip Ever","Last year our class went on a trip to the desert. The bus broke down after ten minutes, so we waited on the road for two hours. Then it started to rain. In the desert! Noam lost his shoe in the mud, and Maya dropped her phone in a puddle. When we finally arrived, the guide said, \"Sorry, the park is closed today.\" We ate our sandwiches on the bus and went home. It was the best day of the year.",
+   [["Why did the class wait on the road?",["The bus broke down","It was raining","The park was closed","Noam lost his shoe"]],["What happened to Maya?",["Her phone fell into water","She lost her shoe","She missed the bus","She ate Noam's sandwich"]],["The last sentence is...",["funny, because the day went badly","true, because the trip was perfect","about the guide","about the weather only"]]]]
+ ]},
+{n:6,en:"Plans & Predictions",he:"תוכניות ותחזיות",tag:"3 יח״ל · עתיד ומודאלים",
+ bank:[
+  ["g","Tomorrow I ___ sleep until noon. That's the plan.",["am going to","will going to","going","am go"],"תוכנית שכבר החלטנו עליה ← be going to."],
+  ["g","Look at those black clouds! It ___ rain.",["is going to","will to","goes to","is go to"],"יש סימנים ברורים עכשיו ← going to."],
+  ["g","I think robots ___ do our homework one day.",["will","are","will to","going"],"ניחוש / תחזית ← will + פועל בסיסי."],
+  ["g","You ___ eat 20 donuts. It's dangerous!",["shouldn't","should","mustn't to","don't should"],"עצה שלילית ← shouldn't + פועל בסיסי."],
+  ["g","At our school, students ___ wear a uniform. It's the rule.",["have to","has to","must to","haves to"],"חובה: students = they ← have to."],
+  ["g","___ I go to the bathroom, please?",["May","Must","Should","Will"],"בקשת רשות מנומסת ← May I…?"],
+  ["g","I ___ swim when I was five, but now I can.",["couldn't","can't","mustn't","won't"],"can בעבר ← could / couldn't."],
+  ["g","You don't ___ come to my party if you don't want to.",["have to","must","should to","can to"],"don't have to = לא חייבים."],
+  ["g","Don't worry, I ___ tell anyone your secret.",["won't","don't will","willn't","not will"],"will not ← won't."],
+  ["o","I am going to be a famous YouTuber","אני הולך/ת להיות יוטיובר/ית מפורסם/ת"],
+  ["o","You should go to bed earlier","כדאי לך ללכת לישון מוקדם יותר"],
+  ["t","אתה חייב לנסות את הפיצה הזאת",["You have to try this pizza","You have try this pizza","You must to try this pizza","You has to try this pizza"]],
+  ["m",["{F}: \"I will start my diet tomorrow.\" 🍩🍩🍩","{F}: \"I will starting my diet tomorrow.\" 🍩🍩🍩","{F}: \"I will to start my diet tomorrow.\" 🍩🍩🍩","{F}: \"I am will start my diet tomorrow.\" 🍩🍩🍩"]],
+  ["m",["{F} can't stop eating popcorn 🍿","{F} can't stops eating popcorn 🍿","{F} can't to stop eating popcorn 🍿","{F} don't can stop eating popcorn 🍿"]]
+ ]},
+{n:7,en:"Since Forever",he:"מאז ומעולם",tag:"4 יח״ל · Present Perfect",
+ bank:[
+  ["g","I have never ___ sushi.",["eaten","ate","eat","eating"],"have / has + צורה שלישית (V3)."],
+  ["g","{F} ___ this song 100 times today!",["has played","have played","played has","has play"],"he / she ← has + V3."],
+  ["g","We have known each other ___ first grade.",["since","for","from","ago"],"since + נקודת התחלה בזמן."],
+  ["g","I've been waiting ___ two hours!",["for","since","ago","during"],"for + משך זמן."],
+  ["g","___ you ever been to London?",["Have","Did","Has","Were"],"Have you ever…? = האם אי-פעם…?"],
+  ["g","Oh no! I ___ my keys. Can you help me find them?",["have lost","lost have","have lose","has lost"],"תוצאה שמשפיעה עכשיו ← have + V3."],
+  ["g","I ___ him yesterday at the mall.",["saw","have seen","have saw","seen"],"yesterday = זמן מוגדר בעבר ← עבר פשוט, לא present perfect."],
+  ["g","My brother is ___ than me, but I'm smarter.",["taller","more tall","tallest","the taller"],"מילה קצרה + er + than."],
+  ["g","This is the ___ day of my life!",["worst","baddest","most bad","worse"],"bad ← worse ← the worst."],
+  ["g","Math is not ___ sleeping.",["as interesting as","as interesting than","interesting as","more interesting as"],"as … as = באותה מידה כמו."],
+  ["g","{F} is the ___ person in our class.",["funniest","most funny","funnier","funnyest"],"funny ← the funniest (y הופך ל-i)."],
+  ["o","I have already finished my homework","כבר סיימתי את שיעורי הבית"],
+  ["o","This is the best pizza in the world","זאת הפיצה הכי טובה בעולם"],
+  ["t","עוד לא ראיתי את הסרט",["I haven't seen the movie yet","I haven't see the movie yet","I haven't saw the movie yet","I don't have seen the movie yet"]],
+  ["m",["{F} has been on the phone for six hours 📱","{F} have been on the phone for six hours 📱","{F} has been on the phone since six hours 📱","{F} is been on the phone for six hours 📱"]]
+ ]},
+{n:8,en:"If I Were Rich",he:"אם הייתי עשיר",tag:"4 יח״ל · תנאי ופסוקיות",
+ bank:[
+  ["g","If it rains tomorrow, we ___ at home.",["will stay","would stay","stay will","stayed"],"תנאי אמיתי: If + הווה, will + פועל."],
+  ["g","If I ___ a million dollars, I would buy a pizza factory.",["had","have","will have","would have"],"תנאי דמיוני: If + עבר, would + פועל."],
+  ["g","If I were you, I ___ tell her the truth.",["would","will","am","did"],"If I were you ← I would… (עצה)."],
+  ["g","If you heat ice, it ___.",["melts","will melted","melted","would melts"],"עובדה מדעית: If + הווה, הווה."],
+  ["g","If I had studied, I ___ the test.",["would have passed","would pass","will pass","had passed"],"חרטה על העבר: If + had V3, would have V3."],
+  ["g","Unless you hurry, you ___ the bus.",["will miss","miss will","would missed","missing"],"unless = אם לא."],
+  ["g","The boy ___ sits next to me snores in class.",["who","which","where","whose"],"who ← על אנשים."],
+  ["g","This is the café ___ we first met.",["where","who","which","what"],"where ← על מקום."],
+  ["g","That's the girl ___ dog bit my teacher.",["whose","who","which","who's"],"whose = ש… שלו / שלה."],
+  ["g","I wish I ___ taller.",["were","am","will be","be"],"I wish + עבר (were) למשאלה על ההווה."],
+  ["o","If I were a cat I would sleep all day","אם הייתי חתול הייתי ישן כל היום"],
+  ["o","The phone that I bought is already broken","הטלפון שקניתי כבר שבור"],
+  ["t","אם תאכל את כל העוגה, יכאב לך הבטן",["If you eat the whole cake, you will get a stomachache","If you will eat the whole cake, you get a stomachache","If you eat the whole cake, you would got a stomachache","If you ate the whole cake, you will get a stomachache"]],
+  ["m",["If {F} had a dragon, {F} would fly to school 🐉","If {F} has a dragon, {F} would fly to school 🐉","If {F} had a dragon, {F} will fly to school 🐉","If {F} would have a dragon, {F} flew to school 🐉"]]
+ ]},
+{n:9,en:"The Passive Plot",he:"עלילה סבילה",tag:"5 יח״ל · סביל ודיבור עקיף",
+ bank:[
+  ["g","The pizza ___ by Itay in three seconds.",["was eaten","ate","was ate","has eat"],"סביל בעבר: was / were + V3."],
+  ["g","English ___ all over the world.",["is spoken","speaks","is speaking","spoken"],"סביל בהווה: is / are + V3."],
+  ["g","The new phone ___ next month.",["will be released","will release","is release","releases"],"סביל בעתיד: will be + V3."],
+  ["g","Oh no! My bike ___!",["has been stolen","has stolen","is stealing","stole"],"סביל ב-present perfect: has been + V3."],
+  ["g","She said that she ___ tired.",["was","is being","were","be"],"דיבור עקיף: הזמן זז אחורה (am ← was)."],
+  ["g","The teacher told us ___ late again.",["not to be","to not being","don't be","not be"],"told someone + (not) to + פועל."],
+  ["g","I'm looking forward to ___ you at the party.",["seeing","see","saw","be seeing to"],"look forward to + ing."],
+  ["g","I enjoy ___ to music while I do homework.",["listening","to listen","listen","listened"],"enjoy + ing."],
+  ["g","{F} decided ___ a YouTube channel about cats.",["to start","starting","start","started"],"decide + to + פועל."],
+  ["g","I'm used to ___ up early. I do it every day.",["getting","get","got","be getting"],"be used to + ing = רגיל ל…"],
+  ["g","He asked me where I ___.",["lived","do live","did I live","live I"],"שאלה עקיפה: בלי היפוך ובלי do."],
+  ["o","The homework must be finished by tomorrow","שיעורי הבית חייבים להיות גמורים עד מחר"],
+  ["o","She told me that she was bored","היא אמרה לי שמשעמם לה"],
+  ["t","העוגה נאפתה על ידי סבתא שלי",["The cake was baked by my grandmother","The cake baked by my grandmother","The cake was bake by my grandmother","The cake is baking by my grandmother"]],
+  ["m",["{F} was caught eating in class 🍫","{F} was catched eating in class 🍫","{F} caught eating in class was 🍫","{F} was caught eat in class 🍫"]],
+  ["r","A Strange Job","Have you ever heard of a professional sleeper? Some companies pay people to sleep in hotel beds and write reviews about them. The sleepers are asked to test the pillows, the noise and the temperature of the room. It sounds like a dream job, but it is not always easy. One sleeper said that she had been given a room next to a busy road, and she could not sleep at all. Still, most professional sleepers say they would never go back to an office job.",
+   [["What does a professional sleeper do?",["Tests beds and writes reviews","Builds hotel beds","Teaches people to sleep","Cleans hotel rooms"]],["Why couldn't one sleeper sleep?",["Her room was near a noisy road","Her pillow was too hard","The room was too cold","She drank too much coffee"]],["In the second sentence, \"them\" refers to...",["hotel beds","companies","people","reviews"]]]]
+ ]},
+{n:10,en:"Bagrut Boss",he:"בוס הבגרות",tag:"5 יח״ל · רמת בגרות",boss:true,
+ bank:[
+  ["g","___ it was raining, we went to the beach.",["Although","Because","Despite","However"],"although + משפט שלם = למרות ש…"],
+  ["g","He was exhausted. ___, he finished the marathon.",["Nevertheless","Because","Although","Unless"],"Nevertheless, = אף על פי כן (בתחילת משפט, עם פסיק)."],
+  ["g","___ the noise, she fell asleep in class.",["Despite","Although","However","Because"],"despite + שם עצם (בלי of!)."],
+  ["g","She studied every day; ___, she got 100 on the test.",["consequently","although","despite","unless"],"consequently = כתוצאה מכך."],
+  ["g","Many teenagers rely heavily ___ their smartphones.",["on","at","in","to"],"rely on = להסתמך על."],
+  ["g","Studies show a strong ___ between sleep and good grades.",["connection","connect","connected","connecting"],"אחרי a strong צריך שם עצם ← connection."],
+  ["g","The new law had a huge ___ on young drivers.",["impact","impacted","impactful","impacting"],"have an impact on = להשפיע על."],
+  ["g","Scientists are trying to find a ___ to the problem of plastic in the ocean.",["solution","solve","solved","soluble"],"a solution to = פתרון ל…"],
+  ["g","In ___ to his job, he also volunteers at a hospital.",["addition","additional","add","adding"],"In addition to = בנוסף ל…"],
+  ["g","The film was so ___ that half the audience fell asleep.",["boring","bored","bore","boredom"],"boring = משעמם (הדבר); bored = משועמם (האדם)."],
+  ["g","Not only ___ late, but he also forgot his books.",["was he","he was","he is","did he be"],"אחרי Not only בתחילת משפט – היפוך: was he."],
+  ["o","Despite the rain the concert was a huge success","למרות הגשם, ההופעה הייתה הצלחה ענקית"],
+  ["t","למרות שהוא היה עייף, הוא המשיך ללמוד",["Although he was tired, he kept studying","Despite he was tired, he kept studying","Although he was tired, but he kept studying","However he was tired, he kept studying"]],
+  ["m",["{F} explaining why the homework is late, despite having two weeks 😅","{F} explaining why the homework is late, despite of having two weeks 😅","{F} explaining why the homework is late, although having two weeks 😅","{F} explaining why the homework is late, despite to have two weeks 😅"]],
+  ["r","Screen Time and Sleep","A recent study followed 2,000 teenagers for three years. Researchers found that teens who spent more than five hours a day on their phones slept, on average, one hour less than those who used them for under two hours. However, the researchers warn that phones are not the only cause. Homework, stress and late-night snacks also play a role. \"We don't want to blame technology for everything,\" said Dr. Levi, who led the study. \"Instead, we want families to create clear rules, such as no phones in the bedroom after 10 p.m.\"",
+   [["According to the study, teens who use phones a lot...",["sleep about an hour less","sleep more than others","do more homework","eat fewer snacks"]],["Why do the researchers say phones are \"not the only cause\"?",["Other things also affect sleep","Phones help teens sleep","The study was too short","Teens don't use phones at night"]],["In the second sentence, \"them\" refers to...",["phones","teenagers","researchers","hours"]],["What does Dr. Levi suggest?",["Setting clear rules at home","Banning all technology","Doing less homework","Eating snacks earlier"]]]],
+  ["r","Ugly Food","Every year, millions of tons of fruit and vegetables are thrown away simply because they look strange. A carrot with two legs or a heart-shaped potato tastes exactly the same as a perfect one, yet supermarkets often refuse to sell them. A few years ago, a group of students decided to change this. They opened a small shop that sells only \"ugly\" food at half price. At first, people laughed at the idea. Today the shop has three branches, and the students have been invited to speak at schools about food waste.",
+   [["Why is so much food thrown away?",["Because of the way it looks","Because it tastes bad","Because it is too expensive","Because students eat it"]],["What did the students do?",["Opened a shop for strange-looking food","Grew carrots with two legs","Bought a supermarket","Wrote a cookbook"]],["Which statement is TRUE?",["The shop has grown since it opened","People loved the idea from day one","Ugly food costs more","The students stopped visiting schools"]],["The word \"yet\" in the second sentence is closest in meaning to...",["but","so","because","also"]]]]
+ ]}
+];
+
+const GOOD=["Big brain energy! 🧠","Nailed it! 🔥","Your English teacher just cried happy tears.","Genius alert! 🚨","Too easy for you, huh?","Legend. Absolute legend.","Correct! Here, have a snack.","Somebody call Oxford. We have a new expert."];
+const BAD=["Oof. So close. Not really, but still.","Bro... no. 😅","Even Itay's hamster knew that one.","Plot twist: that was wrong.","Error 404: correct answer not found.","Nope! But you look cute trying.","That answer was so wrong it's almost art."];
+const FEED=["Yum! You are officially my favorite human.","Crunchy! 10/10, would eat again.","Is this a bribe? Because it's working.","My diet starts tomorrow. Again.","Thank you! I will share it with nobody.","Mmm... I can taste the grammar."];
+
+/* ---------------- state ---------------- */
+const KEY="snacksquad-v1";
+let S={cur:"itay",best:{},stash:{},earned:0,friends:[]};
+try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("לא הצלחתי לשמור (אולי אין מקום לעוד תמונות)");}}
+const curChar=()=>CHARS.find(c=>c.id===S.cur)||CHARS[0];
+const unlockedLevel=n=>n===1||(S.best[n-1]||0)>=0.7;
+
+/* ---------------- audio ---------------- */
+let AC=null;
+function beep(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;const notes=ok?[660,880,1320]:[300,200];notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ok?"triangle":"sawtooth";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*.09);g.gain.exponentialRampToValueAtTime(ok?.18:.08,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(0.0001,t+i*.09+.16);o.connect(g).connect(AC.destination);o.start(t+i*.09);o.stop(t+i*.09+.18);});}catch(e){}}
+let VOICE=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();VOICE=v.find(x=>/en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
+function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/___/g,"blank").replace(/[^\w\s'.,!?:-]/g,""));u.lang="en-US";u.rate=.9;if(VOICE)u.voice=VOICE;speechSynthesis.speak(u);}catch(e){toast("ההקראה לא זמינה בדפדפן הזה");}}
+
+/* ---------------- ui helpers ---------------- */
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function flySnack(e,from,toEl){
+  const d=document.createElement("div");d.className="fly";d.textContent=e;document.body.appendChild(d);
+  const r=from.getBoundingClientRect(),t=(toEl||$("#roundPts")).getBoundingClientRect();
+  d.style.left=(r.left+r.width/2-22)+"px";d.style.top=(r.top+r.height/2-26)+"px";
+  if(!d.animate){d.remove();return;}
+  const a=d.animate([{transform:"scale(.4)",opacity:0},{transform:"scale(1.4) translateY(-30px)",opacity:1,offset:.35},{transform:`translate(${t.left-r.left-r.width/2+10}px,${t.top-r.top-r.height/2+10}px) scale(.5)`,opacity:.9}],{duration:900,easing:"cubic-bezier(.5,-.2,.6,1)"});
+  a.onfinish=()=>d.remove();
+}
+function rain(list){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for(let i=0;i<26;i++){const d=document.createElement("div");d.className="rain";d.textContent=rnd(list);d.style.left=Math.random()*96+"vw";document.body.appendChild(d);
+    const a=d.animate([{transform:"translateY(0) rotate(0)"},{transform:`translateY(${innerHeight+120}px) rotate(${Math.random()*720-360}deg)`}],{duration:1600+Math.random()*1400,delay:Math.random()*600,easing:"ease-in"});a.onfinish=()=>d.remove();}
+}
+function personHTML(p){return p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:face(p.char,"happy");}
+function pickPerson(){
+  if(S.friends.length&&Math.random()<.8){const f=rnd(S.friends);return {name:f.name,img:f.img,g:f.g};}
+  const c=rnd(CHARS);return {name:c.en,char:c,g:c.g};
+}
+const fill=(s,p)=>s.replace(/\{F\}/g,p.name);
+
+/* ---------------- navigation ---------------- */
+const SCREENS=["home","play","result","stash","squad","friends"];
+function go(name){
+  SCREENS.forEach(s=>{const el=$("#s-"+s);if(s==="home"){el.style.display=name==="home"?"contents":"none";}else el.hidden=s!==name;});
+  $("#nav").hidden=(name==="play");document.body.classList.toggle("playing",name==="play");
+  document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===name?"true":"false"));
+  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends();
+  try{speechSynthesis.cancel();}catch(e){}
+  $("#fbWrap").innerHTML=""; window.scrollTo(0,0);
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){e.preventDefault();go(b.dataset.go);}});
+
+/* ---------------- home ---------------- */
+function renderHome(){
+  const c=curChar();
+  $("#heroAv").innerHTML=face(c);
+  $("#heroName").innerHTML=`${c.he}<span class="en" style="display:block;font-size:16px;text-align:right">${esc(c.title)}</span>`;
+  $("#heroLine").textContent=rnd(c.lines);
+  $("#pts").textContent=S.earned;
+  const done=LEVELS.filter(l=>(S.best[l.n]||0)>=.7).length;
+  $("#progTxt").textContent=`${done}/${LEVELS.length} הושלמו`;
+  $("#levels").innerHTML=LEVELS.map(l=>{
+    const open=unlockedLevel(l.n),b=S.best[l.n]||0,st=b>=.95?3:b>=.85?2:b>=.7?1:0;
+    return `<button class="card lvl ${open?"":"locked"} ${l.boss?"boss":""}" data-lvl="${l.n}" ${open?"":"aria-disabled=\"true\""}>
+      <span class="num">${open?l.n:"🔒"}</span>
+      <span class="t"><b class="en">${esc(l.en)}</b><span>${esc(l.he)}</span></span>
+      <span class="side"><span class="tag">${esc(l.tag)}</span><span class="stars" aria-label="${st} כוכבים">${"★".repeat(st)}${"☆".repeat(3-st)}</span></span>
+    </button>`;}).join("");
+}
+$("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-lvl]");if(!b)return;const n=+b.dataset.lvl;
+  if(!unlockedLevel(n)){toast("קודם תעברו את השלב הקודם עם 70% לפחות 💪");return;} startLevel(n);});
+$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=rnd(c.lines);speak($("#heroLine").textContent);wig();};
+$("#feedBtn").onclick=()=>{
+  const have=ALLSNACKS.filter(s=>(S.stash[s.e]||0)>0);
+  if(!have.length){$("#heroLine").textContent="My stash is empty! Answer some questions and bring me snacks. 😩";$("#heroAv").innerHTML=face(curChar(),"sad");wig();return;}
+  const s=rnd(have);S.stash[s.e]--;save();
+  flySnack(s.e,$("#feedBtn"),$("#heroAv"));
+  setTimeout(()=>{$("#heroAv").innerHTML=face(curChar(),"wow");$("#heroLine").textContent=`A ${s.n}! ${rnd(FEED)}`;wig();},700);
+};
+function wig(){const a=$("#heroAv");a.classList.remove("wiggle");void a.offsetWidth;a.classList.add("wiggle");}
+
+/* ---------------- round building ---------------- */
+let R=null;
+function vocabQ(L){
+  const v=L.vocab;const pick=rnd(v);const others=shuffle(v.filter(x=>x!==pick)).slice(0,3);const opts=[pick,...others];
+  const types=["pic","rev","listen"]; if(!/\s/.test(pick[0])&&pick[0].length<=9) types.push("spell");
+  const t=rnd(types);
+  if(t==="spell") return {k:"spell",word:pick[0],emo:pick[1],he:pick[2]};
+  return {k:t,word:pick[0],emo:pick[1],he:pick[2],opts:opts.map(o=>t==="pic"?o[0]:o[1]),ans:t==="pic"?pick[0]:pick[1],tip:`${pick[1]} = ${pick[0]} (${pick[2]})`};
+}
+function bankQ(it){
+  const p=pickPerson();
+  switch(it[0]){
+    case "g":return {k:"gap",s:fill(it[1],p),opts:it[2].slice(),ans:it[2][0],tip:it[3],p:/\{F\}/.test(it[1])?p:null};
+    case "o":return {k:"order",s:it[1],he:it[2]};
+    case "t":return {k:"tr",he:it[1],opts:it[2].slice(),ans:it[2][0]};
+    case "m":{const o=it[1].map(x=>fill(x,p));return {k:"meme",p,opts:o,ans:o[0]};}
+  }
+}
+function buildRound(L){
+  let qs=[];const bank=L.bank.filter(b=>b[0]!=="r");const reads=L.bank.filter(b=>b[0]==="r");
+  const seen=new Set();
+  if(L.vocab){for(let i=0,c=0;c<4&&i<30;i++){const q=vocabQ(L);if(seen.has(q.word))continue;seen.add(q.word);qs.push(q);c++;}}
+  if(L.irr){shuffle(L.irr).slice(0,3).forEach((x,i)=>{qs.push(i===2?{k:"spell",word:x[1],base:x[0]}:{k:"irr",base:x[0],opts:[x[1],...x[2]],ans:x[1],tip:`${x[0]} ← ${x[1]} (פועל חריג)`});});}
+  const need=(reads.length?8:10)-qs.length;
+  qs=qs.concat(shuffle(bank).slice(0,need).map(bankQ));
+  qs=shuffle(qs);
+  if(reads.length){const r=rnd(reads);shuffle(r[3]).slice(0,3).forEach(q=>qs.push({k:"read",title:r[1],text:r[2],q:q[0],opts:q[1].slice(),ans:q[1][0]}));}
+  return qs;
+}
+
+/* ---------------- play ---------------- */
+function startLevel(n){
+  const L=LEVELS.find(l=>l.n===n);
+  R={L,qs:buildRound(L),i:0,right:0,streak:0,loot:[]};
+  go("play");$("#roundPts").textContent="0";renderQ();
+}
+$("#quit").onclick=()=>go("home");
+function renderQ(){
+  const q=R.qs[R.i];$("#fbWrap").innerHTML="";
+  $("#progBar").style.width=(R.i/R.qs.length*100)+"%";
+  $("#streak").textContent="🔥"+R.streak;
+  const box=$("#q");let h="";const labels={pic:"מה זה?",rev:"איזו תמונה?",listen:"הקשיבו ובחרו",spell:"איות",gap:"השלימו את המשפט",order:"סדרו את המשפט",tr:"תרגום",meme:"מים ללא טעויות",irr:"פועל חריג",read:"הבנת הנקרא"};
+  const sayTxt={pic:q.word,rev:q.word,listen:q.word,spell:q.word,gap:q.s,order:q.s,tr:q.ans,meme:q.ans,irr:q.base,read:q.q}[q.k];
+  h+=`<div class="qtype"><span class="tag">${labels[q.k]} · ${R.i+1}/${R.qs.length}</span>${q.k==="listen"?"":`<button class="say" id="sayBtn" aria-label="הקראה">🔊</button>`}</div>`;
+  const opts=(arr,cls)=>`<div class="opts ${cls||""}">${shuffle(arr).map(o=>`<button class="opt ${cls==="grid2 emo"?"emo":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
+  if(q.k==="pic"){h+=`<div class="bigemoji">${q.emo}</div><div class="prompt en">What's this?</div>`+opts(q.opts);}
+  else if(q.k==="rev"){h+=`<div class="bigword en">${esc(q.word)}</div><div class="hint">בחרו את התמונה הנכונה</div>`+opts(q.opts,"grid2 emo");}
+  else if(q.k==="listen"){h+=`<button class="btn blue" id="sayBtn" style="align-self:center;font-size:22px">🔊 הקשיבו</button><div class="hint" style="text-align:center">איזו תמונה שמעתם?</div>`+opts(q.opts,"grid2 emo");}
+  else if(q.k==="irr"){h+=`<div class="prompt en">What is the past form of <b style="color:var(--tomato)">${esc(q.base)}</b>?</div><div class="prompt en" style="font-size:18px">Yesterday I ___ ...</div>`+opts(q.opts,"grid2");}
+  else if(q.k==="gap"){const s=esc(q.s).replace("___",'<span class="blank">?</span>');
+    h+=q.p?`<div class="person"><div class="ph">${personHTML(q.p)}</div><div class="prompt en" style="min-width:0">${s}</div></div>`:`<div class="prompt en">${s}</div>`;h+=opts(q.opts);}
+  else if(q.k==="tr"){h+=`<div class="prompt">${esc(q.he)}</div><div class="hint">איך אומרים את זה באנגלית?</div>`+opts(q.opts);}
+  else if(q.k==="meme"){h+=`<div class="meme">${personHTML(q.p)}<div class="cap top">ME TRYING TO FIND THE MISTAKE</div></div><div class="hint">רק כיתוב אחד כתוב באנגלית נכונה. איזה?</div>`+opts(q.opts);}
+  else if(q.k==="read"){h+=`<h3 class="en">${esc(q.title)}</h3><div class="passage en">${esc(q.text)}</div><div class="prompt en" style="font-size:19px">${esc(q.q)}</div>`+opts(q.opts);}
+  else if(q.k==="spell"){
+    const word=q.word;const letters=shuffle(word.split(""));
+    h+=q.base?`<div class="prompt en">Past form of <b style="color:var(--tomato)">${esc(q.base)}</b>: spell it!</div>`:`<div class="bigemoji">${q.emo}</div><div class="hint">אייתו את המילה באנגלית (${esc(q.he)})</div>`;
+    h+=`<div class="slots letters" id="slots">${word.split("").map(()=>`<span class="slotl"></span>`).join("")}</div>`;
+    h+=`<div class="pool" style="justify-content:center">${letters.map((l,i)=>`<button class="chip letter" data-i="${i}" data-l="${esc(l)}">${esc(l)}</button>`).join("")}</div>`;
+    h+=`<div class="row" style="justify-content:center"><button class="btn white small" id="undo">⌫ מחיקה</button></div>`;
+  }
+  else if(q.k==="order"){
+    const words=q.s.split(" ");let sh=shuffle(words);let tries=0;while(sh.join(" ")===q.s&&tries++<5)sh=shuffle(words);
+    h+=`<div class="hint">${esc(q.he)}</div><div class="slots" id="slots"></div><div class="pool" id="pool">${sh.map((w,i)=>`<button class="chip" data-i="${i}">${esc(w)}</button>`).join("")}</div>`;
+    h+=`<div class="row"><button class="btn" id="check" disabled>בדיקה ✔</button><button class="btn white small" id="reset">התחלה מחדש</button></div>`;
+  }
+  box.innerHTML=h;
+  const sb=$("#sayBtn");if(sb)sb.onclick=()=>speak(sayTxt);
+  if(q.k==="listen") setTimeout(()=>speak(q.word),250);
+  box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===q.ans;
+    box.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.o===q.ans)x.classList.add("ok");});
+    if(!ok)b.classList.add("no");
+    answer(ok,b,q.ans,q.tip);
+  });
+  if(q.k==="spell"){
+    const typed=[];const slots=[...box.querySelectorAll(".slotl")];
+    const upd=()=>slots.forEach((s,i)=>s.textContent=typed[i]?typed[i].l:"");
+    box.querySelectorAll(".letter").forEach(b=>b.onclick=()=>{if(typed.length>=q.word.length)return;typed.push({l:b.dataset.l,b});b.classList.add("used");upd();
+      if(typed.length===q.word.length){const w=typed.map(t=>t.l).join("");const ok=w.toLowerCase()===q.word.toLowerCase();box.querySelectorAll(".letter,#undo").forEach(x=>x.disabled=true);answer(ok,$("#slots"),q.word,q.base?`${q.base} ← ${q.word}`:`${q.word} = ${q.he}`);}});
+    $("#undo").onclick=()=>{const t=typed.pop();if(t){t.b.classList.remove("used");upd();}};
+  }
+  if(q.k==="order"){
+    const picked=[];const slots=$("#slots");
+    const upd=()=>{slots.innerHTML=picked.map((p,j)=>`<button class="chip" data-j="${j}">${esc(p.w)}</button>`).join("");$("#check").disabled=picked.length!==q.s.split(" ").length;};
+    $("#pool").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{b.classList.add("used");picked.push({w:b.textContent,b});upd();});
+    slots.onclick=e=>{const c=e.target.closest("[data-j]");if(!c)return;const p=picked.splice(+c.dataset.j,1)[0];p.b.classList.remove("used");upd();};
+    $("#reset").onclick=()=>{picked.splice(0).forEach(p=>p.b.classList.remove("used"));upd();};
+    $("#check").onclick=()=>{const ok=picked.map(p=>p.w).join(" ")===q.s;box.querySelectorAll(".chip,#check,#reset").forEach(x=>x.disabled=true);answer(ok,slots,q.s,null);};
+  }
+}
+function answer(ok,el,ans,tip){
+  beep(ok);
+  let snack=null;
+  if(ok){R.right++;R.streak++;
+    const tier=R.streak%3===0?"rare":"common";const s=rnd(SNACKS[tier]);snack={e:s[0],n:s[1],t:tier};
+    R.loot.push(snack);S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL[tier];save();
+    flySnack(s[0],el);$("#roundPts").textContent=R.loot.reduce((a,x)=>a+VAL[x.t],0);
+  } else R.streak=0;
+  $("#streak").textContent="🔥"+R.streak;
+  const c=curChar();
+  const html=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
+    <div class="row" style="flex-wrap:nowrap;align-items:center"><div class="ph" style="width:58px;height:58px">${face(c,ok?"happy":"sad")}</div>
+    <div style="min-width:0"><h3 class="en">${esc(ok?rnd(GOOD):rnd(BAD))}</h3>${ok&&snack?`<div>קיבלתם <b>${snack.e} <span class="en">${esc(snack.n)}</span></b>${snack.t==="rare"?" · רצף של 3! נשנוש נדיר 🔥":""}</div>`:""}</div></div>
+    ${!ok?`<div>התשובה הנכונה: <span class="ans en">${esc(ans)}</span></div>`:""}
+    ${tip?`<div class="muted" style="font-size:15px">💡 ${esc(tip)}</div>`:""}
+    <button class="btn ${ok?"":"red"}" id="next">${R.i+1<R.qs.length?"הבא ←":"לתוצאות 🏁"}</button></div></div>`;
+  $("#fbWrap").innerHTML=html;
+  $("#next").focus({preventScroll:true});
+  $("#next").onclick=()=>{R.i++;if(R.i<R.qs.length)renderQ();else finish();};
+}
+function finish(){
+  const pct=R.right/R.qs.length,pass=pct>=.7;const L=R.L;
+  const prev=S.best[L.n]||0;if(pct>prev)S.best[L.n]=pct;
+  let epic=null;
+  if(pass){const s=rnd(SNACKS.epic);epic={e:s[0],n:s[1]};S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL.epic;R.loot.push({e:s[0],n:s[1],t:"epic"});}
+  save();
+  const c=curChar();const st=pct>=.95?3:pct>=.85?2:pct>=.7?1:0;
+  const next=LEVELS.find(l=>l.n===L.n+1);
+  const newly=CHARS.filter(ch=>ch.price>0&&S.earned>=ch.price&&S.earned-R.loot.reduce((a,x)=>a+VAL[x.t],0)<ch.price);
+  $("#res").innerHTML=`
+    <div class="av">${face(c,pass?"happy":"sad")}</div>
+    <h2>${pass?(L.boss?"You beat the Bagrut Boss! 👑":"Level complete!"):"Almost! Try again"}</h2>
+    <div class="score en">${R.right}/${R.qs.length}</div>
+    <div class="stars" style="font-size:30px">${"★".repeat(st)}${"☆".repeat(3-st)}</div>
+    <div class="bubble en" style="margin:0">${esc(pass?rnd(["Sharing is caring. But not these snacks.","I'm so proud I could eat a whole pizza.","Next level? Let's gooo!"]):rnd(["It's fine. I'm fine. Everything is fine. 🙃","Even legends fail sometimes. Then they eat a cookie.","Again! I believe in you. And in snacks."]))}</div>
+    ${R.loot.length?`<div><b>השלל שלכם:</b></div><div class="loot">${R.loot.map(x=>`<span title="${esc(x.n)}">${x.e}</span>`).join("")}</div>`:`<div class="muted">הפעם בלי נשנושים… 😢</div>`}
+    ${epic?`<div class="tag" style="background:var(--sun);font-size:14px">בונוס סיום שלב: ${epic.e} ${esc(epic.n)}</div>`:`<div class="muted">צריך 70% (${Math.ceil(R.qs.length*.7)} תשובות נכונות) כדי לפתוח את השלב הבא.</div>`}
+    ${newly.map(ch=>`<div class="note">🎉 דמות חדשה נפתחה: <b>${ch.he}</b> · <span class="en">${esc(ch.title)}</span></div>`).join("")}
+    <div class="row" style="justify-content:center">
+      ${pass&&next?`<button class="btn red" id="rNext">לשלב ${next.n} ←</button>`:""}
+      <button class="btn ${pass?"white":""}" id="rAgain">🔁 שוב</button>
+      <button class="btn white" data-go="home">🏠 שלבים</button>
+    </div>`;
+  go("result");
+  if(pass) rain(R.loot.map(x=>x.e).concat(["🎉","🍬","🍩"]));
+  const rn=$("#rNext");if(rn)rn.onclick=()=>startLevel(next.n);
+  $("#rAgain").onclick=()=>startLevel(L.n);
+}
+
+/* ---------------- stash & squad ---------------- */
+function renderStash(){
+  $("#pts2").textContent=S.earned;
+  $("#stashGrid").innerHTML=ALLSNACKS.map(s=>{const n=S.stash[s.e]||0;return `<div class="card snack ${n?"":"empty"}"><span class="e">${s.e}</span><span class="n">${esc(s.n)}</span><span class="c">×${n}</span><span class="tag" style="font-size:10px">${{common:"רגיל",rare:"נדיר",epic:"אפי"}[s.t]}</span></div>`;}).join("");
+}
+function renderSquad(){
+  $("#chars").innerHTML=CHARS.map(c=>{const open=S.earned>=c.price;return `<button class="card ch ${S.cur===c.id?"sel":""} ${open?"":"lock"}" data-ch="${c.id}">
+    <span class="av">${face(c)}</span><b>${c.he}</b><span class="sub">${esc(c.en)} · ${esc(c.title)}</span>
+    ${open?(S.cur===c.id?`<span class="tag">נבחר/ה ✔</span>`:`<span class="tag">בחירה</span>`):`<span class="tag">🔒 ${c.price} נשנושים</span>`}</button>`;}).join("");
+}
+$("#chars").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(!b)return;const c=CHARS.find(x=>x.id===b.dataset.ch);
+  if(S.earned<c.price){toast(`צריך עוד ${c.price-S.earned} נשנושים כדי לפתוח את ${c.he}`);return;}
+  S.cur=c.id;save();renderSquad();toast(`${c.he}: "${rnd(c.lines)}"`);});
+
+/* ---------------- friends ---------------- */
+let pendingImg=null;
+function setPreview(){ $("#fprev").innerHTML=pendingImg?`<img src="${pendingImg}" alt="">`:"🙂"; }
+function loadImage(file){
+  if(!file||!/^image\//.test(file.type)){toast("זה לא נראה כמו קובץ תמונה");return;}
+  const rd=new FileReader();
+  rd.onload=()=>{const im=new Image();im.onload=()=>{
+      const S2=256,cv=document.createElement("canvas");cv.width=cv.height=S2;const x=cv.getContext("2d");
+      const m=Math.min(im.width,im.height);x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S2,S2);
+      try{pendingImg=cv.toDataURL("image/jpeg",.8);}catch(e){pendingImg=null;toast("לא הצלחתי לקרוא את התמונה");}
+      setPreview();};
+    im.onerror=()=>toast("לא הצלחתי לפתוח את התמונה");im.src=rd.result;};
+  rd.readAsDataURL(file);
+}
+$("#ffile").addEventListener("change",e=>loadImage(e.target.files[0]));
+document.addEventListener("paste",e=>{if($("#s-friends").hidden)return;const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith("image/"));if(it){loadImage(it.getAsFile());toast("התמונה הודבקה 👍");}});
+$("#gq").addEventListener("input",e=>{$("#gLink").href="https://www.google.com/search?tbm=isch&q="+encodeURIComponent(e.target.value.trim()||"funny face");});
+$("#fform").addEventListener("submit",e=>{e.preventDefault();
+  const name=$("#fname").value.trim().replace(/[^\p{L}\p{N} '-]/gu,"");
+  if(!name){toast("כתבו שם באנגלית");return;}
+  if(!/^[A-Za-z][A-Za-z '-]*$/.test(name)){toast("השם צריך להיות באותיות באנגלית (למשל Yoav)");return;}
+  S.friends.push({id:Date.now().toString(36),name:name.charAt(0).toUpperCase()+name.slice(1),g:$("#fgender").value,img:pendingImg});
+  save();pendingImg=null;setPreview();$("#fname").value="";$("#ffile").value="";renderFriends();
+  toast(`${name} הצטרף/ה לחבורה! עכשיו ${name} יופיע/תופיע בשאלות 😂`);
+});
+function renderFriends(){
+  const fl=$("#flist");
+  if(!S.friends.length){fl.innerHTML=`<div class="card" style="padding:14px;grid-column:1/-1;display:flex;gap:12px;align-items:center"><div class="ph">${face(CHARS[0],"sad")}</div><div>עוד אין חברים במשחק. בינתיים השאלות ישתמשו בדמויות של החבורה. תוסיפו את הראשון/ה למעלה!</div></div>`;return;}
+  fl.innerHTML=S.friends.map(f=>`<div class="card fr"><div class="ph">${f.img?`<img src="${f.img}" alt="${esc(f.name)}">`:face(CHARS[f.g==="f"?1:2])}</div><b>${esc(f.name)}</b><span class="muted" style="font-size:13px">${f.g==="f"?"she":"he"}</span><button class="btn white small" data-del="${f.id}">הסרה</button></div>`).join("");
+}
+$("#flist").addEventListener("click",e=>{const b=e.target.closest("[data-del]");if(!b)return;
+  if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="בטוח? לחצו שוב";b.classList.add("red");setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="הסרה";b.classList.remove("red");}},3000);return;}
+  S.friends=S.friends.filter(f=>f.id!==b.dataset.del);save();renderFriends();});
+
+go("home");
+})();
+</script>
+</body>
+</html>
