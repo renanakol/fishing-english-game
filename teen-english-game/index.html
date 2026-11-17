@@ -140,7 +140,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance
 
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--paper);border-top:3px solid var(--ink)}
-.nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.nav .in{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 .nav button{background:none;border:0;padding:4px;border-radius:12px;display:flex;flex-direction:column;align-items:center;font-family:var(--f-display);font-size:13px;gap:0}
 .nav button i{font-style:normal;font-size:24px;line-height:1.2}
 .nav button[aria-current="true"]{background:var(--sun);outline:2.5px solid var(--ink)}
@@ -219,6 +219,9 @@ body.playing .app{padding-bottom:300px}
 .form{padding:16px;display:flex;flex-direction:column;gap:12px}
 .form label{font-weight:700;font-size:15px;display:flex;flex-direction:column;gap:6px}
 .inp{font:inherit;padding:10px 12px;border:3px solid var(--ink);border-radius:12px;background:#fff;width:100%;min-width:0}
+input,select,textarea,option{color:var(--ink);background-color:#fff;color-scheme:light;-webkit-text-fill-color:var(--ink)}
+.inp::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted);opacity:1}
+html{color-scheme:light}
 .steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px;font-size:15px}
 .preview{display:flex;align-items:center;gap:12px}
 .flist{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
@@ -299,7 +302,8 @@ body.playing .app{padding-bottom:300px}
   <section id="s-voice" hidden>
     <div class="sec-h"><h2>הקול של המשחק</h2></div>
     <div class="card form">
-      <label>בחירת קול
+      <div class="note" id="vClaude" hidden><label style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="vClaudeOn" style="width:22px;height:22px" checked> ✨ להשתמש בקול הטבעי של Claude (זמין כשפותחים דרך הקישור)</label></div>
+      <label>בחירת קול של הטלפון
         <select class="inp" id="vSel"></select>
       </label>
       <div class="muted" style="font-size:14px" id="vInfo"></div>
@@ -320,6 +324,30 @@ body.playing .app{padding-bottom:300px}
       </ol>
     </div>
   </section>
+
+  <!-- PARTY -->
+  <section id="s-party" hidden>
+    <div class="sec-h"><h2>משחקים יחד</h2></div>
+    <div class="card form">
+      <h3>📱 טלפון אחד, מעבירים מיד ליד</h3>
+      <p class="muted" style="margin:0">2 עד 6 שחקנים. כל אחד עונה בתורו, ותשובה מהירה מקבלת בונוס. עובד בכל מקום, גם בקובץ מהוואטסאפ.</p>
+      <div class="row"><input class="inp en" id="ppName" maxlength="14" placeholder="Player name" style="flex:1 1 140px"><button class="btn small" id="ppAdd" type="button">➕ הוספה</button></div>
+      <div class="row" id="ppQuick"></div>
+      <div class="flist" id="ppList"></div>
+      <label>שלב
+        <select class="inp" id="ppLevel"></select>
+      </label>
+      <label>שאלות לכל שחקן
+        <select class="inp" id="ppPer"><option value="3">3</option><option value="5" selected>5</option><option value="8">8</option></select>
+      </label>
+      <button class="btn red" id="ppGo" type="button" disabled>🎉 מתחילים!</button>
+    </div>
+    <div class="card form">
+      <h3>🌐 חדר אונליין: כל אחד מהטלפון שלו</h3>
+      <div id="olBody" style="display:flex;flex-direction:column;gap:12px"><div class="muted">בודק חיבור…</div></div>
+    </div>
+  </section>
+  <section id="s-online" hidden><div class="card qcard" id="ol"></div></section>
 
   <!-- FRIENDS -->
   <section id="s-friends" hidden>
@@ -362,6 +390,7 @@ body.playing .app{padding-bottom:300px}
     <button data-go="home" aria-current="true"><i>🏠</i>שלבים</button>
     <button data-go="friends"><i>📸</i>חברים</button>
     <button data-go="stash"><i>🍩</i>נשנושייה</button>
+    <button data-go="party"><i>🎉</i>יחד</button>
     <button data-go="squad"><i>😎</i>דמויות</button>
   </div>
 </nav>
@@ -376,6 +405,7 @@ const rnd=a=>a[Math.floor(Math.random()*a.length)];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const INK="#211B33";
+let TTS=null,ROOM=null;
 
 /* ---------------- characters ---------------- */
 const CHARS=[
@@ -734,13 +764,18 @@ function pickVoice(){try{
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,800);}catch(e){}
 function clean(t){return t.replace(/___/g,"...").replace(/[^\w\s'.,!?:;"-]/g," ").replace(/\s+/g," ").trim();}
 function speak(t,opts){try{
-  if(!t||!("speechSynthesis" in window))return;
   opts=opts||{};
+  if(t&&TTS&&S.claudeVoice!==false){const txt=clean(t);if(txt){const call=opts.queue?TTS.add:TTS.speak;
+    call.call(TTS,[{text:txt,voice:opts.voice||"buttery",language:"en",rate:S.rate||1}]).catch(e=>{if(e&&(e.code==="not_granted"||e.code==="unavailable"))TTS=null;else if(e&&(e.code==="no_gesture"||e.code==="rate_limited"||e.code==="upstream_error"))browserSpeak(t,opts);});return;}}
+  browserSpeak(t,opts);}catch(e){}}
+function browserSpeak(t,opts){try{
+  if(!t||!("speechSynthesis" in window))return;
   if(!opts.queue)speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(clean(t));u.lang=VOICE?VOICE.lang:"en-US";u.rate=S.rate||.95;u.pitch=opts.pitch||1.02;if(VOICE)u.voice=VOICE;
   speechSynthesis.speak(u);}catch(e){}}
-const charSay=(c,t,q)=>speak(t,{pitch:c.pitch,queue:q});
+const charSay=(c,t,q)=>speak(t,{pitch:c.pitch,queue:q,voice:CVOICE[c.id]});
 function fillVoiceUI(){const sel=document.getElementById("vSel");if(!sel)return;
+  const cv=document.getElementById("vClaude");if(cv){cv.hidden=!TTS;const cb=document.getElementById("vClaudeOn");if(cb)cb.checked=S.claudeVoice!==false;}
   if(!VOICES.length){sel.innerHTML='<option>קול ברירת המחדל של המכשיר</option>';document.getElementById("vInfo").textContent="המכשיר לא מציג רשימת קולות באנגלית. נסו לרענן, או הורידו קול לפי ההוראות למטה.";return;}
   sel.innerHTML=VOICES.map((v,i)=>`<option value="${esc(v.name)}">${i<3&&vScore(v)>20?"⭐ ":""}${esc(v.name)} (${esc(v.lang)})</option>`).join("");
   sel.value=VOICE?VOICE.name:"";
@@ -751,6 +786,7 @@ function initVoiceUI(){
 document.addEventListener("change",e=>{
   if(e.target.id==="vSel"){S.voice=e.target.value;VOICE=VOICES.find(v=>v.name===S.voice)||VOICE;save();speak("Hi! I am your new English voice. Do you like me?");}
   if(e.target.id==="vAuto"){S.auto=e.target.checked;save();}
+  if(e.target.id==="vClaudeOn"){S.claudeVoice=e.target.checked;save();}
   if(e.target.id==="vFb"){S.fbVoice=e.target.checked;save();}});
 document.addEventListener("input",e=>{if(e.target.id==="vRate"){S.rate=+e.target.value;save();$("#vRateTxt").textContent=S.rate<.9?"איטי":S.rate>1.02?"מהיר":"רגיל";}});
 document.addEventListener("click",e=>{if(e.target.id==="vTest")speak("Hey! Welcome to Snack Squad. Answer the questions, and I will give you pizza. Deal?");});
@@ -780,14 +816,14 @@ const mix=t=>esc(t).replace(/([A-Za-z][A-Za-z0-9 '\/().,+→=…:·?!-]*[A-Za-z0
 function wig(el){el.classList.remove("wiggle");void el.offsetWidth;el.classList.add("wiggle");}
 
 /* ---------------- navigation ---------------- */
-const SCREENS=["home","play","result","stash","squad","friends","voice"];
+const SCREENS=["home","play","result","stash","squad","friends","voice","party","online"];
 function go(name){
   stopTimer();
   SCREENS.forEach(s=>{const el=$("#s-"+s);if(s==="home"){el.style.display=name==="home"?"contents":"none";}else el.hidden=s!==name;});
-  $("#nav").hidden=(name==="play");document.body.classList.toggle("playing",name==="play");
+  $("#nav").hidden=(name==="play"||name==="online");document.body.classList.toggle("playing",name==="play");
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===name?"true":"false"));
-  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends(); if(name==="voice")initVoiceUI();
-  try{speechSynthesis.cancel();}catch(e){}
+  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends(); if(name==="voice")initVoiceUI(); if(name==="party")renderParty();
+  try{speechSynthesis.cancel();}catch(e){} try{if(TTS&&TTS.active())TTS.stop().catch(()=>{});}catch(e){}
   $("#fbWrap").innerHTML=""; window.scrollTo(0,0);
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){e.preventDefault();go(b.dataset.go);}});
@@ -888,12 +924,13 @@ function buildStage(L,k){
 let R=null,TIMER=null;
 function stopTimer(){if(TIMER){clearInterval(TIMER);TIMER=null;}}
 function startStage(n,k){
+  if(OL)olLeave();
   const L=LEVELS.find(l=>l.n===n);
   R={L,k,qs:buildStage(L,k),i:0,right:0,streak:0,loot:[],hearts:3,shield:false,chat:{},lesson:k===1};
-  go("play");$("#roundPts").textContent=bal();drawHearts();
+  go("play");$("#roundPts").textContent=bal();drawHearts();$("#hearts").hidden=false;
   if(R.lesson)renderLesson();else renderQ();
 }
-$("#quit").onclick=()=>go("home");
+$("#quit").onclick=()=>go(R&&R.party?"party":"home");
 function drawHearts(hit){const h=$("#hearts");h.textContent="❤️".repeat(R.hearts)+"🤍".repeat(3-R.hearts)+(R.shield?"🛡️":"");if(hit)wig(h);}
 function renderLesson(){
   const L=R.L,ls=L.lesson,c=CH(ls.c);
@@ -912,7 +949,7 @@ function renderQ(){
   $("#progBar").style.width=(R.i/R.qs.length*100)+"%";
   const box=$("#q");let h="";
   const sayTxt={pic:q.word,rev:q.word,listen:q.word,spell:q.word,gap:q.s,order:q.s,tr:q.ans,meme:q.ans,irr:q.base,read:q.q,chat:q.msg,food:q.req,who:q.text}[q.k];
-  h+=`<div class="qtype"><span class="tag">${LABELS[q.k]} · ${R.i+1}/${R.qs.length}</span>${q.k==="listen"||q.k==="speed"?"":`<button class="say" id="sayBtn" aria-label="הקראה">🔊</button>`}</div>`;
+  h+=`<div class="qtype"><span class="tag">${R.party?`<span class="en" style="display:inline">${esc(partyPlayer().name)}</span> · `:""}${LABELS[q.k]} · ${R.i+1}/${R.qs.length}</span>${q.k==="listen"||q.k==="speed"?"":`<button class="say" id="sayBtn" aria-label="הקראה">🔊</button>`}</div>`;
   const opts=(arr,cls)=>`<div class="opts ${cls||""}">${shuffle(arr).map(o=>`<button class="opt ${/emo/.test(cls||"")?"emo":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
   if(q.k==="pic"){h+=`<div class="bigemoji">${q.emo}</div><div class="prompt en">What's this?</div>`+opts(q.opts);}
   else if(q.k==="rev"){h+=`<div class="bigword en">${esc(q.word)}</div><div class="hint">בחרו את התמונה הנכונה</div>`+opts(q.opts,"grid2 emo");}
@@ -1002,7 +1039,7 @@ function runSpeed(q){
 
 /* ---------------- character powers (feeding = using snacks) ---------------- */
 function renderPowers(q){
-  const pb=$("#powerbar");const c=curChar(),pw=c.power;
+  const pb=$("#powerbar");if(R.party){pb.innerHTML="";return;}const c=curChar(),pw=c.power;
   const mc=!!$("#q .opt");
   const usable={fifty:mc,poll:mc,hint:q.k!=="speed",shield:!R.shield,skip:q.k!=="speed",retry:false}[pw.kind];
   if(pw.kind==="retry"){pb.innerHTML=`<div class="muted" style="font-size:14px">${pw.ic} ${c.he} תציע עוד ניסיון אם תטעו (🍬${pw.cost})</div>`;return;}
@@ -1035,6 +1072,7 @@ function usePower(q){
 /* ---------------- answering ---------------- */
 function answer(ok,el,ans,tip,isSpeed,skipped){
   if(!isSpeed)beep(ok);
+  if(R.party){$("#powerbar").innerHTML="";partyAnswer(ok,ans,tip,R.qs[R.i]);return;}
   $("#powerbar").innerHTML="";
   const q=R.qs[R.i];let snack=null,saved=false;
   if(ok){R.right++;R.streak++;
@@ -1150,6 +1188,210 @@ function renderFriends(){
 $("#flist").addEventListener("click",e=>{const b=e.target.closest("[data-del]");if(!b)return;
   if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="בטוח? לחצו שוב";b.classList.add("red");setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="הסרה";b.classList.remove("red");}},3000);return;}
   S.friends=S.friends.filter(f=>f.id!==b.dataset.del);save();renderFriends();});
+
+
+/* ---------------- Claude voice (when opened through the claude.ai link) ---------------- */
+const CVOICE={itay:"rounded",maya:"airy",noam:"buttery",shira:"glassy",dor:"rounded",lia:"airy"};
+
+/* ---------------- party mode: one phone, passed around ---------------- */
+let PP=[];
+function avatarHTML(p){return p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:face(CH(p.c)||CHARS[0],"happy");}
+function renderParty(){
+  $("#ppList").innerHTML=PP.length?PP.map((p,i)=>`<div class="card fr"><div class="ph">${avatarHTML(p)}</div><b>${esc(p.name)}</b><button class="btn white small" data-ppdel="${i}" type="button">הסרה</button></div>`).join(""):`<div class="muted">הוסיפו לפחות 2 שחקנים.</div>`;
+  $("#ppQuick").innerHTML=S.friends.filter(f=>!PP.some(p=>p.name===f.name)).map(f=>`<button class="btn white small" type="button" data-ppf="${f.id}">➕ ${esc(f.name)}</button>`).join("");
+  const sel=$("#ppLevel");if(!sel.options.length)sel.innerHTML=LEVELS.map(l=>`<option value="${l.n}">${l.n} · ${esc(l.en)} (${esc(l.tag)})</option>`).join("");
+  $("#ppGo").disabled=PP.length<2;
+  renderOnlineBox();
+}
+function addPP(name,img){if(PP.length>=6){toast("עד 6 שחקנים");return;}if(!/^[A-Za-z][A-Za-z '-]*$/.test(name)){toast("שם באותיות באנגלית (למשל Noa)");return;}
+  PP.push({name:name.charAt(0).toUpperCase()+name.slice(1),img:img||null,c:CHARS[PP.length%CHARS.length].id});renderParty();}
+$("#ppAdd").onclick=()=>{addPP($("#ppName").value.trim());$("#ppName").value="";};
+$("#ppName").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("#ppAdd").click();}});
+$("#ppQuick").addEventListener("click",e=>{const b=e.target.closest("[data-ppf]");if(!b)return;const f=S.friends.find(x=>x.id===b.dataset.ppf);if(f)addPP(f.name,f.img);});
+$("#ppList").addEventListener("click",e=>{const b=e.target.closest("[data-ppdel]");if(!b)return;PP.splice(+b.dataset.ppdel,1);renderParty();});
+const MCK=new Set(["pic","rev","gap","tr","meme","irr","who","food","listen","spell","order"]);
+function mixedQs(L,n,kinds){let out=[];for(let g=0;g<8&&out.length<n;g++){out=out.concat(buildStage(L,1),buildStage(L,2),[whoQ(L.n),foodQ(L.n)]).filter(q=>kinds.has(q.k));}return shuffle(out).slice(0,n);}
+$("#ppGo").onclick=()=>{
+  const L=LEVELS.find(l=>l.n===+$("#ppLevel").value),per=+$("#ppPer").value;
+  const players=PP.map(p=>Object.assign({},p,{score:0,right:0}));
+  R={L,k:0,qs:mixedQs(L,players.length*per,MCK),i:0,right:0,streak:0,loot:[],hearts:3,shield:false,chat:{},party:{players}};
+  go("play");$("#hearts").textContent="";partyTurn();
+};
+function partyPlayer(){return R.party.players[R.i%R.party.players.length];}
+function partyTurn(){
+  const p=partyPlayer();$("#fbWrap").innerHTML="";$("#powerbar").innerHTML="";
+  $("#progBar").style.width=(R.i/R.qs.length*100)+"%";
+  const board=R.party.players.slice().sort((a,b)=>b.score-a.score).map(x=>`<span class="tag">${esc(x.name)} ${x.score}</span>`).join(" ");
+  $("#q").innerHTML=`<div class="result" style="padding:0"><div class="ph" style="width:120px;height:120px">${avatarHTML(p)}</div>
+    <h2>התור של <span class="en" style="display:inline">${esc(p.name)}</span>!</h2>
+    <div class="muted">תעבירו ${p.name?"את הטלפון":""} 📱 · שאלה ${Math.floor(R.i/R.party.players.length)+1} מתוך ${R.qs.length/R.party.players.length}</div>
+    <div class="row" style="justify-content:center">${board}</div>
+    <button class="btn red" id="ppReady">אני מוכן/ה! ←</button></div>`;
+  speak(`${p.name}, it's your turn!`);
+  $("#ppReady").onclick=()=>{R.qStart=Date.now();renderQ();};
+}
+function partyAnswer(ok,ans,tip,q){
+  const p=partyPlayer();let pts=0;
+  if(ok){const sec=(Date.now()-(R.qStart||Date.now()))/1000;pts=100+(sec<6?50:sec<12?25:0);p.score+=pts;p.right++;}
+  const line=ok?rnd(GOOD):rnd(BAD);
+  $("#fbWrap").innerHTML=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
+    <div class="row" style="flex-wrap:nowrap"><div class="ph" style="width:58px;height:58px">${avatarHTML(p)}</div><div style="min-width:0"><h3 class="en">${esc(line)}</h3>
+    <div>${ok?`+${pts} נקודות ל-<b class="en" style="display:inline">${esc(p.name)}</b>${pts>100?" (בונוס מהירות ⚡)":""}`:`<b class="en" style="display:inline">${esc(p.name)}</b> לא קיבל/ה נקודות הפעם`}</div></div></div>
+    ${!ok&&ans?`<div>התשובה הנכונה: <span class="ans en">${esc(ans)}</span></div>`:""}
+    ${tip?`<div class="muted" style="font-size:15px">💡 ${mix(tip)}</div>`:""}
+    <button class="btn ${ok?"":"red"}" id="next">${R.i+1<R.qs.length?"לשחקן הבא ←":"לתוצאות 🏆"}</button></div></div>`;
+  if(S.fbVoice!==false){const full=q.k==="gap"?q.s.replace("___",ans):ans;speak(ok?line:line+" The correct answer is: "+full);}
+  $("#next").onclick=()=>{R.i++;if(R.i<R.qs.length)partyTurn();else partyFinish();};
+}
+const TITLES_TOP=["👑 Grammar Royalty","🧠 Big Brain of the Night","🔥 Unstoppable"],TITLES_LAST=["🥄 The Wooden Spoon (still loved)","😴 Needs more snacks","🐢 Slow but stylish"];
+function partyFinish(){
+  const ps=R.party.players.slice().sort((a,b)=>b.score-a.score);
+  $("#res").innerHTML=`<h2>🏆 הטבלה הסופית</h2>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%">${ps.map((p,i)=>`<div class="card" style="display:flex;gap:12px;align-items:center;padding:10px;${i===0?"background:var(--sun)":""}">
+      <span class="logo" style="font-size:28px;width:34px;text-align:center">${["🥇","🥈","🥉"][i]||i+1}</span><div class="ph" style="width:56px;height:56px">${avatarHTML(p)}</div>
+      <div style="min-width:0;flex:1;text-align:right"><b class="en" style="display:block;text-align:right;font-size:20px">${esc(p.name)}</b><span class="muted" style="font-size:13px">${i===0?TITLES_TOP[Math.floor(Math.random()*3)]:i===ps.length-1?TITLES_LAST[Math.floor(Math.random()*3)]:`${p.right} תשובות נכונות`}</span></div>
+      <span class="logo" style="font-size:24px">${p.score}</span></div>`).join("")}</div>
+    <div class="row" style="justify-content:center"><button class="btn red" id="ppAgain">🔁 עוד סבב</button><button class="btn white" data-go="party">⚙️ שחקנים</button></div>`;
+  go("result");rain(["🎉","🏆","🍕","🍩","🍬"]);speak(`${ps[0].name} wins! Congratulations!`);
+  $("#ppAgain").onclick=()=>$("#ppGo").click();
+}
+
+/* ---------------- online room: everyone on their own phone ---------------- */
+let OL=null;
+const olName=code=>"snack-"+code;
+function renderOnlineBox(){
+  const b=$("#olBody");if(OL)return;
+  if(!ROOM){b.innerHTML=`<div class="note">החדר האונליין עובד רק כשפותחים את המשחק דרך הקישור של המשחק ב-Claude, ורק לשחקנים שהוזמנו לקישור ומחוברים עם חשבון. בקובץ שנשלח בוואטסאפ אין חדר אונליין – שם משחקים על טלפון אחד.</div>`;return;}
+  b.innerHTML=`<p class="muted" style="margin:0">טלפון אחד (או מחשב מחובר לטלוויזיה) פותח חדר ומקבל קוד. כולם מצטרפים עם הקוד ועונים מהטלפון שלהם. מי שעונה נכון ומהר מקבל יותר נקודות.</p>
+   <div class="row"><select class="inp" id="olLevel" style="flex:1 1 200px">${LEVELS.map(l=>`<option value="${l.n}">${l.n} · ${esc(l.en)}</option>`).join("")}</select><button class="btn blue" id="olHost" type="button">🖥️ פתיחת חדר</button></div>
+   <hr style="border:0;border-top:2px dashed var(--ink);width:100%">
+   <div class="row"><input class="inp" id="olCode" inputmode="numeric" maxlength="4" placeholder="קוד חדר" style="flex:1 1 90px"><input class="inp en" id="olNick" maxlength="14" placeholder="Nickname" style="flex:1 1 120px"></div>
+   <div class="row" id="olAv">${CHARS.map((c,i)=>`<button type="button" class="ph" data-olc="${c.id}" style="width:48px;height:48px;${i?"":"outline:3px solid var(--tomato)"}" aria-label="${esc(c.en)}">${face(c)}</button>`).join("")}</div>
+   <button class="btn red" id="olJoin" type="button">🚀 הצטרפות לחדר</button>`;
+  let av=CHARS[0].id;
+  $("#olAv").onclick=e=>{const x=e.target.closest("[data-olc]");if(!x)return;av=x.dataset.olc;$("#olAv").querySelectorAll("[data-olc]").forEach(y=>y.style.outline=y===x?"3px solid var(--tomato)":"");};
+  $("#olHost").onclick=()=>olHost(+$("#olLevel").value);
+  $("#olJoin").onclick=()=>{const code=$("#olCode").value.trim(),nick=$("#olNick").value.trim();
+    if(!/^\d{4}$/.test(code)){toast("הקוד הוא 4 ספרות");return;}if(!/^[A-Za-z0-9][A-Za-z0-9 _-]*$/.test(nick)){toast("כינוי באותיות באנגלית");return;}
+    olJoin(code,nick,av);};
+}
+function olQ(q){
+  const base={k:q.k,ans:q.ans,opts:shuffle(q.opts),emo:false};
+  if(q.k==="gap")return Object.assign(base,{p:q.s});
+  if(q.k==="tr")return Object.assign(base,{p:q.he,he:true});
+  if(q.k==="meme")return Object.assign(base,{p:"Which caption has no mistakes?"});
+  if(q.k==="pic")return Object.assign(base,{p:"What's this?",big:q.emo});
+  if(q.k==="rev")return Object.assign(base,{p:q.word,emo:true});
+  if(q.k==="irr")return Object.assign(base,{p:`Past form of "${q.base}"?`});
+  if(q.k==="food")return Object.assign(base,{p:`${q.c.en}: "${q.req}"`,emo:true});
+  if(q.k==="who"){const nm=id=>CH(id).he;return {k:"who",p:`"${q.text}"`,opts:shuffle(q.opts.map(nm)),ans:nm(q.ans)};}
+  return null;
+}
+function olShell(h){go("online");$("#ol").innerHTML=h;}
+const QDUR=20;
+async function olHost(lvl){
+  const code=String(Math.floor(1000+Math.random()*9000));let room;
+  try{room=await ROOM.join(olName(code));}catch(e){toast("לא הצלחתי לפתוח חדר. נסו שוב.");return;}
+  const L=LEVELS.find(l=>l.n===lvl);
+  const qs=mixedQs(L,10,new Set(["gap","tr","meme","pic","rev","irr","food","who"])).map(olQ).filter(Boolean);
+  OL={role:"host",room,code,L,qs,qi:-1,phase:"lobby",ans:{},scores:{},names:{},timer:null};
+  room.presence({role:"host",phase:"lobby",lvl:L.n,total:qs.length});
+  room.onPeers(()=>olHostTick());
+  olHostRender();
+}
+function olPlayers(){return OL.room.peers().filter(p=>p.presence&&p.presence.role==="player"&&!p.sameTab);}
+function olHostTick(){
+  if(!OL||OL.role!=="host")return;
+  olPlayers().forEach(p=>{OL.names[p.peer]={n:String(p.presence.name||"?").slice(0,14),c:String(p.presence.c||"itay")};if(!(p.peer in OL.scores))OL.scores[p.peer]=0;
+    const a=p.presence.ans;if(OL.phase==="q"&&a&&a.qn===OL.qi&&!OL.ans[p.peer])OL.ans[p.peer]={o:String(a.o),ms:Math.max(0,Math.min(QDUR*1000,+a.ms||QDUR*1000))};});
+  if(OL.phase==="q"&&olPlayers().length&&olPlayers().every(p=>OL.ans[p.peer]))olReveal();else olHostRender();
+}
+function olBoard(){return Object.keys(OL.scores).filter(k=>OL.names[k]).map(k=>({p:k,n:OL.names[k].n,c:OL.names[k].c,s:OL.scores[k]})).sort((a,b)=>b.s-a.s);}
+function olNext(){
+  OL.qi++;OL.ans={};
+  if(OL.qi>=OL.qs.length){OL.phase="end";OL.room.presence({phase:"end",q:null,board:olBoard().slice(0,30)});olHostRender();rain(["🎉","🏆","🍕"]);return;}
+  const q=OL.qs[OL.qi];OL.phase="q";OL.t0=Date.now();
+  OL.room.presence({phase:"q",qn:OL.qi,dur:QDUR,q:{k:q.k,p:q.p,opts:q.opts,emo:q.emo,big:q.big||null,he:!!q.he},reveal:null});
+  clearInterval(OL.timer);OL.timer=setInterval(()=>{if(OL.phase!=="q")return clearInterval(OL.timer);if(Date.now()-OL.t0>=QDUR*1000)olReveal();else olHostRender();},500);
+  if(q.k!=="tr"&&q.k!=="who")speak(q.p);
+  olHostRender();
+}
+function olReveal(){
+  clearInterval(OL.timer);const q=OL.qs[OL.qi];OL.phase="reveal";
+  const res={};Object.entries(OL.ans).forEach(([peer,a])=>{const ok=a.o===q.ans;const pts=ok?500+Math.round(500*(1-a.ms/(QDUR*1000))):0;OL.scores[peer]=(OL.scores[peer]||0)+pts;res[peer]=pts;});
+  OL.last=res;
+  OL.room.presence({phase:"reveal",reveal:{ans:q.ans,res},board:olBoard().slice(0,30)});
+  olHostRender();
+}
+function olHostRender(){
+  if(!OL||OL.role!=="host")return;
+  const pl=olPlayers();let h=`<div class="qtype"><span class="tag">🖥️ מנחה · חדר</span><button class="x" id="olQuit" aria-label="סגירת החדר">✕</button></div>`;
+  if(OL.phase==="lobby"){
+    h+=`<div class="result" style="padding:0"><div class="muted">קוד החדר</div><div class="score en" style="font-size:72px;letter-spacing:6px">${OL.code}</div>
+    <div class="muted">פותחים את המשחק בטלפון ← 🎉 יחד ← מקלידים את הקוד. שלב ${OL.L.n}: <span class="en" style="display:inline">${esc(OL.L.en)}</span></div>
+    <div class="flist" style="width:100%">${pl.map(p=>`<div class="card fr"><div class="ph">${face(CH(String(p.presence.c))||CHARS[0])}</div><b>${esc(String(p.presence.name||"?").slice(0,14))}</b></div>`).join("")||`<div class="muted">מחכים לשחקנים…</div>`}</div>
+    <button class="btn red" id="olStart" ${pl.length?"":"disabled"}>▶️ מתחילים (${pl.length} שחקנים)</button></div>`;
+  } else if(OL.phase==="q"){
+    const q=OL.qs[OL.qi],left=Math.max(0,QDUR-Math.floor((Date.now()-OL.t0)/1000));
+    h+=`<div class="timer"><i style="width:${left/QDUR*100}%"></i></div><div class="row" style="justify-content:space-between"><b>שאלה ${OL.qi+1}/${OL.qs.length}</b><b>⏱️ ${left}</b><b>✋ ${Object.keys(OL.ans).length}/${pl.length}</b></div>
+      ${q.big?`<div class="bigemoji">${q.big}</div>`:""}<div class="prompt ${q.he?"":"en"}">${esc(q.p).replace("___",'<span class="blank">?</span>')}</div>
+      <div class="opts grid2">${q.opts.map(o=>`<div class="opt ${q.emo?"emo":""}">${esc(o)}</div>`).join("")}</div>
+      <button class="btn white small" id="olSkip">⏭️ לחשוף תשובה</button>`;
+  } else {
+    const q=OL.qs[OL.qi]||{},b=olBoard();
+    h+=`${OL.phase==="end"?`<h2 style="text-align:center">🏆 המנצחים!</h2>`:`<div class="prompt ${q.he?"":"en"}">${esc(q.p||"")}</div><div class="opt ok" style="text-align:center">${esc(q.ans||"")}</div>`}
+      <div style="display:flex;flex-direction:column;gap:8px">${b.slice(0,10).map((x,i)=>`<div class="card" style="display:flex;gap:10px;align-items:center;padding:8px;${i===0?"background:var(--sun)":""}"><span class="logo" style="font-size:22px;width:30px;text-align:center">${["🥇","🥈","🥉"][i]||i+1}</span><div class="ph" style="width:44px;height:44px">${face(CH(x.c)||CHARS[0])}</div><b class="en" style="flex:1;min-width:0">${esc(x.n)}</b>${OL.phase==="reveal"&&OL.last&&OL.last[x.p]?`<span class="tag" style="background:#C9F5D9">+${OL.last[x.p]}</span>`:""}<span class="logo" style="font-size:20px">${x.s}</span></div>`).join("")||`<div class="muted">אף אחד לא ענה</div>`}</div>
+      ${OL.phase==="end"?`<button class="btn" id="olQuit2">סיום</button>`:`<button class="btn red" id="olNextBtn">${OL.qi+1<OL.qs.length?"שאלה הבאה ←":"לתוצאות 🏆"}</button>`}`;
+  }
+  olShell(h);
+  const on=(id,f)=>{const el=document.getElementById(id);if(el)el.onclick=f;};
+  on("olStart",olNext);on("olNextBtn",olNext);on("olSkip",olReveal);on("olQuit",olLeave);on("olQuit2",olLeave);
+}
+async function olJoin(code,nick,c){
+  let room;try{room=await ROOM.join(olName(code));}catch(e){toast("לא הצלחתי להצטרף. בדקו את הקוד ונסו שוב.");return;}
+  OL={role:"player",room,code,nick,c,lastHost:null,qn:-1,seen:0,picked:null};
+  room.presence({role:"player",name:nick,c,ans:null});
+  room.onPeers(()=>olPlayerRender());
+  olShell(`<div class="result"><h2>מתחברים לחדר ${esc(code)}…</h2></div>`);
+  setTimeout(()=>{if(OL&&OL.role==="player"&&!OL.lastHost)olPlayerRender(true);},4000);
+}
+function olPlayerRender(force){
+  if(!OL||OL.role!=="player")return;
+  const host=OL.room.peers().find(p=>p.presence&&p.presence.role==="host");
+  const me=CH(OL.c)||CHARS[0];
+  if(!host){if(force||OL.lastHost)olShell(`<div class="qtype"><span class="tag">חדר ${esc(OL.code)}</span><button class="x" id="olQuit" aria-label="יציאה">✕</button></div><div class="result" style="padding:0"><div class="av">${face(me,"sad")}</div><h2>לא מצאתי מנחה בחדר הזה</h2><div class="muted">בדקו שהקוד נכון ושהטלפון של המנחה פתוח על המשחק.</div></div>`);
+    const q=document.getElementById("olQuit");if(q)q.onclick=olLeave;return;}
+  const st=host.presence;if(st===OL.lastHost)return;OL.lastHost=st;
+  let h=`<div class="qtype"><span class="tag">חדר ${esc(OL.code)} · <span class="en">${esc(OL.nick)}</span></span><button class="x" id="olQuit" aria-label="יציאה">✕</button></div>`;
+  const board=Array.isArray(st.board)?st.board:[];const myIdx=board.findIndex(x=>x&&x.p===OL.room.peers().find(p=>p.sameTab)?.peer);
+  if(st.phase==="lobby"){h+=`<div class="result" style="padding:0"><div class="av">${face(me,"happy")}</div><h2>אתם בפנים! 🎉</h2><div class="muted">מחכים שהמנחה יתחיל…</div></div>`;}
+  else if(st.phase==="q"&&st.q){
+    if(st.qn!==OL.qn){OL.qn=st.qn;OL.seen=Date.now();OL.picked=null;OL.room.presence({ans:null});}
+    const q=st.q,opts=Array.isArray(q.opts)?q.opts.slice(0,4).map(String):[];
+    h+=`<div class="row" style="justify-content:space-between"><b>שאלה ${(+st.qn||0)+1}</b><span class="muted">⏱️ ${+st.dur||20} שניות</span></div>
+      ${q.big?`<div class="bigemoji">${esc(String(q.big))}</div>`:""}<div class="prompt ${q.he?"":"en"}">${esc(String(q.p||"")).replace("___",'<span class="blank">?</span>')}</div>
+      ${OL.picked!==null?`<div class="note" style="text-align:center">✅ נשלח: <b class="en" style="display:inline">${esc(OL.picked)}</b><br>מחכים לכולם…</div>`:`<div class="opts ${q.emo?"grid2":""}">${opts.map(o=>`<button class="opt ${q.emo?"emo":""}" data-ol="${esc(o)}">${esc(o)}</button>`).join("")}</div>`}`;
+  }
+  else if(st.phase==="reveal"||st.phase==="end"){
+    const rv=st.reveal||{};const myPeer=(OL.room.peers().find(p=>p.sameTab)||{}).peer;const pts=rv.res&&myPeer?rv.res[myPeer]:undefined;
+    const myScore=(board.find(x=>x&&x.p===myPeer)||{}).s||0;const rank=board.findIndex(x=>x&&x.p===myPeer)+1;
+    if(st.phase==="reveal"){const ok=pts>0;h+=`<div class="result" style="padding:0;${""}"><div class="av">${face(me,ok?"happy":"sad")}</div><h2 class="en" style="text-align:center">${esc(ok?rnd(GOOD):pts===undefined?"Too slow! ⏰":rnd(BAD))}</h2>
+      <div>התשובה הנכונה: <b class="en" style="display:inline">${esc(String(rv.ans||""))}</b></div>${ok?`<div class="tag" style="background:#C9F5D9;font-size:16px">+${pts}</div>`:""}
+      <div class="logo" style="font-size:34px">${myScore}</div><div class="muted">${rank?`מקום ${rank} מתוך ${board.length}`:""}</div></div>`;
+      if(ok)beep(true);else beep(false);}
+    else h+=`<div class="result" style="padding:0"><h2>🏆 המשחק נגמר!</h2><div class="logo" style="font-size:40px">${rank?["🥇","🥈","🥉"][rank-1]||"#"+rank:""}</div><div>יש לכם <b>${myScore}</b> נקודות</div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%">${board.slice(0,5).map((x,i)=>`<div class="card" style="display:flex;justify-content:space-between;padding:8px 12px"><b>${i+1}. <span class="en" style="display:inline">${esc(String(x.n||"?"))}</span></b><span>${+x.s||0}</span></div>`).join("")}</div>
+      <button class="btn" id="olQuit2">סיום</button></div>`;
+  }
+  olShell(h);
+  $("#ol").querySelectorAll("[data-ol]").forEach(b=>b.onclick=()=>{OL.picked=b.dataset.ol;OL.room.presence({ans:{qn:OL.qn,o:OL.picked,ms:Date.now()-OL.seen}});OL.lastHost=null;olPlayerRender();});
+  const on=(id,f)=>{const el=document.getElementById(id);if(el)el.onclick=f;};on("olQuit",olLeave);on("olQuit2",olLeave);
+}
+async function olLeave(){if(OL){clearInterval(OL.timer);try{await OL.room.leave();}catch(e){}}OL=null;go("party");}
+
+(async()=>{try{if(window.claude&&typeof window.claude.use==="function"){
+  const [t,r]=await Promise.all([window.claude.use("tts").catch(()=>null),window.claude.use("room").catch(()=>null)]);TTS=t;ROOM=r;
+  if(!$("#s-party").hidden)renderOnlineBox(); fillVoiceUI();}}catch(e){}})();
 
 go("home");
 })();
