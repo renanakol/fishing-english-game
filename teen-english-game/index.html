@@ -325,6 +325,23 @@ body{background-image:none;font-size:17px}
 body.big{zoom:1.15}
 body.calm *,body.calm *:before,body.calm *:after{animation:none!important;transition:none!important}
 :focus-visible{outline:3px solid var(--sky)!important;outline-offset:2px}
+
+.goal{display:flex;gap:12px;align-items:center;width:100%;text-align:right;background:var(--paper);border:2px solid #3A3350;border-radius:16px;padding:10px 14px;cursor:pointer;font:inherit;color:inherit}
+.goal .ge{font-size:34px;line-height:1}
+.goal .gt{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.goal .gt b{font-family:var(--f-display);font-weight:400;font-size:17px}
+.goal small{font-size:14px;color:var(--muted)}
+.gbar{display:block;height:10px;border-radius:999px;background:#E6E1EE;overflow:hidden}
+.gbar i{display:block;height:100%;background:var(--good);border-radius:999px}
+.uses{padding:14px;display:flex;flex-direction:column;gap:10px}
+.use{display:flex;gap:12px;align-items:flex-start}
+.use>span{font-size:26px;line-height:1.2}
+.use b{display:block}
+.use small{display:block;font-size:14px;color:var(--muted)}
+.result .goal{max-width:420px}
+.snackrow{display:flex;flex-wrap:wrap;gap:8px}
+.snackchip{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:2px solid #3A3350;border-radius:999px;padding:6px 12px;font-size:15px}
+.snackchip>span:first-child{font-size:22px}
 </style>
 
 <div dir="rtl" lang="he">
@@ -341,6 +358,7 @@ body.calm *,body.calm *:before,body.calm *:after{animation:none!important;transi
       <div class="herotxt"><div class="who" id="heroName"></div><div class="en heroline" id="heroLine"></div></div>
     </div>
     <button class="btn red cont" id="contBtn" type="button"></button>
+    <div id="homeGoal"></div>
     <div class="card daily" id="daily"></div>
     <div class="sec-h"><h2>השלבים</h2><span class="muted" id="progTxt"></span></div>
     <div class="levels" id="levels"></div>
@@ -365,17 +383,20 @@ body.calm *,body.calm *:before,body.calm *:after{animation:none!important;transi
 
   <!-- STASH -->
   <section id="s-stash" hidden>
-    <div class="sec-h"><h2>הנשנושייה שלי</h2><span class="muted">במקום מטבעות – אוכל!</span></div>
-    <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:6px">
-      <div class="row" style="justify-content:space-between"><b>שווי הנשנושים שהרווחתם</b><span class="logo" style="font-size:26px" id="pts2">0</span></div>
-      <div class="row" style="justify-content:space-between"><b>יתרה להאכלת הדמות</b><span class="logo" style="font-size:26px" id="bal">0</span></div>
-      <div class="muted" style="font-size:14px">🍬 רגיל = 1 · 🍕 נדיר = 3 · 🎂 אפי = 10. כל 3 תשובות נכונות = נשנוש, רצף של 5 = נשנוש נדיר, סיום שלב = סיבוב בגלגל המזל 🎡 (ולפעמים הגלגל מופיע גם באמצע). <b>בזמן המשחק מאכילים את הדמות בנשנושים כדי להפעיל את הכוח המיוחד שלה.</b> סך כל מה שהרווחתם פותח דמויות חדשות (גם אם אכלו לכם אותו).</div>
+    <div class="sec-h"><h2>הנשנושייה שלי</h2><span class="logo" style="font-size:26px">🍬<span id="bal">0</span></span></div>
+    <div id="stashGoal"></div>
+    <div class="card uses">
+      <h3>מה עושים עם הנשנושים?</h3>
+      <div class="use"><span aria-hidden="true">🛍️</span><div><b>קונים קישוטים לחבורה</b><small>כובעים, משקפיים, חיות מחמד ומסגרות · 6–30 🍬 · למטה בחנות</small></div></div>
+      <div class="use"><span aria-hidden="true">⚡</span><div><b>מפעילים כוח בזמן משחק</b><small>מאכילים את הדמות ומקבלים עזרה: מחיקת תשובות, מגן, רמז · 1–5 🍬</small></div></div>
+      <div class="use"><span aria-hidden="true">🔓</span><div><b>פותחים דמויות חדשות</b><small>לפי כל מה שהרווחתם אי-פעם (<span id="pts2">0</span> 🍬), גם אם כבר אכלתם: שירה ב-15, דור ב-35, ליה ב-70</small></div></div>
+      <div class="muted" style="font-size:14px">איך מרוויחים: כל 3 תשובות נכונות = 🍬 · רצף של 5 = 🍕 נדיר · סיום שלב = בונוס · סיום אתגר = גלגל המזל 🎡 · אתגר יומי = 🍕</div>
     </div>
     <div class="sec-h"><h2>🛍️ החנות</h2><span class="muted">קונים בנשנושים ומלבישים את החבורה</span></div>
     <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px" id="shopFor"></div>
     <div class="stashgrid" id="shopGrid"></div>
     <div class="sec-h"><h2>🍩 הנשנושים שלי</h2></div>
-    <div class="stashgrid" id="stashGrid"></div>
+    <div class="snackrow" id="stashGrid"></div>
   </section>
 
   <!-- SQUAD -->
@@ -942,7 +963,7 @@ function renderHome(){
   $("#heroAv").innerHTML=face(c);
   $("#heroName").innerHTML=`${esc(c.he)} <span class="muted en" style="display:inline;font-size:14px">${esc(c.title)}</span>`;
   $("#heroLine").textContent=nm(rnd(c.lines));renderDaily();
-  $("#pts").textContent=bal();
+  $("#pts").textContent=bal();$("#homeGoal").innerHTML=goalHTML();
   const nx=nextStage(),cb=$("#contBtn");
   if(nx){const L=LEVELS.find(l=>l.n===nx.n);cb.innerHTML=`<span>▶ ${nx.n===1&&nx.k===1?"מתחילים":"ממשיכים"}: שלב ${nx.n} · ${STAGES[nx.k-1].he}</span><small class="en">${esc(L.en)}</small>`;cb.onclick=()=>startStage(nx.n,nx.k);cb.hidden=false;}
   else cb.hidden=true;
@@ -1253,7 +1274,6 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
   if(ok){R.right++;R.streak++;R.meter=(R.meter||0)+1;
     const tier=R.streak%5===0?"rare":R.meter>=3?"common":null;
     if(tier&&!skipped){R.meter=0;const s=rnd(SNACKS[tier]);snack={e:s[0],n:s[1],t:tier};R.loot.push(snack);S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL[tier];save();flySnack(s[0],el);}
-    if(!R.wheelUsed&&!skipped&&R.i>=2&&Math.random()<.1){R.wheelUsed=true;R.pendingWheel=true;}
   } else {R.streak=0;
     if(R.shield){R.shield=false;saved=true;}else R.hearts--;
     drawHearts(!saved);
@@ -1266,7 +1286,7 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
   const canRetry=!ok&&c.power.kind==="retry"&&!isSpeed&&q.k!=="chat";
   const html=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
     <div class="row" style="flex-wrap:nowrap;align-items:center"><div class="ph" style="width:58px;height:58px">${face(c,ok?"happy":"sad")}</div>
-    <div style="min-width:0"><h3 class="en">${esc(line)}</h3>${snack?`<div>קיבלתם <b>${snack.e} <span class="en">${esc(snack.n)}</span></b>${snack.t==="rare"?" · רצף של 5! נשנוש נדיר 🔥":""}</div>`:ok&&!skipped?`<div class="muted" style="font-size:14px">🍬 ${"●".repeat(R.meter)}${"○".repeat(3-R.meter)} עוד ${3-R.meter} תשובות נכונות לנשנוש</div>`:""}
+    <div style="min-width:0"><h3 class="en">${esc(line)}</h3>${snack?`<div>קיבלתם <b>${snack.e} <span class="en">${esc(snack.n)}</span></b>${snack.t==="rare"?" · רצף של 5! נשנוש נדיר 🔥":""}${(g=>g?` · <span class="muted">${g.ready?`אפשר לקנות ${g.e} בחנות!`:`עוד 🍬${g.need-g.have} ל${g.e} ${esc(g.label)}`}</span>`:"")(nextGoal())}</div>`:ok&&!skipped?`<div class="muted" style="font-size:14px">🍬 ${"●".repeat(R.meter)}${"○".repeat(3-R.meter)} עוד ${3-R.meter} תשובות נכונות לנשנוש</div>`:""}
     ${R.pendingWheel?`<div><b>🎡 הופיע גלגל המזל!</b></div>`:""}
     ${!ok?`<div>${saved?"🛡️ המגן של נועם הציל לכם את הלב!":dead?"💔 נגמרו הלבבות…":"💔 הפסדתם לב"}</div>`:""}</div></div>
     ${!ok&&ans?`<div>${isSpeed?"התוצאה":"התשובה הנכונה"}: <span class="ans en">${esc(ans)}</span></div>`:""}
@@ -1293,6 +1313,8 @@ function finish(){
   const L=R.L,k=R.k,pass=R.hearts>0;
   const st=pass?Math.min(3,R.hearts):0;
   if(st>stars(L.n,k))S.st[L.n+"."+k]=st;
+  let bonus=null;
+  if(pass&&k<3){const s=rnd(SNACKS.common);bonus={e:s[0],n:s[1],t:"common"};S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=1;R.loot.push(bonus);}
   save();
   const c=curChar();
   const next=k<3?{n:L.n,k:k+1}:LEVELS.find(l=>l.n===L.n+1)?{n:L.n+1,k:1}:null;
@@ -1307,7 +1329,7 @@ function finish(){
     <div class="stars" style="font-size:30px">${"★".repeat(st)}${"☆".repeat(3-st)}</div>
     <div class="bubble en" style="margin:0">${esc(pass?rnd(["Sharing is caring. But not these snacks.","I'm so proud I could eat a whole pizza.","Next stage? Let's gooo!"]):rnd(["It's fine. I'm fine. Everything is fine. 🙃","Even legends fail sometimes. Then they eat a cookie.","Again! I believe in you. And in snacks."]))}</div>
     ${R.loot.length?`<div><b>השלל שלכם:</b></div><div class="loot">${R.loot.map(x=>`<span title="${esc(x.n)}">${x.e}</span>`).join("")}</div>`:`<div class="muted">הפעם בלי נשנושים… 😢</div>`}
-    ${pass?`<div class="tag" id="wheelPrize" style="background:var(--sun);font-size:14px">🎡 גלגל המזל מסתובב…</div>`:`<div class="muted">נגמרו 3 הלבבות. טיפ: האכילו את ${c.he} כדי להשתמש בכוח (${c.power.ic} ${esc(c.power.name)}).</div>`}
+    ${pass?(k===3?`<div class="tag" id="wheelPrize" style="background:var(--sun);font-size:14px">🎡 גלגל המזל מסתובב…</div>`:`<div class="tag" style="background:var(--sun);font-size:14px">בונוס סיום: ${bonus.e} ${esc(bonus.n)}</div>`)+goalHTML("resGoal"):`<div class="muted">נגמרו 3 הלבבות. טיפ: האכילו את ${c.he} כדי להשתמש בכוח (${c.power.ic} ${esc(c.power.name)}).</div>`}
     ${newly.map(ch=>`<div class="note">🎉 דמות חדשה נפתחה: <b>${ch.he}</b> · <span class="en">${esc(ch.title)}</span> · ${ch.power.ic} ${esc(ch.power.name)}</div>`).join("")}
     <div class="row" style="justify-content:center">
       ${pass&&next?`<button class="btn red" id="rNext">${next.k===1?`לשלב ${next.n} ←`:`ל${STAGES[next.k-1].he} ←`}</button>`:""}
@@ -1316,7 +1338,8 @@ function finish(){
       <button class="btn white" data-go="home">🏠 שלבים</button>
     </div>`;
   go("result");
-  if(pass)setTimeout(()=>openWheel(k===3?"סיימתם אתגר! סובבו את הגלגל":"עברתם את השלב! סובבו את הגלגל",pr=>{const w=$("#wheelPrize");if(w)w.textContent=pr?`🎡 זכיתם ב-${pr.e} ${pr.n}`:"🎡 הגלגל נעצר על כלום. בפעם הבאה!";if(pr)rain([pr.e,"🎉",pr.e]);},k===3),400);
+  if(pass&&k===3)setTimeout(()=>openWheel("סיימתם את האתגר! סובבו את הגלגל",pr=>{const w=$("#wheelPrize");if(w)w.textContent=pr?`🎡 זכיתם ב-${pr.e} ${pr.n}`:"🎡 הגלגל נעצר על כלום. בפעם הבאה!";const g=$("#resGoal");if(g)g.outerHTML=goalHTML("resGoal");if(pr)rain([pr.e,"🎉",pr.e]);},true),400);
+  else if(pass)rain(R.loot.map(x=>x.e).concat(["🎉"]));
   const rn=$("#rNext");if(rn)rn.onclick=()=>startStage(next.n,next.k);
   $("#rAgain").onclick=()=>startStage(L.n,k);
   const rs=$("#rShare");if(rs)rs.onclick=()=>shareResult({title:lastOfAll?"I beat the Bagrut Boss!":`Level ${L.n} · ${L.en}`,big:"★".repeat(st)+"☆".repeat(3-st),line:`${R.right}/${R.qs.length} correct · ${STAGES[k-1].ic}`,sub:"Can you beat me? 😏"});
@@ -1471,11 +1494,25 @@ document.addEventListener("click",e=>{
     eq[it.slot]=eq[it.slot]===it.id?null:it.id;S.equip[shopFor]=eq;save();renderShop();}
 });
 
+
+/* ---------------- next goal: make clear what snacks buy ---------------- */
+function nextGoal(){
+  const b=bal(),owned=new Set(S.owned||[]);const opts=[];
+  ITEMS.filter(i=>!owned.has(i.id)).forEach(i=>opts.push({e:i.e,label:i.he,have:b,need:i.price,kind:"shop"}));
+  CHARS.filter(c=>c.price>S.earned).forEach(c=>opts.push({e:"🔓",label:`לפתוח את ${c.baseHe}`,have:S.earned,need:c.price,kind:"char"}));
+  if(!opts.length)return null;
+  const can=opts.filter(o=>o.have>=o.need&&o.kind==="shop");if(can.length)return Object.assign(can.sort((a,b)=>b.need-a.need)[0],{ready:true});
+  return opts.sort((a,b)=>(a.need-a.have)-(b.need-b.have))[0];
+}
+function goalHTML(id){const g=nextGoal();if(!g)return "";const pct=Math.min(100,Math.round(g.have/g.need*100));
+  return `<button class="goal" ${id?`id="${id}"`:""} data-go="stash" type="button"><span class="ge" aria-hidden="true">${g.e}</span><span class="gt"><b>${g.ready?"אפשר כבר לקנות":"היעד הבא"}: ${esc(g.label)}</b>
+    <span class="gbar" aria-hidden="true"><i style="width:${pct}%"></i></span><small>${g.ready?`יש לכם 🍬${g.have}, המחיר 🍬${g.need} · לחצו לחנות`:g.kind==="char"?`הרווחתם 🍬${g.have} מתוך ${g.need}`:`🍬${g.have} מתוך ${g.need} · עוד ${g.need-g.have}`}</small></span></button>`;}
 /* ---------------- stash & squad ---------------- */
 function renderStash(){
-  $("#pts2").textContent=S.earned;$("#bal").textContent=bal();
+  $("#pts2").textContent=S.earned;$("#bal").textContent=bal();$("#stashGoal").innerHTML=goalHTML();
   setTimeout(renderShop,0);
-  $("#stashGrid").innerHTML=ALLSNACKS.map(s=>{const n=S.stash[s.e]||0;return `<div class="card snack ${n?"":"empty"}"><span class="e">${s.e}</span><span class="n">${esc(s.n)}</span><span class="c">×${n}</span><span class="tag" style="font-size:10px">${{common:"רגיל",rare:"נדיר",epic:"אפי"}[s.t]}</span></div>`;}).join("");
+  const have=ALLSNACKS.filter(x=>(S.stash[x.e]||0)>0);
+  $("#stashGrid").innerHTML=have.length?have.map(x=>`<span class="snackchip" title="${esc(x.n)}"><span aria-hidden="true">${x.e}</span><span class="en">${esc(x.n)}</span><b>×${S.stash[x.e]}</b></span>`).join(""):`<div class="muted">עוד אין נשנושים. כל 3 תשובות נכונות = 🍬</div>`;
 }
 function skinSelect(attr,id,cur,list){return `<select class="inp skinsel" ${attr}="${id}" aria-label="מי משחק">${list.map(o=>`<option value="${esc(o.v)}" ${o.v===cur?"selected":""}>${esc(o.t)}</option>`).join("")}</select>`;}
 function setSkin(charId,friendId){S.skins=S.skins||{};Object.keys(S.skins).forEach(k=>{if(S.skins[k]===friendId)delete S.skins[k];});
