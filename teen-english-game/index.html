@@ -236,6 +236,14 @@ body.playing .app{padding-bottom:300px}
 .ch{padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .ch .av{width:96px;height:96px}
 .ch b{font-family:var(--f-display);font-weight:400;font-size:18px}
+.daily{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--paper)}
+.flame{display:flex;flex-direction:column;align-items:center;font-size:30px;line-height:1;min-width:52px}
+.flame b{font-family:var(--f-word);font-weight:400;font-size:26px;color:var(--tomato)}
+.flame.big{font-size:54px}.flame.big b{font-size:44px}
+.accw{position:relative;display:block;width:100%;height:100%}
+.accw>.base,.accw>.base>svg,.accw>.base>.skin{display:block;width:100%;height:100%}
+.accs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.snack.on{background:var(--sun)}
 .skin{display:block;position:relative;width:100%;height:100%}
 .skin img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid var(--ink);display:block;background:var(--bubble)}
 .skin i{position:absolute;bottom:-2px;right:-2px;font-style:normal;font-size:clamp(14px,30%,34px);line-height:1}
@@ -277,6 +285,7 @@ html{color-scheme:light}
       <div class="logo">Snack<span>Squad</span><small>אנגלית לנוער · מהבסיס ועד הבגרות</small></div>
       <div class="row" style="flex-wrap:nowrap;gap:8px"><button class="stashpill" data-go="voice" aria-label="הגדרות קול"><b>🔊</b></button><button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button></div>
     </header>
+    <div class="card daily" id="daily"></div>
     <div class="card hero" id="hero">
       <div class="av" id="heroAv"></div>
       <div style="min-width:0">
@@ -318,6 +327,10 @@ html{color-scheme:light}
       <div class="row" style="justify-content:space-between"><b>יתרה להאכלת הדמות</b><span class="logo" style="font-size:26px" id="bal">0</span></div>
       <div class="muted" style="font-size:14px">🍬 רגיל = 1 · 🍕 נדיר = 3 · 🎂 אפי = 10. כל 3 תשובות נכונות = נשנוש, רצף של 5 = נשנוש נדיר, סיום שלב = סיבוב בגלגל המזל 🎡 (ולפעמים הגלגל מופיע גם באמצע). <b>בזמן המשחק מאכילים את הדמות בנשנושים כדי להפעיל את הכוח המיוחד שלה.</b> סך כל מה שהרווחתם פותח דמויות חדשות (גם אם אכלו לכם אותו).</div>
     </div>
+    <div class="sec-h"><h2>🛍️ החנות</h2><span class="muted">קונים בנשנושים ומלבישים את החבורה</span></div>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px" id="shopFor"></div>
+    <div class="stashgrid" id="shopGrid"></div>
+    <div class="sec-h"><h2>🍩 הנשנושים שלי</h2></div>
     <div class="stashgrid" id="stashGrid"></div>
   </section>
 
@@ -475,7 +488,8 @@ function nmQ(q){if(!S.skins||!Object.keys(S.skins).length)return q;const out={};
     else out[k]=v;}
   return out;}
 
-function face(c,mood){const f=c&&skinOf(c.id);
+function face(c,mood){return c?withAcc(c,face0(c,mood)):"";}
+function face0(c,mood){const f=c&&skinOf(c.id);
   if(f&&f.img)return `<span class="skin"><img src="${f.img}" alt="${esc(f.name)}">${mood&&mood!=="happy"?`<i>${{sad:"😢",wow:"😮"}[mood]||""}</i>`:""}</span>`;
   return faceSVG(c,mood);}
 function faceSVG(c,mood){
@@ -881,7 +895,7 @@ function renderHome(){
   const c=curChar();
   $("#heroAv").innerHTML=face(c);
   $("#heroName").innerHTML=`${c.he}<span class="en" style="display:block;font-size:16px;text-align:right">${esc(c.title)}</span>`;
-  $("#heroLine").textContent=nm(rnd(c.lines));
+  $("#heroLine").textContent=nm(rnd(c.lines));renderDaily();
   $("#heroPower").innerHTML=`<b>${c.power.ic} הכוח של ${c.he}: ${esc(c.power.name)}</b><br>${esc(c.power.he)}. מפעילים בזמן המשחק כשמאכילים ${c.g==="f"?"אותה":"אותו"} ב-🍬${c.power.cost}. יש לכם 🍬${bal()}.`;
   $("#pts").textContent=bal();
   const total=LEVELS.length*3,done=Object.keys(S.st).filter(k=>S.st[k]>0).length;
@@ -1212,6 +1226,7 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
     ${!ok&&ans?`<div>${isSpeed?"התוצאה":"התשובה הנכונה"}: <span class="ans en">${esc(ans)}</span></div>`:""}
     ${tip?`<div class="muted" style="font-size:15px">💡 ${mix(tip)}</div>`:""}
     <div class="row">
+    ${q.k==="meme"?`<button class="btn pink" id="shMeme">📤 שתפו את המים</button>`:""}
     ${canRetry?`<button class="btn pink" id="retry">🎭 שירה עושה דרמה: עוד ניסיון (🍬${c.power.cost})</button>`:""}
     <button class="btn ${ok?"":"red"}" id="next">${dead?"לתוצאות 💔":R.i+1<R.qs.length?"הבא ←":"לתוצאות 🏁"}</button></div></div></div>`;
   $("#fbWrap").innerHTML=html;
@@ -1220,6 +1235,7 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
   $("#next").onclick=()=>{if(dead){finish();return;}
     const go2=()=>{R.i++;if(R.i<R.qs.length)renderQ();else finish();};
     if(R.pendingWheel){R.pendingWheel=false;$("#fbWrap").innerHTML="";openWheel("גלגל מזל בהפתעה!",()=>{$("#roundPts").textContent=bal();go2();});}else go2();};
+  const sm=$("#shMeme");if(sm)sm.onclick=()=>shareMeme(q.p,q.ans);
   const rt=$("#retry");if(rt)rt.onclick=()=>{
     if(!spend(c.power.cost)){toast(`אין מספיק נשנושים (צריך 🍬${c.power.cost})`);return;}
     if(!saved)R.hearts++;drawHearts();toast("שירה: \"NOOO! This is so unfair! Try again!\" 🎭");charSay(c,"No! This is so unfair! Try again!");
@@ -1227,6 +1243,7 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
 }
 function finish(){
   stopTimer();
+  if(R.daily){dailyFinish();return;}
   const L=R.L,k=R.k,pass=R.hearts>0;
   const st=pass?Math.min(3,R.hearts):0;
   if(st>stars(L.n,k))S.st[L.n+"."+k]=st;
@@ -1248,6 +1265,7 @@ function finish(){
     ${newly.map(ch=>`<div class="note">🎉 דמות חדשה נפתחה: <b>${ch.he}</b> · <span class="en">${esc(ch.title)}</span> · ${ch.power.ic} ${esc(ch.power.name)}</div>`).join("")}
     <div class="row" style="justify-content:center">
       ${pass&&next?`<button class="btn red" id="rNext">${next.k===1?`לשלב ${next.n} ←`:`ל${STAGES[next.k-1].he} ←`}</button>`:""}
+      ${pass?`<button class="btn pink" id="rShare">📤 שיתוף</button>`:""}
       <button class="btn ${pass?"white":""}" id="rAgain">🔁 שוב</button>
       <button class="btn white" data-go="home">🏠 שלבים</button>
     </div>`;
@@ -1255,6 +1273,7 @@ function finish(){
   if(pass)setTimeout(()=>openWheel(k===3?"סיימתם אתגר! סובבו את הגלגל":"עברתם את השלב! סובבו את הגלגל",pr=>{const w=$("#wheelPrize");if(w)w.textContent=pr?`🎡 זכיתם ב-${pr.e} ${pr.n}`:"🎡 הגלגל נעצר על כלום. בפעם הבאה!";if(pr)rain([pr.e,"🎉",pr.e]);},k===3),400);
   const rn=$("#rNext");if(rn)rn.onclick=()=>startStage(next.n,next.k);
   $("#rAgain").onclick=()=>startStage(L.n,k);
+  const rs=$("#rShare");if(rs)rs.onclick=()=>shareResult({title:lastOfAll?"I beat the Bagrut Boss!":`Level ${L.n} · ${L.en}`,big:"★".repeat(st)+"☆".repeat(3-st),line:`${R.right}/${R.qs.length} correct · ${STAGES[k-1].ic}`,sub:"Can you beat me? 😏"});
 }
 
 
@@ -1283,9 +1302,133 @@ function openWheel(title,done,lucky){
     },matchMedia("(prefers-reduced-motion: reduce)").matches?200:4200);
   };
 }
+
+/* ---------------- daily challenge & streak ---------------- */
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const dayDiff=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
+const MILESTONES=[3,7,14,30,60,100];
+function dailyState(){const d=S.daily||{},t=today();const gap=d.last?dayDiff(d.last,t):99;
+  return {done:d.last===t,streak:gap<=1?(d.streak||0):0,best:d.best||0,broken:!!d.last&&gap>1&&(d.streak||0)>0};}
+function renderDaily(){const st=dailyState();const next=MILESTONES.find(m=>m>st.streak)||st.streak+10;
+  $("#daily").innerHTML=`<div class="flame" aria-label="רצף ימים">🔥<b>${st.streak}</b></div><div style="min-width:0;flex:1"><b>${st.done?"האתגר היומי הושלם! ✅":"האתגר היומי מחכה לכם"}</b>
+    <div class="muted" style="font-size:14px">${st.done?`חזרו מחר כדי לשמור על הרצף. עוד ${next-st.streak} ימים לבונוס 🎂`:st.broken?"הרצף נשבר 😢 מתחילים רצף חדש היום!":st.streak?`רצף של ${st.streak} ימים. אל תשברו אותו!`:"6 שאלות, 3 דקות. התחילו רצף היום!"}</div></div>
+    ${st.done?"":`<button class="btn red small" id="dailyGo">▶️ יאללה</button>`}`;
+  const b=$("#dailyGo");if(b)b.onclick=startDaily;}
+function startDaily(){
+  const L=LEVELS.filter(l=>isOpen(l.n,1)).pop()||LEVELS[0];
+  R={L,k:0,daily:true,qs:mixedQs(L,6,MCK),i:0,right:0,streak:0,loot:[],hearts:3,shield:false,chat:{},meter:0,wheelUsed:true,pendingWheel:false};
+  if(/[?&]debug\b/.test(location.search))R.hearts=99;
+  go("play");$("#roundPts").textContent=bal();drawHearts();renderQ();
+}
+function dailyFinish(){
+  const pass=R.hearts>0,c=curChar();let st=dailyState(),milestone=false,reward=null;
+  if(pass&&!st.done){const streak=st.streak+1;S.daily={last:today(),streak,best:Math.max(streak,st.best)};milestone=MILESTONES.includes(streak);
+    const s=rnd(SNACKS.rare);reward={e:s[0],n:s[1],t:"rare"};S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL.rare;R.loot.push(reward);save();}
+  st=dailyState();
+  $("#res").innerHTML=`<div class="av">${face(c,pass?"happy":"sad")}</div>
+    <h2>${pass?"Daily challenge done! 🔥":"Almost! Try again"}</h2>
+    <div class="flame big">🔥<b>${st.streak}</b></div><div class="muted">${pass?`רצף של ${st.streak} ימים${st.best>st.streak?` · השיא שלכם: ${st.best}`:""}`:"הרצף עוד לא נשמר להיום. נסו שוב!"}</div>
+    <div class="score en">${R.right}/${R.qs.length}</div>
+    ${reward?`<div class="tag" style="background:var(--sun);font-size:14px">פרס יומי: ${reward.e} ${esc(reward.n)}</div>`:""}
+    ${milestone?`<div class="note">🎉 הגעתם ל-${st.streak} ימים ברצף! מגיע לכם סיבוב בגלגל המזל.</div>`:""}
+    <div class="row" style="justify-content:center">${pass?`<button class="btn pink" id="rShare">📤 שתפו את הרצף</button>`:`<button class="btn red" id="rAgain">🔁 שוב</button>`}<button class="btn white" data-go="home">🏠 בית</button></div>`;
+  go("result");
+  const a=$("#rAgain");if(a)a.onclick=startDaily;
+  const sh=$("#rShare");if(sh)sh.onclick=()=>shareResult({title:"Daily challenge done!",big:"🔥 "+st.streak,line:`${st.streak}-day streak · ${R.right}/${R.qs.length} correct`,sub:"Can you beat my streak? 😏"});
+  if(pass){rain(["🔥","🎉",reward?reward.e:"🍬"]);if(milestone)setTimeout(()=>openWheel(`${st.streak} ימים ברצף!`,()=>{},true),700);}
+}
+
+/* ---------------- share images (result cards & memes) ---------------- */
+let DL=null;
+function svgImg(svg){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg.replace("<svg ",'<svg width="240" height="240" '));});}
+function urlImg(u){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=u;});}
+async function avatarImg(c,mood){const f=skinOf(c.id);return f&&f.img?urlImg(f.img):svgImg(faceSVG(c,mood||"happy"));}
+function roundRect(x,X,Y,W,H,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+W,Y,X+W,Y+H,r);x.arcTo(X+W,Y+H,X,Y+H,r);x.arcTo(X,Y+H,X,Y,r);x.arcTo(X,Y,X+W,Y,r);x.closePath();}
+function fitText(x,t,max,size,font){let s=size;do{x.font=`${s}px ${font}`;s-=2;}while(x.measureText(t).width>max&&s>14);}
+async function cardBlob(o){
+  try{await document.fonts.ready;}catch(e){}
+  const W=1080,H=1350,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  x.fillStyle="#BFEBD6";x.fillRect(0,0,W,H);x.fillStyle="#AEE3CA";for(let i=0;i<W;i+=90)for(let j=0;j<H;j+=90)if(((i+j)/90)%2===0)x.fillRect(i,j,45,45),x.fillRect(i+45,j+45,45,45);
+  x.fillStyle="#211B33";roundRect(x,72,92,W-144,H-210,48);x.fill();x.fillStyle="#FFD23F";roundRect(x,60,80,W-144,H-210,48);x.fill();x.lineWidth=8;x.strokeStyle="#211B33";x.stroke();
+  x.textAlign="center";x.fillStyle="#211B33";
+  if(o.img){x.save();x.beginPath();x.arc(W/2-12,380,190,0,7);x.closePath();x.fillStyle="#FF8FD2";x.fill();x.clip();x.drawImage(o.img,W/2-202,190,380,380);x.restore();x.beginPath();x.arc(W/2-12,380,190,0,7);x.lineWidth=10;x.stroke();}
+  fitText(x,o.title,W-240,86,'"Lilita One","Secular One",sans-serif');x.fillText(o.title,W/2-12,690);
+  x.font='150px "Lilita One","Secular One",sans-serif';x.fillStyle="#FF5A3C";x.fillText(o.big,W/2-12,860);
+  x.fillStyle="#211B33";fitText(x,o.line,W-240,52,'"Rubik",sans-serif');x.fillText(o.line,W/2-12,950);
+  x.font='bold 54px "Rubik",sans-serif';x.fillText(o.sub,W/2-12,1050);
+  x.font='64px "Lilita One",sans-serif';x.fillStyle="#211B33";x.fillText("Snack",W/2-120,1160);x.fillStyle="#FF5A3C";x.fillText("Squad",W/2+90,1160);
+  return new Promise(r=>cv.toBlob(b=>r(b),"image/png"));
+}
+async function memeBlob(img,cap){
+  try{await document.fonts.ready;}catch(e){}
+  const W=1080,cv=document.createElement("canvas");cv.width=W;cv.height=W;const x=cv.getContext("2d");x.fillStyle="#211B33";x.fillRect(0,0,W,W);
+  if(img)x.drawImage(img,0,0,W,W);
+  x.textAlign="center";x.lineJoin="round";const font='"Lilita One","Secular One",sans-serif';
+  const lines=[];const words=cap.split(" ");let cur="";x.font=`84px ${font}`;words.forEach(w=>{const t=cur?cur+" "+w:w;if(x.measureText(t).width>W-80){lines.push(cur);cur=w;}else cur=t;});if(cur)lines.push(cur);
+  const top=lines.slice(0,Math.ceil(lines.length/2)),bot=lines.slice(Math.ceil(lines.length/2));
+  const draw=(t,y)=>{x.lineWidth=14;x.strokeStyle="#000";x.strokeText(t,W/2,y);x.fillStyle="#fff";x.fillText(t,W/2,y);};
+  top.forEach((t,i)=>draw(t,110+i*92));bot.forEach((t,i)=>draw(t,W-50-(bot.length-1-i)*92));
+  x.font='bold 34px "Rubik",sans-serif';x.fillStyle="rgba(255,255,255,.85)";x.textAlign="right";x.fillText("Snack Squad",W-24,W-14>0?44:44);
+  return new Promise(r=>cv.toBlob(b=>r(b),"image/png"));
+}
+function showShare(blob,filename,text){
+  if(!blob){toast("לא הצלחתי ליצור תמונה");return;}
+  const url=URL.createObjectURL(blob);const file=(()=>{try{return new File([blob],filename,{type:"image/png"});}catch(e){return null;}})();
+  const canShare=!!(file&&navigator.canShare&&navigator.canShare({files:[file]}));
+  const d=document.createElement("div");d.className="wheelwrap";d.setAttribute("role","dialog");d.setAttribute("aria-label","שיתוף");
+  d.innerHTML=`<div class="wheelcard"><h2>📤 שיתוף</h2><img src="${url}" alt="תמונה לשיתוף" style="width:100%;max-height:52vh;object-fit:contain;border:3px solid var(--ink);border-radius:14px">
+    <div class="row" style="justify-content:center">${canShare?`<button class="btn red" id="shNow">📤 שליחה לוואטסאפ / סטורי</button>`:""}${DL?`<button class="btn" id="shSave">💾 שמירת התמונה</button>`:""}</div>
+    <div class="muted" style="font-size:14px">${canShare?"או ":""}לחיצה ארוכה על התמונה ← שמירה בגלריה, ואז שולחים לחברים 😉</div><button class="btn white small" id="shClose">סגירה</button></div>`;
+  document.body.appendChild(d);
+  const close=()=>{d.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  $("#shClose").onclick=close;d.addEventListener("click",e=>{if(e.target===d)close();});
+  const sn=$("#shNow");if(sn)sn.onclick=()=>{navigator.share({files:[file],text}).catch(()=>{});};
+  const sv=$("#shSave");if(sv)sv.onclick=()=>{DL.save({filename,data:blob}).then(()=>toast("נשמר ✔")).catch(e=>{if(e&&e.code!=="declined")toast("השמירה לא זמינה כאן. לחיצה ארוכה על התמונה תעבוד.");});};
+}
+async function shareResult(o){const c=curChar();const img=await avatarImg(c,"happy");showShare(await cardBlob(Object.assign({img},o)),"snack-squad.png",o.sub);}
+async function shareMeme(p,cap){const img=p.img?await urlImg(p.img):p.char?await avatarImg(p.char,"happy"):null;showShare(await memeBlob(img,cap),"snack-squad-meme.png","😂 "+cap);}
+
+/* ---------------- shop: dress up the squad with snacks ---------------- */
+const ITEMS=[
+ {id:"cap",slot:"hat",e:"🧢",he:"כובע מצחייה",price:6},{id:"tophat",slot:"hat",e:"🎩",he:"מגבעת",price:10},{id:"grad",slot:"hat",e:"🎓",he:"כובע בוגרים",price:15},{id:"crown",slot:"hat",e:"👑",he:"כתר",price:25},
+ {id:"shades",slot:"eyes",e:"🕶️",he:"משקפי שמש",price:8},{id:"goggles",slot:"eyes",e:"🥽",he:"משקפי מעבדה",price:12},
+ {id:"cat",slot:"pet",e:"🐱",he:"חתול",price:12},{id:"dog",slot:"pet",e:"🐶",he:"כלב",price:12},{id:"dino",slot:"pet",e:"🦖",he:"דינוזאור",price:20},{id:"uni",slot:"pet",e:"🦄",he:"חד-קרן",price:30},
+ {id:"gold",slot:"frame",e:"🟡",he:"מסגרת זהב",price:15,ring:"#FFC53D"},{id:"fire",slot:"frame",e:"🔥",he:"מסגרת אש",price:20,ring:"#FF5A3C"},{id:"rainbow",slot:"frame",e:"🌈",he:"מסגרת קשת",price:25,ring:"url(#rb)"}
+];
+const SLOTHE={hat:"כובע",eyes:"משקפיים",pet:"חיית מחמד",frame:"מסגרת"};
+function withAcc(c,inner){
+  const eq=S.equip&&S.equip[c.id];if(!eq||!Object.values(eq).some(Boolean))return inner;
+  const it=id=>ITEMS.find(x=>x.id===id);const hat=it(eq.hat),eyes=it(eq.eyes),pet=it(eq.pet),fr=it(eq.frame);
+  let o=`<svg class="accs" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rb" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#FF5A3C"/><stop offset=".33" stop-color="#FFD23F"/><stop offset=".66" stop-color="#1FAE62"/><stop offset="1" stop-color="#4F7DFF"/></linearGradient></defs>`;
+  if(fr)o+=`<circle cx="60" cy="60" r="57" fill="none" stroke="${fr.ring}" stroke-width="6"/>`;
+  if(hat)o+=`<text x="60" y="30" font-size="44" text-anchor="middle">${hat.e}</text>`;
+  if(eyes)o+=`<text x="60" y="70" font-size="38" text-anchor="middle">${eyes.e}</text>`;
+  if(pet)o+=`<text x="90" y="110" font-size="28" text-anchor="middle">${pet.e}</text>`;
+  return `<span class="accw"><span class="base">${inner}</span>${o}</svg></span>`;
+}
+let shopFor=null;
+function renderShop(){
+  const owned=new Set(S.owned||[]);const open=CHARS.filter(c=>S.earned>=c.price);shopFor=shopFor&&open.some(c=>c.id===shopFor)?shopFor:S.cur;
+  const c=CH(shopFor),eq=(S.equip&&S.equip[c.id])||{};
+  $("#shopFor").innerHTML=`<div class="ph" style="width:110px;height:110px">${face(c,"happy")}</div><div class="row" style="justify-content:center">${open.map(x=>`<button class="btn small ${x.id===shopFor?"":"white"}" data-shopch="${x.id}">${esc(x.he)}</button>`).join("")}</div>`;
+  $("#shopGrid").innerHTML=ITEMS.map(it=>{const has=owned.has(it.id),on=eq[it.slot]===it.id;
+    return `<div class="card snack ${on?"on":""}"><span class="e">${it.e}</span><span class="n" style="direction:rtl">${esc(it.he)}</span><span class="muted" style="font-size:11px">${SLOTHE[it.slot]}</span>
+      ${has?`<button class="btn small ${on?"":"white"}" data-wear="${it.id}">${on?"להוריד":"להלביש"}</button>`:`<button class="btn small pink" data-buy="${it.id}">🍬${it.price}</button>`}</div>`;}).join("");
+}
+document.addEventListener("click",e=>{
+  const ch=e.target.closest("[data-shopch]");if(ch){shopFor=ch.dataset.shopch;renderShop();return;}
+  const by=e.target.closest("[data-buy]");if(by){const it=ITEMS.find(x=>x.id===by.dataset.buy);
+    if(!spend(it.price)){toast(`חסרים לכם ${it.price-bal()} נשנושים. תמשיכו לשחק! 💪`);return;}
+    S.owned=(S.owned||[]).concat(it.id);S.equip=S.equip||{};S.equip[shopFor]=Object.assign({},S.equip[shopFor],{[it.slot]:it.id});save();
+    toast(`קניתם ${it.e} ${it.he}!`);renderStash();return;}
+  const wr=e.target.closest("[data-wear]");if(wr){const it=ITEMS.find(x=>x.id===wr.dataset.wear);S.equip=S.equip||{};const eq=Object.assign({},S.equip[shopFor]);
+    eq[it.slot]=eq[it.slot]===it.id?null:it.id;S.equip[shopFor]=eq;save();renderShop();}
+});
+
 /* ---------------- stash & squad ---------------- */
 function renderStash(){
   $("#pts2").textContent=S.earned;$("#bal").textContent=bal();
+  setTimeout(renderShop,0);
   $("#stashGrid").innerHTML=ALLSNACKS.map(s=>{const n=S.stash[s.e]||0;return `<div class="card snack ${n?"":"empty"}"><span class="e">${s.e}</span><span class="n">${esc(s.n)}</span><span class="c">×${n}</span><span class="tag" style="font-size:10px">${{common:"רגיל",rare:"נדיר",epic:"אפי"}[s.t]}</span></div>`;}).join("");
 }
 function skinSelect(attr,id,cur,list){return `<select class="inp skinsel" ${attr}="${id}" aria-label="מי משחק">${list.map(o=>`<option value="${esc(o.v)}" ${o.v===cur?"selected":""}>${esc(o.t)}</option>`).join("")}</select>`;}
@@ -1408,8 +1551,9 @@ function partyFinish(){
       <span class="logo" style="font-size:28px;width:34px;text-align:center">${["🥇","🥈","🥉"][i]||i+1}</span><div class="ph" style="width:56px;height:56px">${avatarHTML(p)}</div>
       <div style="min-width:0;flex:1;text-align:right"><b class="en" style="display:block;text-align:right;font-size:20px">${esc(p.name)}</b><span class="muted" style="font-size:13px">${i===0?TITLES_TOP[Math.floor(Math.random()*3)]:i===ps.length-1?TITLES_LAST[Math.floor(Math.random()*3)]:`${p.right} תשובות נכונות`}</span></div>
       <span class="logo" style="font-size:24px">${p.score}</span></div>`).join("")}</div>
-    <div class="row" style="justify-content:center"><button class="btn red" id="ppAgain">🔁 עוד סבב</button><button class="btn white" data-go="party">⚙️ שחקנים</button></div>`;
+    <div class="row" style="justify-content:center"><button class="btn red" id="ppAgain">🔁 עוד סבב</button><button class="btn pink" id="ppShare">📤 שיתוף</button><button class="btn white" data-go="party">⚙️ שחקנים</button></div>`;
   go("result");rain(["🎉","🏆","🍕","🍩","🍬"]);speak(`${ps[0].name} wins! Congratulations!`);
+  $("#ppShare").onclick=async()=>{const w=ps[0];const img=w.img?await urlImg(w.img):await avatarImg(CH(w.c)||CHARS[0]);showShare(await cardBlob({img,title:`${w.name} wins! 🏆`,big:String(w.score),line:ps.slice(0,3).map((p,i)=>`${i+1}. ${p.name} ${p.score}`).join("   "),sub:"Snack Squad party night 🎉"}),"snack-squad-party.png","🏆");};
   $("#ppAgain").onclick=()=>$("#ppGo").click();
 }
 
@@ -1549,7 +1693,7 @@ function olPlayerRender(force){
 async function olLeave(){if(OL){clearInterval(OL.timer);try{await OL.room.leave();}catch(e){}}OL=null;go("party");}
 
 (async()=>{try{if(window.claude&&typeof window.claude.use==="function"){
-  const [t,r]=await Promise.all([window.claude.use("tts").catch(()=>null),window.claude.use("room").catch(()=>null)]);TTS=t;ROOM=r;
+  const [t,r,dl]=await Promise.all([window.claude.use("tts").catch(()=>null),window.claude.use("room").catch(()=>null),window.claude.use("downloads").catch(()=>null)]);TTS=t;ROOM=r;DL=dl;
   if(!$("#s-party").hidden)renderOnlineBox(); fillVoiceUI();}}catch(e){}})();
 
 go("home");
