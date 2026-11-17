@@ -279,6 +279,57 @@ html{color-scheme:light}
 .rain{position:fixed;top:-60px;z-index:65;font-size:34px;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:380px){.hero{grid-template-columns:100px 1fr}.hero .av{width:100px;height:100px}.opts.grid2{grid-template-columns:1fr}.opt.emo{font-size:40px}}
+
+/* ---- clean pass: calmer surfaces, stronger contrast, bigger targets ---- */
+:root{--bg:#EEF5F1;--bg2:#EEF5F1;--muted:#4D475C;--tomato:#D93A1E;--good:#157A45;--bad:#C62828;--sky:#3560D8;--line:#D8D2E2;--sh:0 3px 0 rgba(33,27,51,.85);--sh-s:0 2px 0 rgba(33,27,51,.85)}
+body{background-image:none;font-size:17px}
+.app{gap:14px}
+.card{border-width:2px;box-shadow:0 2px 0 rgba(33,27,51,.12);border-color:#3A3350}
+.btn{border-width:2px;min-height:48px}
+.btn.small{min-height:42px;font-size:16px}
+.btn.red{background:var(--tomato);color:#fff}
+.stashpill{border-width:2px;min-height:44px}
+.logo span{color:var(--tomato)}
+.opt{border-width:2px;box-shadow:none;min-height:56px;font-size:19px;border-color:#3A3350}
+.opt:hover{background:#F6F2FF}
+.opt.ok{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.no{background:var(--bad);color:#fff;border-color:var(--bad)}
+.tag{border-width:1.5px;font-size:13px}
+.prompt{font-size:22px}
+.hint,.muted{color:var(--muted)}
+.hero{display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--paper);grid-template-columns:none}
+.heroav{width:76px;height:76px;flex:none;padding:0;border:0;background:var(--sun);border-radius:50%;overflow:hidden;cursor:pointer}
+.heroav svg,.heroav .accw,.heroav .skin{width:100%;height:100%;display:block}
+.herotxt{min-width:0;display:flex;flex-direction:column;gap:2px}
+.herotxt .who{font-size:19px}
+.heroline{font-size:15px;color:var(--muted)}
+.cont{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:14px 18px;font-size:21px}
+.cont small{font-family:var(--f-body);font-size:14px;opacity:.9}
+.daily{padding:10px 14px;gap:12px}
+.lvl{grid-template-columns:44px 1fr;gap:10px;padding:12px}
+.lvl .num{width:44px;height:44px;font-size:22px;border-width:2px;background:var(--sun)!important;color:var(--ink)!important}
+.lvl.boss .num{background:var(--ink)!important;color:var(--sun)!important}
+.lvl .t b{font-size:19px}
+.lvl .t span{font-size:14px}
+.stg{border-width:1.5px;box-shadow:none;min-height:48px;font-size:15px;background:#fff}
+.stg.done{background:#DDF3E6;border-color:var(--good)}
+.stg.next{background:var(--sun);border-width:2.5px}
+.lockedsum{text-align:center;color:var(--muted);font-size:15px;padding:6px}
+.nav{border-top-width:2px}
+.nav button{font-size:13px;min-height:52px}
+.nav button[aria-current="true"]{outline:2px solid var(--ink)}
+.fb{border-top-width:2px}
+.fb.good{background:#E3F5EA}
+.fb.bad{background:#FCE4E1}
+.chip{border-width:2px;box-shadow:none;min-height:44px}
+.say{border-width:2px;box-shadow:none}
+.x{border-width:2px;box-shadow:none}
+.prog{border-width:2px}
+.switch{flex-direction:row!important;align-items:center;gap:10px;font-weight:500!important}
+.switch input{width:24px;height:24px;flex:none}
+body.big{zoom:1.15}
+body.calm *,body.calm *:before,body.calm *:after{animation:none!important;transition:none!important}
+:focus-visible{outline:3px solid var(--sky)!important;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -290,21 +341,14 @@ html{color-scheme:light}
   <section id="s-home" style="display:contents">
     <header class="brand">
       <div class="logo">Snack<span>Squad</span><small>אנגלית לנוער · מהבסיס ועד הבגרות</small></div>
-      <div class="row" style="flex-wrap:nowrap;gap:8px"><button class="stashpill" data-go="voice" aria-label="הגדרות קול"><b>🔊</b></button><button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button></div>
+      <div class="row" style="flex-wrap:nowrap;gap:8px"><button class="stashpill" data-go="voice" aria-label="הגדרות: קול ותצוגה"><b>⚙️</b></button><button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button></div>
     </header>
-    <div class="card daily" id="daily"></div>
     <div class="card hero" id="hero">
-      <div class="av" id="heroAv"></div>
-      <div style="min-width:0">
-        <div class="bubble en" id="heroLine">Is there pizza in this lesson?</div>
-        <div class="who" id="heroName"></div>
-      </div>
-      <div class="powerbox" id="heroPower"></div>
-      <div class="acts">
-        <button class="btn white small" id="talkBtn">💬 עוד שטות</button>
-        <button class="btn white small" data-go="squad">🔄 החליפו דמות</button>
-      </div>
+      <button class="heroav" id="heroAv" type="button" aria-label="הדמות שלכם. לחצו כדי לשמוע משפט"></button>
+      <div class="herotxt"><div class="who" id="heroName"></div><div class="en heroline" id="heroLine"></div></div>
     </div>
+    <button class="btn red cont" id="contBtn" type="button"></button>
+    <div class="card daily" id="daily"></div>
     <div class="sec-h"><h2>השלבים</h2><span class="muted" id="progTxt"></span></div>
     <div class="levels" id="levels"></div>
   </section>
@@ -349,7 +393,14 @@ html{color-scheme:light}
 
   <!-- VOICE -->
   <section id="s-voice" hidden>
-    <div class="sec-h"><h2>הקול של המשחק</h2></div>
+    <div class="sec-h"><h2>הגדרות</h2></div>
+    <div class="card form">
+      <h3>תצוגה ונגישות</h3>
+      <label class="switch"><input type="checkbox" id="aBig"> טקסט וכפתורים גדולים יותר</label>
+      <label class="switch"><input type="checkbox" id="aCalm"> בלי אנימציות ותנועה</label>
+      <div class="muted" style="font-size:15px">בזמן משחק אפשר לענות גם עם המקלדת: מקשים 1–4 לבחירת תשובה, Enter להמשך.</div>
+    </div>
+    <h3 style="margin:0">הקול של המשחק</h3>
     <div class="card form">
       <div class="note" id="vClaude" hidden><label style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="vClaudeOn" style="width:22px;height:22px" checked> ✨ להשתמש בקול הטבעי של Claude (זמין כשפותחים דרך הקישור)</label></div>
       <label>בחירת קול של הטלפון
@@ -844,13 +895,18 @@ function initVoiceUI(){
 document.addEventListener("change",e=>{
   if(e.target.id==="vSel"){S.voice=e.target.value;VOICE=VOICES.find(v=>v.name===S.voice)||VOICE;save();speak("Hi! I am your new English voice. Do you like me?");}
   if(e.target.id==="vAuto"){S.auto=e.target.checked;save();}
+  if(e.target.id==="aBig"){S.big=e.target.checked;save();applyA11y();}
+  if(e.target.id==="aCalm"){S.calm=e.target.checked;save();applyA11y();}
   if(e.target.id==="vClaudeOn"){S.claudeVoice=e.target.checked;save();}
   if(e.target.id==="vFb"){S.fbVoice=e.target.checked;save();}});
 document.addEventListener("input",e=>{if(e.target.id==="vRate"){S.rate=+e.target.value;save();$("#vRateTxt").textContent=S.rate<.9?"איטי":S.rate>1.02?"מהיר":"רגיל";}});
 document.addEventListener("click",e=>{if(e.target.id==="vTest")speak("Hey! Welcome to Snack Squad. Answer the questions, and I will give you pizza. Deal?");});
 
 /* ---------------- ui helpers ---------------- */
-function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2400);}
+const reduced=()=>!!S.calm||matchMedia("(prefers-reduced-motion: reduce)").matches;
+function applyA11y(){document.body.classList.toggle("big",!!S.big);document.body.classList.toggle("calm",!!S.calm);
+  const b=document.getElementById("aBig"),c=document.getElementById("aCalm");if(b)b.checked=!!S.big;if(c)c.checked=!!S.calm;}
+function toast(t){const d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2400);}
 function flySnack(e,from,toEl){
   const d=document.createElement("div");d.className="fly";d.textContent=e;document.body.appendChild(d);
   const r=from.getBoundingClientRect(),t=(toEl||$("#roundPts")).getBoundingClientRect();
@@ -860,7 +916,7 @@ function flySnack(e,from,toEl){
   a.onfinish=()=>d.remove();
 }
 function rain(list){
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if(reduced()) return;
   for(let i=0;i<26;i++){const d=document.createElement("div");d.className="rain";d.textContent=rnd(list);d.style.left=Math.random()*96+"vw";document.body.appendChild(d);
     const a=d.animate([{transform:"translateY(0) rotate(0)"},{transform:`translateY(${innerHeight+120}px) rotate(${Math.random()*720-360}deg)`}],{duration:1600+Math.random()*1400,delay:Math.random()*600,easing:"ease-in"});a.onfinish=()=>d.remove();}
 }
@@ -880,37 +936,38 @@ function go(name){
   SCREENS.forEach(s=>{const el=$("#s-"+s);if(s==="home"){el.style.display=name==="home"?"contents":"none";}else el.hidden=s!==name;});
   $("#nav").hidden=(name==="play"||name==="online");document.body.classList.toggle("playing",name==="play");
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===name?"true":"false"));
-  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends(); if(name==="voice")initVoiceUI(); if(name==="party")renderParty();
+  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends(); if(name==="voice"){initVoiceUI();applyA11y();} if(name==="party")renderParty();
   try{speechSynthesis.cancel();}catch(e){} try{if(TTS&&TTS.active())TTS.stop().catch(()=>{});}catch(e){}
   $("#fbWrap").innerHTML=""; window.scrollTo(0,0);
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){e.preventDefault();go(b.dataset.go);}});
 
 /* ---------------- home ---------------- */
+function nextStage(){for(const l of LEVELS)for(const st of STAGES)if(isOpen(l.n,st.k)&&!stars(l.n,st.k))return {n:l.n,k:st.k};return null;}
 function renderHome(){
   const c=curChar();
   $("#heroAv").innerHTML=face(c);
-  $("#heroName").innerHTML=`${c.he}<span class="en" style="display:block;font-size:16px;text-align:right">${esc(c.title)}</span>`;
+  $("#heroName").innerHTML=`${esc(c.he)} <span class="muted en" style="display:inline;font-size:14px">${esc(c.title)}</span>`;
   $("#heroLine").textContent=nm(rnd(c.lines));renderDaily();
-  $("#heroPower").innerHTML=`<b>${c.power.ic} הכוח של ${c.he}: ${esc(c.power.name)}</b><br>${esc(c.power.he)}. מפעילים בזמן המשחק כשמאכילים ${c.g==="f"?"אותה":"אותו"} ב-🍬${c.power.cost}. יש לכם 🍬${bal()}.`;
   $("#pts").textContent=bal();
+  const nx=nextStage(),cb=$("#contBtn");
+  if(nx){const L=LEVELS.find(l=>l.n===nx.n);cb.innerHTML=`<span>▶ ${nx.n===1&&nx.k===1?"מתחילים":"ממשיכים"}: שלב ${nx.n} · ${STAGES[nx.k-1].he}</span><small class="en">${esc(L.en)}</small>`;cb.onclick=()=>startStage(nx.n,nx.k);cb.hidden=false;}
+  else cb.hidden=true;
   const total=LEVELS.length*3,done=Object.keys(S.st).filter(k=>S.st[k]>0).length;
-  $("#progTxt").textContent=`${Math.min(done,total)}/${total} שלבונים`;
-  let nextMarked=false;
-  $("#levels").innerHTML=LEVELS.map(l=>{
-    const open=isOpen(l.n,1);
-    const pills=STAGES.map(st=>{const o=isOpen(l.n,st.k),sr=stars(l.n,st.k);let cls=sr?"done":o?"":"locked";if(o&&!sr&&!nextMarked){cls="next";nextMarked=true;}
-      return `<button class="stg ${cls}" data-lvl="${l.n}" data-stg="${st.k}" ${o?"":'aria-disabled="true"'}>${o?st.ic:"🔒"} ${st.he}<small>${sr?"★".repeat(sr)+"☆".repeat(3-sr):o?"מוכן!":"נעול"}</small></button>`;}).join("");
-    return `<div class="card lvl ${open?"":"locked"} ${l.boss?"boss":""}">
-      <span class="num">${open?l.n:"🔒"}</span>
-      <span class="t"><b class="en">${esc(l.en)}</b><span>${esc(l.he)}</span></span>
-      <span class="side"><span class="tag">${esc(l.tag)}</span></span>
+  $("#progTxt").textContent=`${Math.min(done,total)} מתוך ${total}`;
+  const open=LEVELS.filter(l=>isOpen(l.n,1)),locked=LEVELS.length-open.length;
+  $("#levels").innerHTML=open.map(l=>{
+    const pills=STAGES.map(st=>{const o=isOpen(l.n,st.k),sr=stars(l.n,st.k);const cls=sr?"done":o?(nx&&nx.n===l.n&&nx.k===st.k?"next":""):"locked";
+      return `<button class="stg ${cls}" data-lvl="${l.n}" data-stg="${st.k}" ${o?"":'aria-disabled="true"'} aria-label="שלב ${l.n}, ${st.he}${sr?`, ${sr} כוכבים`:o?"":", נעול"}">${st.he}<small aria-hidden="true">${sr?"★".repeat(sr)+"☆".repeat(3-sr):o?"מוכן":"🔒"}</small></button>`;}).join("");
+    return `<div class="card lvl ${l.boss?"boss":""}">
+      <span class="num" aria-hidden="true">${l.n}</span>
+      <span class="t"><b class="en">${esc(l.en)}</b><span>${esc(l.he)} · ${esc(l.tag)}</span></span>
       <div class="stages">${pills}</div>
-    </div>`;}).join("");
+    </div>`;}).join("")+(locked?`<div class="lockedsum">🔒 עוד ${locked} שלבים בדרך לבגרות. מסיימים שלב ← נפתח הבא.</div>`:"");
 }
 $("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-stg]");if(!b)return;const n=+b.dataset.lvl,k=+b.dataset.stg;
   if(!isOpen(n,k)){toast("קודם צריך לעבור את השלבון הקודם 💪");return;} startStage(n,k);});
-$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=nm(rnd(c.lines));charSay(c,$("#heroLine").textContent);wig($("#heroAv"));};
+$("#heroAv").onclick=()=>{const c=curChar();$("#heroLine").textContent=nm(rnd(c.lines));charSay(c,$("#heroLine").textContent);wig($("#heroAv"));};
 
 /* ---------------- question builders ---------------- */
 function vocabQ(L,avoid){
@@ -1286,7 +1343,7 @@ function openWheel(title,done,lucky){
   $("#whSpin").onclick=()=>{
     const btn=$("#whSpin");btn.disabled=true;const idx=pickIdx();const wh=$("#wh");
     const target=360*6+(360-(idx+.5)*seg)+(Math.random()*seg*.6-seg*.3);
-    if(matchMedia("(prefers-reduced-motion: reduce)").matches)wh.style.transition="none";
+    if(reduced())wh.style.transition="none";
     requestAnimationFrame(()=>{wh.style.transform=`rotate(${target}deg)`;});
     let tick=0;const ti=setInterval(()=>{if(++tick>14)return clearInterval(ti);try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=900;g.gain.value=.04;o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+.03);}catch(e){}},120+tick*15);
     setTimeout(()=>{clearInterval(ti);const w=WHEEL[idx];let prize=null;
@@ -1295,7 +1352,7 @@ function openWheel(title,done,lucky){
       $("#whMsg").innerHTML=prize?`<b style="font-size:20px">זכיתם ב-${prize.e} <span class="en">${esc(prize.n)}</span>!</b>`:`<b style="font-size:20px">כלום! 😢</b> <span class="en">Better luck next time.</span>`;
       speak(prize?`You won a ${prize.n}!`:"Oh no! Nothing this time.");
       btn.disabled=false;btn.textContent="המשך ←";btn.onclick=()=>{d.remove();done&&done(prize);};
-    },matchMedia("(prefers-reduced-motion: reduce)").matches?200:4200);
+    },reduced()?200:4200);
   };
 }
 
@@ -1306,8 +1363,8 @@ const MILESTONES=[3,7,14,30,60,100];
 function dailyState(){const d=S.daily||{},t=today();const gap=d.last?dayDiff(d.last,t):99;
   return {done:d.last===t,streak:gap<=1?(d.streak||0):0,best:d.best||0,broken:!!d.last&&gap>1&&(d.streak||0)>0};}
 function renderDaily(){const st=dailyState();const next=MILESTONES.find(m=>m>st.streak)||st.streak+10;
-  $("#daily").innerHTML=`<div class="flame" aria-label="רצף ימים">🔥<b>${st.streak}</b></div><div style="min-width:0;flex:1"><b>${st.done?"האתגר היומי הושלם! ✅":"האתגר היומי מחכה לכם"}</b>
-    <div class="muted" style="font-size:14px">${st.done?`חזרו מחר כדי לשמור על הרצף. עוד ${next-st.streak} ימים לבונוס 🎂`:st.broken?"הרצף נשבר 😢 מתחילים רצף חדש היום!":st.streak?`רצף של ${st.streak} ימים. אל תשברו אותו!`:"6 שאלות, 3 דקות. התחילו רצף היום!"}</div></div>
+  $("#daily").innerHTML=`<div class="flame" aria-label="רצף של ${st.streak} ימים">🔥<b>${st.streak}</b></div><div style="min-width:0;flex:1"><b>${st.done?"האתגר היומי הושלם ✅":"אתגר יומי · 3 דקות"}</b>
+    <div class="muted" style="font-size:14px">${st.done?`חזרו מחר כדי לשמור על הרצף. עוד ${next-st.streak} ימים לבונוס 🎂`:st.broken?"הרצף נשבר 😢 מתחילים רצף חדש היום!":st.streak?`רצף של ${st.streak} ימים. אל תשברו אותו!`:"6 שאלות קצרות. התחילו רצף היום!"}</div></div>
     ${st.done?"":`<button class="btn red small" id="dailyGo">▶️ יאללה</button>`}`;
   const b=$("#dailyGo");if(b)b.onclick=startDaily;}
 function startDaily(){
@@ -1692,6 +1749,11 @@ async function olLeave(){if(OL){clearInterval(OL.timer);try{await OL.room.leave(
   if(!$("#s-party").hidden)renderOnlineBox(); fillVoiceUI();}}catch(e){}})();
 
 
+
+document.addEventListener("keydown",e=>{if($("#s-play").hidden||e.target.closest("input,select,textarea"))return;
+  const n=+e.key;if(n>=1&&n<=4){const o=[...document.querySelectorAll("#q .opt:not([disabled]):not(.gone),#q .tk:not([disabled])")];if(o[n-1]){e.preventDefault();o[n-1].click();}}});
+new MutationObserver(()=>document.querySelectorAll(".en:not([lang]),.opt:not([lang]),.msg:not([lang]),.prompt.en:not([lang])").forEach(el=>{if(el.classList.contains("en")||/^[\x00-\x7F’‘…–—✓\p{Emoji}\s]*$/u.test(el.textContent))el.setAttribute("lang","en");})).observe(document.body,{childList:true,subtree:true});
+applyA11y();
 go("home");
 })();
 </script>
