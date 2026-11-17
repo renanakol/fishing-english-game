@@ -202,7 +202,7 @@ body.playing .app{padding-bottom:300px}
   <section id="s-home" style="display:contents">
     <header class="brand">
       <div class="logo">Snack<span>Squad</span><small>אנגלית לנוער · מהבסיס ועד הבגרות</small></div>
-      <button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button>
+      <div class="row" style="flex-wrap:nowrap;gap:8px"><button class="stashpill" data-go="voice" aria-label="הגדרות קול"><b>🔊</b></button><button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button></div>
     </header>
     <div class="card hero" id="hero">
       <div class="av" id="heroAv"></div>
@@ -250,6 +250,32 @@ body.playing .app{padding-bottom:300px}
   <section id="s-squad" hidden>
     <div class="sec-h"><h2>החבורה</h2><span class="muted">בחרו מי מלווה אתכם</span></div>
     <div class="chars" id="chars"></div>
+  </section>
+
+  <!-- VOICE -->
+  <section id="s-voice" hidden>
+    <div class="sec-h"><h2>הקול של המשחק</h2></div>
+    <div class="card form">
+      <label>בחירת קול
+        <select class="inp" id="vSel"></select>
+      </label>
+      <div class="muted" style="font-size:14px" id="vInfo"></div>
+      <label>מהירות דיבור: <span id="vRateTxt"></span>
+        <input type="range" id="vRate" min="0.7" max="1.15" step="0.05">
+      </label>
+      <label style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="vAuto" style="width:22px;height:22px"> הקראה אוטומטית של כל שאלה</label>
+      <label style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="vFb" style="width:22px;height:22px"> להקריא גם את התגובות והתשובה הנכונה</label>
+      <button class="btn blue" type="button" id="vTest">▶️ נסו את הקול</button>
+    </div>
+    <div class="note">
+      <b>רוצים קול הרבה יותר טבעי? מורידים קול איכותי לטלפון (חינם, פעם אחת):</b>
+      <ol class="steps">
+        <li><b>אייפון:</b> הגדרות ← נגישות ← תוכן מוקרא ← קולות ← English ← בוחרים קול עם הסימון "משופר" או "פרימיום" (למשל Ava, Zoe, Evan) ומורידים.</li>
+        <li><b>אנדרואיד:</b> הגדרות ← נגישות ← המרת טקסט לדיבור ← מנוע Google ← התקנת נתוני קול ← English (US) ← מורידים קול באיכות גבוהה.</li>
+        <li><b>מחשב:</b> בדפדפן Edge יש קולות "Natural" מצוינים (למשל Aria, Jenny). בכרום – Google US English.</li>
+        <li>חוזרים לכאן, מרעננים את הדף ובוחרים את הקול החדש מהרשימה.</li>
+      </ol>
+    </div>
   </section>
 
   <!-- FRIENDS -->
@@ -576,7 +602,7 @@ const FEED=["Yum! You are officially my favorite human.","Crunchy! 10/10, would 
 
 /* ---------------- state ---------------- */
 const KEY="snacksquad-v1";
-let S={cur:"itay",best:{},stash:{},earned:0,friends:[]};
+let S={cur:"itay",best:{},stash:{},earned:0,friends:[],voice:"",rate:0.95,auto:true,fbVoice:true};
 try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("לא הצלחתי לשמור (אולי אין מקום לעוד תמונות)");}}
 const curChar=()=>CHARS.find(c=>c.id===S.cur)||CHARS[0];
@@ -585,10 +611,42 @@ const unlockedLevel=n=>n===1||(S.best[n-1]||0)>=0.7;
 /* ---------------- audio ---------------- */
 let AC=null;
 function beep(ok){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;const notes=ok?[660,880,1320]:[300,200];notes.forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ok?"triangle":"sawtooth";o.frequency.value=f;g.gain.setValueAtTime(0.0001,t+i*.09);g.gain.exponentialRampToValueAtTime(ok?.18:.08,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(0.0001,t+i*.09+.16);o.connect(g).connect(AC.destination);o.start(t+i*.09);o.stop(t+i*.09+.18);});}catch(e){}}
-let VOICE=null;
-function pickVoice(){try{const v=speechSynthesis.getVoices();VOICE=v.find(x=>/en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}catch(e){}}
-try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}
-function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/___/g,"blank").replace(/[^\w\s'.,!?:-]/g,""));u.lang="en-US";u.rate=.9;if(VOICE)u.voice=VOICE;speechSynthesis.speak(u);}catch(e){toast("ההקראה לא זמינה בדפדפן הזה");}}
+let VOICE=null,VOICES=[];
+const NOVELTY=/\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|princess|deranged|hysterical|pipe organ|grandma|grandpa|rocko|shelley|flo|eddy|reed|sandy)\b/i;
+function vScore(v){let n=0;const nm=v.name;
+  if(/natural|neural/i.test(nm))n+=60; if(/online/i.test(nm))n+=20;
+  if(/premium/i.test(nm))n+=55; if(/enhanced|משופר/i.test(nm))n+=45; if(/siri/i.test(nm))n+=35;
+  if(/google/i.test(nm))n+=30;
+  if(/\b(ava|zoe|evan|allison|susan|samantha|nathan|tom|aria|jenny|guy|ana|michelle|emma|brian|serena|daniel|libby|sonia|ryan|karen|moira|tessa)\b/i.test(nm))n+=15;
+  if(/en[-_]US/i.test(v.lang))n+=10;else if(/en[-_](GB|AU|IE|CA)/i.test(v.lang))n+=7;
+  if(v.localService===false)n+=3;
+  if(NOVELTY.test(nm))n-=200; if(/espeak|compact/i.test(nm))n-=60;
+  return n;}
+function pickVoice(){try{
+  VOICES=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)).sort((a,b)=>vScore(b)-vScore(a));
+  VOICE=VOICES.find(v=>v.name===S.voice)||VOICES[0]||null;
+  fillVoiceUI();}catch(e){}}
+try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,800);}catch(e){}
+function clean(t){return t.replace(/___/g,"...").replace(/[^\w\s'.,!?:;"-]/g," ").replace(/\s+/g," ").trim();}
+function speak(t,opts){try{
+  if(!("speechSynthesis" in window)){toast("ההקראה לא זמינה בדפדפן הזה");return;}
+  if(!(opts&&opts.queue))speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(clean(t));u.lang=VOICE?VOICE.lang:"en-US";u.rate=S.rate||.95;u.pitch=1.02;if(VOICE)u.voice=VOICE;
+  speechSynthesis.speak(u);}catch(e){}}
+function fillVoiceUI(){const sel=document.getElementById("vSel");if(!sel)return;
+  if(!VOICES.length){sel.innerHTML='<option>קול ברירת המחדל של המכשיר</option>';document.getElementById("vInfo").textContent="המכשיר לא מציג רשימת קולות באנגלית. נסו לרענן, או הורידו קול לפי ההוראות למטה.";return;}
+  sel.innerHTML=VOICES.map((v,i)=>`<option value="${esc(v.name)}">${i<3&&vScore(v)>20?"⭐ ":""}${esc(v.name)} (${esc(v.lang)})</option>`).join("");
+  sel.value=VOICE?VOICE.name:"";
+  document.getElementById("vInfo").textContent=VOICE&&vScore(VOICE)>=30?"נבחר אוטומטית הקול הכי טבעי שנמצא במכשיר. אפשר להחליף.":"הקולות במכשיר הזה בסיסיים. כדאי להוריד קול איכותי לפי ההוראות למטה.";}
+function initVoiceUI(){
+  $("#vRate").value=S.rate;$("#vRateTxt").textContent=S.rate<.9?"איטי":S.rate>1.02?"מהיר":"רגיל";
+  $("#vAuto").checked=S.auto!==false;$("#vFb").checked=S.fbVoice!==false;fillVoiceUI();}
+document.addEventListener("change",e=>{
+  if(e.target.id==="vSel"){S.voice=e.target.value;VOICE=VOICES.find(v=>v.name===S.voice)||VOICE;save();speak("Hi! I am your new English voice. Do you like me?");}
+  if(e.target.id==="vAuto"){S.auto=e.target.checked;save();}
+  if(e.target.id==="vFb"){S.fbVoice=e.target.checked;save();}});
+document.addEventListener("input",e=>{if(e.target.id==="vRate"){S.rate=+e.target.value;save();$("#vRateTxt").textContent=S.rate<.9?"איטי":S.rate>1.02?"מהיר":"רגיל";}});
+document.addEventListener("click",e=>{if(e.target.id==="vTest")speak("Hey! Welcome to Snack Squad. Answer the questions, and I will give you pizza. Deal?");});
 
 /* ---------------- ui helpers ---------------- */
 function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
@@ -613,12 +671,12 @@ function pickPerson(){
 const fill=(s,p)=>s.replace(/\{F\}/g,p.name);
 
 /* ---------------- navigation ---------------- */
-const SCREENS=["home","play","result","stash","squad","friends"];
+const SCREENS=["home","play","result","stash","squad","friends","voice"];
 function go(name){
   SCREENS.forEach(s=>{const el=$("#s-"+s);if(s==="home"){el.style.display=name==="home"?"contents":"none";}else el.hidden=s!==name;});
   $("#nav").hidden=(name==="play");document.body.classList.toggle("playing",name==="play");
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===name?"true":"false"));
-  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends();
+  if(name==="home")renderHome(); if(name==="stash")renderStash(); if(name==="squad")renderSquad(); if(name==="friends")renderFriends(); if(name==="voice")initVoiceUI();
   try{speechSynthesis.cancel();}catch(e){}
   $("#fbWrap").innerHTML=""; window.scrollTo(0,0);
 }
@@ -720,8 +778,9 @@ function renderQ(){
     h+=`<div class="row"><button class="btn" id="check" disabled>בדיקה ✔</button><button class="btn white small" id="reset">התחלה מחדש</button></div>`;
   }
   box.innerHTML=h;
-  const sb=$("#sayBtn");if(sb)sb.onclick=()=>speak(sayTxt);
-  if(q.k==="listen") setTimeout(()=>speak(q.word),250);
+  const sb=$("#sayBtn");if(sb)sb.onclick=()=>speak(q.k==="read"?q.text+" ... "+q.q:sayTxt);
+  const autoTxt={pic:"What's this?",rev:q.word,listen:q.word,gap:q.s,meme:"Which caption has no mistakes?",irr:"What is the past form of "+q.base+"?",read:q.q,spell:q.base?"Spell the past form of "+q.base:null}[q.k];
+  if(q.k==="listen")speak(q.word); else if(S.auto!==false&&autoTxt)speak(autoTxt);
   box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
     const ok=b.dataset.o===q.ans;
     box.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.o===q.ans)x.classList.add("ok");});
@@ -761,6 +820,8 @@ function answer(ok,el,ans,tip){
     ${tip?`<div class="muted" style="font-size:15px">💡 ${esc(tip)}</div>`:""}
     <button class="btn ${ok?"":"red"}" id="next">${R.i+1<R.qs.length?"הבא ←":"לתוצאות 🏁"}</button></div></div>`;
   $("#fbWrap").innerHTML=html;
+  if(S.fbVoice!==false){const q=R.qs[R.i];const full=q.k==="gap"?q.s.replace("___",ans):ans;
+    speak(ok?($(".fb h3").textContent):($(".fb h3").textContent+" The correct answer is: "+full));}
   $("#next").focus({preventScroll:true});
   $("#next").onclick=()=>{R.i++;if(R.i<R.qs.length)renderQ();else finish();};
 }
