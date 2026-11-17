@@ -236,6 +236,10 @@ body.playing .app{padding-bottom:300px}
 .ch{padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .ch .av{width:96px;height:96px}
 .ch b{font-family:var(--f-display);font-weight:400;font-size:18px}
+.skin{display:block;position:relative;width:100%;height:100%}
+.skin img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid var(--ink);display:block;background:var(--bubble)}
+.skin i{position:absolute;bottom:-2px;right:-2px;font-style:normal;font-size:clamp(14px,30%,34px);line-height:1}
+.skinsel{font-size:13px;padding:6px 8px}
 .ch .sub{font-size:13px;color:var(--muted);direction:ltr}
 .ch.sel{background:var(--sun)}
 .ch.lock .av{filter:grayscale(1) brightness(.6)}
@@ -319,7 +323,7 @@ html{color-scheme:light}
 
   <!-- SQUAD -->
   <section id="s-squad" hidden>
-    <div class="sec-h"><h2>החבורה</h2><span class="muted">בחרו מי מלווה אתכם</span></div>
+    <div class="sec-h"><h2>החבורה</h2><span class="muted">בחרו מלווה, ואיזה חבר משחק כל דמות</span></div>
     <div class="chars" id="chars"></div>
   </section>
 
@@ -454,8 +458,27 @@ const CHARS=[
   lines:["Rules? I thought they were suggestions.","I dyed my hair blue by accident. On purpose.","Chaos is my cardio.","I put ketchup on ice cream. Don't judge."]}
 ];
 const CH=id=>CHARS.find(c=>c.id===id);
+/* A character can be "played" by a friend: S.skins[charId] = friendId. */
+function skinOf(id){try{const fid=S.skins&&S.skins[id];return fid?S.friends.find(f=>f.id===fid)||null:null;}catch(e){return null;}}
+CHARS.forEach(c=>{c.baseEn=c.en;c.baseHe=c.he;c.baseG=c.g;delete c.en;delete c.he;delete c.g;
+  Object.defineProperty(c,"en",{get(){const f=skinOf(this.id);return f?f.name:this.baseEn;}});
+  Object.defineProperty(c,"he",{get(){const f=skinOf(this.id);return f?f.name:this.baseHe;}});
+  Object.defineProperty(c,"g",{get(){const f=skinOf(this.id);return f?f.g:this.baseG;}});});
+const HSUF={itay:"eats",maya:"vibes",noam:"gg",shira:"drama",dor:"zzz",lia:"chaos"};
+const handle=c=>"@"+c.en.toLowerCase().replace(/[^a-z0-9]/g,"")+"."+HSUF[c.id];
+/* swap character names inside English/Hebrew text for the friends who play them */
+function nm(t){if(typeof t!=="string"||!S.skins)return t;
+  CHARS.forEach(c=>{const f=skinOf(c.id);if(!f)return;t=t.replace(new RegExp("\\b"+c.baseEn+"\\b","g"),f.name).split(c.baseHe).join(f.name);});return t;}
+function nmQ(q){if(!S.skins||!Object.keys(S.skins).length)return q;const out={};
+  for(const k in q){const v=q[k];if(k==="c"||k==="p")out[k]=v;else if(typeof v==="string")out[k]=nm(v);
+    else if(Array.isArray(v))out[k]=v.map(x=>typeof x==="string"?nm(x):Array.isArray(x)?x.map(nm):x&&typeof x==="object"&&"w" in x?Object.assign({},x,{w:nm(x.w)}):x);
+    else out[k]=v;}
+  return out;}
 
-function face(c,mood){
+function face(c,mood){const f=c&&skinOf(c.id);
+  if(f&&f.img)return `<span class="skin"><img src="${f.img}" alt="${esc(f.name)}">${mood&&mood!=="happy"?`<i>${{sad:"😢",wow:"😮"}[mood]||""}</i>`:""}</span>`;
+  return faceSVG(c,mood);}
+function faceSVG(c,mood){
   const s=c.skin,h=c.hair,k=`stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
   let o=`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(c.en)}">`;
   if(c.x.includes("hoodie")) o+=`<path d="M14 120 Q14 80 30 64 Q60 40 90 64 Q106 80 106 120Z" fill="${c.shirt}" ${k}/>`;
@@ -858,7 +881,7 @@ function renderHome(){
   const c=curChar();
   $("#heroAv").innerHTML=face(c);
   $("#heroName").innerHTML=`${c.he}<span class="en" style="display:block;font-size:16px;text-align:right">${esc(c.title)}</span>`;
-  $("#heroLine").textContent=rnd(c.lines);
+  $("#heroLine").textContent=nm(rnd(c.lines));
   $("#heroPower").innerHTML=`<b>${c.power.ic} הכוח של ${c.he}: ${esc(c.power.name)}</b><br>${esc(c.power.he)}. מפעילים בזמן המשחק כשמאכילים ${c.g==="f"?"אותה":"אותו"} ב-🍬${c.power.cost}. יש לכם 🍬${bal()}.`;
   $("#pts").textContent=bal();
   const total=LEVELS.length*3,done=Object.keys(S.st).filter(k=>S.st[k]>0).length;
@@ -877,7 +900,7 @@ function renderHome(){
 }
 $("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-stg]");if(!b)return;const n=+b.dataset.lvl,k=+b.dataset.stg;
   if(!isOpen(n,k)){toast("קודם צריך לעבור את השלבון הקודם 💪");return;} startStage(n,k);});
-$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=rnd(c.lines);charSay(c,$("#heroLine").textContent);wig($("#heroAv"));};
+$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=nm(rnd(c.lines));charSay(c,$("#heroLine").textContent);wig($("#heroAv"));};
 
 /* ---------------- question builders ---------------- */
 function vocabQ(L,avoid){
@@ -979,7 +1002,7 @@ function buildStage(L,k){
     qs.push(slangQ());
     qs.push(speedQ(L));
   }
-  return qs;
+  return qs.map(nmQ);
 }
 
 /* ---------------- play ---------------- */
@@ -999,8 +1022,8 @@ function renderLesson(){
   const L=R.L,ls=L.lesson,c=CH(ls.c);
   $("#progBar").style.width="0%";$("#powerbar").innerHTML="";
   $("#q").innerHTML=`<div class="qtype"><span class="tag">📖 שיעור · שלב ${L.n}</span></div>
-    <div class="lesson"><div class="host"><div class="av">${face(c,"happy")}</div><div class="bubble">${ls.he.map(mix).map((t,i)=>i?`<p style="margin:.5em 0 0">${t}</p>`:`<b>${t}</b>`).join("")}</div></div>
-    <div class="exs">${ls.ex.map((x,i)=>`<div class="ex"><button class="say" data-ex="${i}" aria-label="הקראה">🔊</button><div><div class="en">${esc(x[0])}</div><div class="muted" style="font-size:14px">${mix(x[1])}</div></div></div>`).join("")}</div>
+    <div class="lesson"><div class="host"><div class="av">${face(c,"happy")}</div><div class="bubble">${ls.he.map(t=>mix(nm(t))).map((t,i)=>i?`<p style="margin:.5em 0 0">${t}</p>`:`<b>${t}</b>`).join("")}</div></div>
+    <div class="exs">${ls.ex.map((x,i)=>`<div class="ex"><button class="say" data-ex="${i}" aria-label="הקראה">🔊</button><div><div class="en">${esc(nm(x[0]))}</div><div class="muted" style="font-size:14px">${mix(x[1])}</div></div></div>`).join("")}</div>
     <button class="btn red" id="lessonGo">הבנתי, יאללה מתחילים! ←</button></div>`;
   $("#q").querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>charSay(c,ls.ex[+b.dataset.ex][0]));
   if(S.auto!==false)ls.ex.forEach((x,i)=>charSay(c,x[0],i>0));
@@ -1025,7 +1048,7 @@ function renderQ(){
   else if(q.k==="read"){h+=`<h3 class="en">${esc(q.title)}</h3><div class="passage en">${esc(q.text)}</div><div class="prompt en" style="font-size:19px">${esc(q.q)}</div>`+opts(q.opts);}
   else if(q.k==="chat"){
     const hist=R.chat[q.key]||[];
-    h+=`<div class="chat"><div class="top"><div class="ph">${face(q.c,"happy")}</div><div><b>${q.c.he} · <span class="en">${esc(q.c.en)}</span></b><small class="en">${esc(q.title)} · online</small></div></div>
+    h+=`<div class="chat"><div class="top"><div class="ph">${face(q.c,"happy")}</div><div><b>${q.c.he===q.c.en?`<span class="en">${esc(q.c.en)}</span>`:`${esc(q.c.he)} · <span class="en">${esc(q.c.en)}</span>`}</b><small class="en">${esc(q.title)} · online</small></div></div>
       <div class="msgs" id="msgs">${hist.map(m=>`<div class="msg ${m.me?"me":"them"}">${esc(m.t)}</div>`).join("")}<div class="typing" id="typing">•••</div></div></div>
       <div class="hint">בחרו את התשובה שלכם – בלי טעויות!</div>`+opts(q.opts);
   }
@@ -1046,12 +1069,12 @@ function renderQ(){
   else if(q.k==="tiktok"){
     h+=`<div class="tt"><div class="ttbg">${face(q.c,"wow")}</div>
       <div class="ttside"><span>❤️<small>${q.likes}</small></span><span>💬<small>${Math.floor(Math.random()*900+100)}</small></span><span>↗️<small>Share</small></span></div>
-      <div class="ttcap"><b>${HANDLE[q.c.id]}</b><div>${q.toks.map((t,i)=>`<button class="tk" data-tk="${i}">${esc(t.w)}</button>`).join(" ")}</div><small>♪ original sound · ${esc(q.c.en)}</small></div></div>
+      <div class="ttcap"><b>${handle(q.c)}</b><div>${q.toks.map((t,i)=>`<button class="tk" data-tk="${i}">${esc(t.w)}</button>`).join(" ")}</div><small>♪ original sound · ${esc(q.c.en)}</small></div></div>
       <div class="hint">יש טעות אחת בכיתוב. לחצו על המילה השגויה!</div>`;
   }
   else if(q.k==="story"){const sh=esc(q.s).replace("___",'<span class="blank" style="color:#fff;border-color:#fff">?</span>');
     h+=`<div class="story" style="background:linear-gradient(160deg,${q.c.shirt},#211B33)"><div class="bars"><i class="on"></i><i></i><i></i></div>
-      <div class="row" style="flex-wrap:nowrap;gap:8px"><div class="ph" style="width:36px;height:36px;border-width:2px;box-shadow:none">${face(q.c)}</div><b>${HANDLE[q.c.id].slice(1)}</b><small style="opacity:.7">2h</small></div>
+      <div class="row" style="flex-wrap:nowrap;gap:8px"><div class="ph" style="width:36px;height:36px;border-width:2px;box-shadow:none">${face(q.c)}</div><b>${handle(q.c).slice(1)}</b><small style="opacity:.7">2h</small></div>
       <div style="font-size:64px;text-align:center">${q.emo}</div><div class="prompt" style="color:#fff;text-align:center">${sh}</div>
       <div class="poll"><b style="text-align:center">Help me! Which one? 👇</b><div class="opts">${shuffle(q.opts).map(o=>`<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div></div></div>`;
   }
@@ -1061,7 +1084,7 @@ function renderQ(){
       <div class="prompt en" style="font-size:19px">${esc(q.q)}</div>`+opts(q.opts);
   }
   else if(q.k==="slang"){
-    h+=`<div class="chat"><div class="top ig"><div class="ph">${face(q.c)}</div><div><b class="en">${HANDLE[q.c.id].slice(1)}</b><small>Active now</small></div></div>
+    h+=`<div class="chat"><div class="top ig"><div class="ph">${face(q.c)}</div><div><b class="en">${handle(q.c).slice(1)}</b><small>Active now</small></div></div>
       <div class="msgs"><div class="msg them">${esc(q.msg)}</div></div></div><div class="prompt" style="font-size:19px">מה הכוונה בהודעה?</div>`+opts(q.opts);
   }
   else if(q.k==="speed"){
@@ -1178,7 +1201,7 @@ function answer(ok,el,ans,tip,isSpeed,skipped){
   $("#roundPts").textContent=bal();drawHearts();
   if(q.k==="chat"){R.chat[q.key]=(R.chat[q.key]||[]).concat([{t:q.msg},{t:q.ans,me:true}]);}
   const c=curChar();const praise=ok&&(R.streak%4===0||Math.random()<.12);
-  const line=skipped?"Chaos mode! Question deleted. 🌀":ok?(praise?rnd(GOOD):"Correct ✓"):rnd(BAD);
+  const line=nm(skipped?"Chaos mode! Question deleted. 🌀":ok?(praise?rnd(GOOD):"Correct ✓"):rnd(BAD));
   const dead=R.hearts<=0;
   const canRetry=!ok&&c.power.kind==="retry"&&!isSpeed&&q.k!=="chat";
   const html=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
@@ -1265,15 +1288,23 @@ function renderStash(){
   $("#pts2").textContent=S.earned;$("#bal").textContent=bal();
   $("#stashGrid").innerHTML=ALLSNACKS.map(s=>{const n=S.stash[s.e]||0;return `<div class="card snack ${n?"":"empty"}"><span class="e">${s.e}</span><span class="n">${esc(s.n)}</span><span class="c">×${n}</span><span class="tag" style="font-size:10px">${{common:"רגיל",rare:"נדיר",epic:"אפי"}[s.t]}</span></div>`;}).join("");
 }
+function skinSelect(attr,id,cur,list){return `<select class="inp skinsel" ${attr}="${id}" aria-label="מי משחק">${list.map(o=>`<option value="${esc(o.v)}" ${o.v===cur?"selected":""}>${esc(o.t)}</option>`).join("")}</select>`;}
+function setSkin(charId,friendId){S.skins=S.skins||{};Object.keys(S.skins).forEach(k=>{if(S.skins[k]===friendId)delete S.skins[k];});
+  if(friendId)S.skins[charId]=friendId;else delete S.skins[charId];save();}
 function renderSquad(){
-  $("#chars").innerHTML=CHARS.map(c=>{const open=S.earned>=c.price;return `<button class="card ch ${S.cur===c.id?"sel":""} ${open?"":"lock"}" data-ch="${c.id}">
-    <span class="av">${face(c)}</span><b>${c.he}</b><span class="sub">${esc(c.en)} · ${esc(c.title)}</span>
+  const fopts=[{v:"",t:"🎭 הדמות המקורית"}].concat(S.friends.map(f=>({v:f.id,t:`📸 ${f.name}`})));
+  $("#chars").innerHTML=CHARS.map(c=>{const open=S.earned>=c.price;const sk=skinOf(c.id);return `<div class="card ch ${S.cur===c.id?"sel":""} ${open?"":"lock"}">
+    <span class="av">${face(c)}</span><b>${esc(c.he)}</b>${sk?`<span style="font-size:13px">🎭 בתור ${esc(c.baseHe)}</span>`:""}<span class="sub">${esc(c.title)}</span>
     <span style="font-size:13px">${c.power.ic} ${esc(c.power.name)} · 🍬${c.power.cost}</span>
-    ${open?(S.cur===c.id?`<span class="tag">נבחר/ה ✔</span>`:`<span class="tag">בחירה</span>`):`<span class="tag">🔒 צריך ${c.price} נשנושים שהורווחו</span>`}</button>`;}).join("");
+    ${S.friends.length?skinSelect("data-skin",c.id,sk?sk.id:"",fopts):""}
+    ${open?(S.cur===c.id?`<span class="tag">מלווה אתכם ✔</span>`:`<button class="btn small" data-ch="${c.id}">בחירה כמלווה</button>`):`<span class="tag">🔒 צריך ${c.price} נשנושים שהורווחו</span>`}</div>`;}).join("")+
+    (S.friends.length?"":`<div class="note" style="grid-column:1/-1">רוצים שהחברים שלכם ישחקו את הדמויות? הוסיפו חברים במסך 📸 חברים, ואז בחרו כאן מי משחק כל דמות.</div>`);
 }
 $("#chars").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(!b)return;const c=CH(b.dataset.ch);
   if(S.earned<c.price){toast(`צריך להרוויח עוד ${c.price-S.earned} נשנושים כדי לפתוח את ${c.he}`);return;}
-  S.cur=c.id;save();renderSquad();toast(`${c.he}: ${c.power.ic} ${c.power.he}`);charSay(c,rnd(c.lines));});
+  S.cur=c.id;save();renderSquad();toast(`${c.he}: ${c.power.ic} ${c.power.he}`);charSay(c,nm(rnd(c.lines)));});
+$("#chars").addEventListener("change",e=>{const sel=e.target.closest("[data-skin]");if(!sel)return;const c=CH(sel.dataset.skin);
+  setSkin(c.id,sel.value);renderSquad();toast(sel.value?`${c.he} משחק/ת עכשיו את ${c.baseHe} 🎭`:`${c.he} חזר/ה להיות הדמות המקורית`);});
 
 /* ---------------- friends ---------------- */
 let pendingImg=null;
@@ -1303,11 +1334,17 @@ $("#fform").addEventListener("submit",e=>{e.preventDefault();
 function renderFriends(){
   const fl=$("#flist");
   if(!S.friends.length){fl.innerHTML=`<div class="card" style="padding:14px;grid-column:1/-1;display:flex;gap:12px;align-items:center"><div class="ph">${face(CHARS[0],"sad")}</div><div>עוד אין חברים במשחק. בינתיים השאלות ישתמשו בדמויות של החבורה. תוסיפו את הראשון/ה למעלה!</div></div>`;return;}
-  fl.innerHTML=S.friends.map(f=>`<div class="card fr"><div class="ph">${f.img?`<img src="${f.img}" alt="${esc(f.name)}">`:face(CHARS[f.g==="f"?1:2])}</div><b>${esc(f.name)}</b><span class="muted" style="font-size:13px">${f.g==="f"?"she":"he"}</span><button class="btn white small" data-del="${f.id}">הסרה</button></div>`).join("");
+  fl.innerHTML=S.friends.map(f=>`<div class="card fr"><div class="ph">${f.img?`<img src="${f.img}" alt="${esc(f.name)}">`:face(CHARS[f.g==="f"?1:2])}</div><b>${esc(f.name)}</b><span class="muted" style="font-size:13px">${f.g==="f"?"she":"he"}</span>
+    ${skinSelect("data-fskin",f.id,(CHARS.find(c=>S.skins&&S.skins[c.id]===f.id)||{}).id||"",[{v:"",t:"🎭 בלי דמות"}].concat(CHARS.map(c=>({v:c.id,t:`בתור ${c.baseHe} · ${c.title}`}))))}
+    <button class="btn white small" data-del="${f.id}">הסרה</button></div>`).join("");
 }
 $("#flist").addEventListener("click",e=>{const b=e.target.closest("[data-del]");if(!b)return;
   if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="בטוח? לחצו שוב";b.classList.add("red");setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="הסרה";b.classList.remove("red");}},3000);return;}
-  S.friends=S.friends.filter(f=>f.id!==b.dataset.del);save();renderFriends();});
+  S.friends=S.friends.filter(f=>f.id!==b.dataset.del);if(S.skins)Object.keys(S.skins).forEach(k=>{if(S.skins[k]===b.dataset.del)delete S.skins[k];});save();renderFriends();});
+$("#flist").addEventListener("change",e=>{const sel=e.target.closest("[data-fskin]");if(!sel)return;const fid=sel.dataset.fskin;
+  if(S.skins)Object.keys(S.skins).forEach(k=>{if(S.skins[k]===fid)delete S.skins[k];});
+  if(sel.value)setSkin(sel.value,fid);else save();renderFriends();const f=S.friends.find(x=>x.id===fid);
+  if(f)toast(sel.value?`${f.name} משחק/ת עכשיו את ${CH(sel.value).baseHe} 🎭`:`${f.name} כבר לא משחק/ת דמות`);});
 
 
 /* ---------------- Claude voice (when opened through the claude.ai link) ---------------- */
@@ -1330,7 +1367,7 @@ $("#ppName").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault
 $("#ppQuick").addEventListener("click",e=>{const b=e.target.closest("[data-ppf]");if(!b)return;const f=S.friends.find(x=>x.id===b.dataset.ppf);if(f)addPP(f.name,f.img);});
 $("#ppList").addEventListener("click",e=>{const b=e.target.closest("[data-ppdel]");if(!b)return;PP.splice(+b.dataset.ppdel,1);renderParty();});
 const MCK=new Set(["pic","rev","gap","tr","meme","irr","who","food","listen","spell","order","tiktok","story","slang"]);
-function mixedQs(L,n,kinds){let out=[];for(let g=0;g<8&&out.length<n;g++){out=out.concat(buildStage(L,1),buildStage(L,2),[whoQ(L.n),foodQ(L.n),slangQ(),slangQ(),tiktokQ(L.n)]).filter(q=>kinds.has(q.k));}return shuffle(out).slice(0,n);}
+function mixedQs(L,n,kinds){let out=[];for(let g=0;g<8&&out.length<n;g++){out=out.concat(buildStage(L,1),buildStage(L,2),[whoQ(L.n),foodQ(L.n),slangQ(),slangQ(),tiktokQ(L.n)].map(nmQ)).filter(q=>kinds.has(q.k));}return shuffle(out).slice(0,n);}
 $("#ppGo").onclick=()=>{
   const L=LEVELS.find(l=>l.n===+$("#ppLevel").value),per=+$("#ppPer").value;
   const players=PP.map(p=>Object.assign({},p,{score:0,right:0}));
@@ -1353,7 +1390,7 @@ function partyTurn(){
 function partyAnswer(ok,ans,tip,q){
   const p=partyPlayer();let pts=0;
   if(ok){const sec=(Date.now()-(R.qStart||Date.now()))/1000;pts=100+(sec<6?50:sec<12?25:0);p.score+=pts;p.right++;}
-  const praise=ok&&Math.random()<.2;const line=ok?(praise?rnd(GOOD):"Correct ✓"):rnd(BAD);
+  const praise=ok&&Math.random()<.2;const line=nm(ok?(praise?rnd(GOOD):"Correct ✓"):rnd(BAD));
   $("#fbWrap").innerHTML=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
     <div class="row" style="flex-wrap:nowrap"><div class="ph" style="width:58px;height:58px">${avatarHTML(p)}</div><div style="min-width:0"><h3 class="en">${esc(line)}</h3>
     <div>${ok?`+${pts} נקודות ל-<b class="en" style="display:inline">${esc(p.name)}</b>${pts>100?" (בונוס מהירות ⚡)":""}`:`<b class="en" style="display:inline">${esc(p.name)}</b> לא קיבל/ה נקודות הפעם`}</div></div></div>
