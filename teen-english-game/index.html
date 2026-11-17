@@ -243,6 +243,7 @@ body.playing .app{padding-bottom:300px}
 .accw{position:relative;display:block;width:100%;height:100%}
 .accw>.base,.accw>.base>svg,.accw>.base>.skin{display:block;width:100%;height:100%}
 .accs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.ph:has(.accs),.heroav:has(.accs){overflow:visible}
 .snack.on{background:var(--sun)}
 .skin{display:block;position:relative;width:100%;height:100%}
 .skin img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:3px solid var(--ink);display:block;background:var(--bubble)}
@@ -641,7 +642,7 @@ const LEVELS=[
         ["maya","New phone",[["Look! This is my new phone 📱","Wow, it's a cool phone!","Wow, it's a phone cool!","Wow, it's an cool phone!"],["It has a pink cat on it. Do you like cats?","Yes, I love cats!","Yes, I love cat!","Yes, I loves cats!"],["What color is my phone?","It's pink.","It pink.","Its pinks."]]]]},
 {n:2,en:"Me & My Crew",he:"אני והחבר'ה",tag:"מתחילים +",
  lesson:{c:"maya",he:["היי! מאיה כאן. היום: הפועל to be – להיות.","I am · you are · he / she / it is · we / they are.","ושייכות: my (שלי), your (שלך), our (שלנו). כשאין שם עצם אחריו: mine, yours, ours."],ex:[["I am tired. We are hungry.","אני עייפה. אנחנו רעבים."],["Is she your friend?","היא החברה שלך?"],["This pizza is mine!","הפיצה הזאת שלי!"]]},
- vocab:[["happy","😀","שמח"],["sad","😢","עצוב"],["angry","😠","כועס"],["tired","😴","עייף"],["scared","😱","מפוחד"],["bored","🥱","משועמם"],["hungry","🤤","רעב"],["cool","😎","מגניב"],["sick","🤒","חולה"],["in love","😍","מאוהב"],["confused","😕","מבולבל"],["surprised","😮","מופתע"],["nervous","😬","לחוץ"],["silly","🤪","מטופש"]],
+ vocab:[["happy","😀","שמח"],["sad","😢","עצוב"],["angry","😠","כועס"],["tired","😴","עייף"],["scared","😱","מפוחד"],["bored","🥱","משועמם"],["hungry","🤤","רעב"],["cool","😎","מגניב"],["sick","🤒","חולה"],["in love","😍","מאוהב"],["confused","😵‍💫","מבולבל"],["surprised","😮","מופתע"],["nervous","😬","לחוץ"],["silly","🤪","מטופש"]],
  bank:[
   ["g","{F} ___ my best friend. Sadly.",["is","am","are","be"],"he / she / it / שם של אדם ← is."],
   ["g","We ___ hungry. Again.",["are","is","am","be"],"we / you / they ← are."],
@@ -886,14 +887,21 @@ function pickVoice(){try{
   fillVoiceUI();}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,800);}catch(e){}
 function clean(t){return t.replace(/___/g,"...").replace(/[^\w\s'.,!?:;"-]/g," ").replace(/\s+/g," ").trim();}
+let SPEAK_GEN=0;
 function speak(t,opts){try{
-  opts=opts||{};
-  if(t&&TTS&&S.claudeVoice!==false){const txt=clean(t);if(txt){const call=opts.queue?TTS.add:TTS.speak;
-    call.call(TTS,[{text:txt,voice:opts.voice||"buttery",language:"en",rate:S.rate||1}]).catch(e=>{if(e&&(e.code==="not_granted"||e.code==="unavailable"))TTS=null;else if(e&&(e.code==="no_gesture"||e.code==="rate_limited"||e.code==="upstream_error"))browserSpeak(t,opts);});return;}}
+  opts=opts||{};const gen=opts.queue?SPEAK_GEN:++SPEAK_GEN;
+  if(t&&TTS&&S.claudeVoice!==false){const txt=clean(t);if(txt){
+    try{speechSynthesis.cancel();}catch(e){}
+    const call=opts.queue?TTS.add:TTS.speak;
+    call.call(TTS,[{text:txt,voice:opts.voice||"buttery",language:"en",rate:S.rate||1}]).catch(e=>{
+      if(e&&(e.code==="not_granted"||e.code==="unavailable")){TTS=null;return;}
+      const quiet=(()=>{try{return !TTS.active();}catch(x){return true;}})();
+      if(e&&(e.code==="no_gesture"||e.code==="rate_limited"||e.code==="upstream_error")&&gen===SPEAK_GEN&&quiet)browserSpeak(t,opts);});
+    return;}}
   browserSpeak(t,opts);}catch(e){}}
 function browserSpeak(t,opts){try{
   if(!t||!("speechSynthesis" in window))return;
-  if(!opts.queue)speechSynthesis.cancel();
+  if(!opts.queue){speechSynthesis.cancel();try{if(TTS&&TTS.active())TTS.stop().catch(()=>{});}catch(e){}}
   const u=new SpeechSynthesisUtterance(clean(t));u.lang=VOICE?VOICE.lang:"en-US";u.rate=S.rate||.95;u.pitch=opts.pitch||1.02;if(VOICE)u.voice=VOICE;
   speechSynthesis.speak(u);}catch(e){}}
 const charSay=(c,t,q)=>speak(t,{pitch:c.pitch,queue:q,voice:CVOICE[c.id]});
@@ -1465,14 +1473,27 @@ const ITEMS=[
  {id:"gold",slot:"frame",e:"🟡",he:"מסגרת זהב",price:15,ring:"#FFC53D"},{id:"fire",slot:"frame",e:"🔥",he:"מסגרת אש",price:20,ring:"#FF5A3C"},{id:"rainbow",slot:"frame",e:"🌈",he:"מסגרת קשת",price:25,ring:"url(#rb)"}
 ];
 const SLOTHE={hat:"כובע",eyes:"משקפיים",pet:"חיית מחמד",frame:"מסגרת"};
+const K='stroke="#211B33" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+const ACC={
+ cap:`<path d="M23 46 Q24 12 60 12 Q96 12 97 46 Z" fill="#3560D8" ${K}/><path d="M60 44 Q94 36 116 46 Q96 53 60 48 Z" fill="#3560D8" ${K}/><path d="M60 13 V44" stroke="#2A4DB0" stroke-width="2"/><circle cx="60" cy="13" r="3.5" fill="#211B33"/>`,
+ tophat:`<rect x="34" y="-14" width="52" height="44" rx="5" fill="#2B2540" ${K}/><rect x="34" y="18" width="52" height="8" fill="#D93A1E"/><ellipse cx="60" cy="31" rx="44" ry="8" fill="#2B2540" ${K}/>`,
+ grad:`<path d="M30 30 Q30 44 60 44 Q90 44 90 30 V24 H30 Z" fill="#2B2540" ${K}/><path d="M8 22 L60 4 L112 22 L60 40 Z" fill="#2B2540" ${K}/><path d="M60 22 L96 30 V46" fill="none" stroke="#FFD23F" stroke-width="3"/><circle cx="96" cy="49" r="4.5" fill="#FFD23F" ${K}/><circle cx="60" cy="22" r="3" fill="#FFD23F"/>`,
+ crown:`<path d="M26 34 L22 4 L42 20 L60 -2 L78 20 L98 4 L94 34 Z" fill="#FFD23F" ${K}/><path d="M27 28 H93" stroke="#E0A400" stroke-width="3"/><circle cx="60" cy="18" r="4.5" fill="#D93A1E" ${K}/><circle cx="38" cy="25" r="3.5" fill="#3560D8"/><circle cx="82" cy="25" r="3.5" fill="#1FAE62"/>`,
+ shades:`<path d="M18 52 H102" ${K}/><path d="M28 47 H57 V56 Q57 66 44 66 Q29 66 28 56 Z" fill="#211B33" ${K}/><path d="M63 47 H92 V56 Q91 66 76 66 Q63 66 63 56 Z" fill="#211B33" ${K}/><path d="M33 51 L41 51" stroke="#fff" stroke-width="3" opacity=".7"/><path d="M68 51 L76 51" stroke="#fff" stroke-width="3" opacity=".7"/>`,
+ goggles:`<path d="M14 56 H106" stroke="#5B4B8A" stroke-width="7" stroke-linecap="round"/><circle cx="44" cy="56" r="14" fill="#9FE3FF" fill-opacity=".55" stroke="#211B33" stroke-width="4.5"/><circle cx="76" cy="56" r="14" fill="#9FE3FF" fill-opacity=".55" stroke="#211B33" stroke-width="4.5"/><path d="M37 50 Q41 46 46 47" fill="none" stroke="#fff" stroke-width="3"/><path d="M69 50 Q73 46 78 47" fill="none" stroke="#fff" stroke-width="3"/>`,
+ cat:`<g transform="translate(78 78)"><path d="M6 14 L4 -6 L16 6 Z M38 14 L40 -6 L28 6 Z" fill="#F4A300" ${K}/><ellipse cx="22" cy="20" rx="20" ry="17" fill="#F4A300" ${K}/><circle cx="15" cy="18" r="2.8" fill="#211B33"/><circle cx="29" cy="18" r="2.8" fill="#211B33"/><path d="M19 25 Q22 28 25 25" fill="none" stroke="#211B33" stroke-width="2.2"/><path d="M2 23 H10 M34 23 H42" stroke="#211B33" stroke-width="1.8"/></g>`,
+ dog:`<g transform="translate(78 78)"><ellipse cx="22" cy="20" rx="19" ry="17" fill="#E8C9A0" ${K}/><path d="M5 6 Q-4 16 4 30 Q12 26 10 10 Z M39 6 Q48 16 40 30 Q32 26 34 10 Z" fill="#8A5A3B" ${K}/><circle cx="15" cy="17" r="2.8" fill="#211B33"/><circle cx="29" cy="17" r="2.8" fill="#211B33"/><ellipse cx="22" cy="25" rx="4.5" ry="3.5" fill="#211B33"/><path d="M22 29 Q22 34 26 33" fill="#FF7A8A" stroke="#211B33" stroke-width="1.5"/></g>`,
+ dino:`<g transform="translate(76 76)"><path d="M6 4 L10 -4 L14 4 L18 -5 L22 4 L26 -4 L30 4" fill="#7BD389" ${K}/><path d="M2 38 Q0 6 22 4 Q46 4 46 22 Q46 34 30 34 L30 40 Z" fill="#7BD389" ${K}/><circle cx="30" cy="15" r="3.2" fill="#211B33"/><path d="M34 27 L40 27" stroke="#211B33" stroke-width="2"/><path d="M36 33 L38 29 L40 33" fill="#fff" stroke="#211B33" stroke-width="1.4"/></g>`,
+ uni:`<g transform="translate(76 76)"><path d="M20 4 L26 -16 L30 6 Z" fill="#FFD23F" ${K}/><path d="M22 -8 L28 -6 M21 -2 L29 0" stroke="#E0A400" stroke-width="2"/><path d="M10 10 Q4 2 8 -2 Q14 2 16 8 Z" fill="#fff" ${K}/><ellipse cx="24" cy="22" rx="19" ry="17" fill="#fff" ${K}/><path d="M6 10 Q-2 20 6 32 Q2 22 10 16 Z" fill="#FF8FD2" ${K}/><circle cx="20" cy="20" r="2.8" fill="#211B33"/><circle cx="32" cy="20" r="2.8" fill="#211B33"/><ellipse cx="26" cy="29" rx="6" ry="3.5" fill="#FFC3E6"/></g>`
+};
 function withAcc(c,inner){
   const eq=S.equip&&S.equip[c.id];if(!eq||!Object.values(eq).some(Boolean))return inner;
   const it=id=>ITEMS.find(x=>x.id===id);const hat=it(eq.hat),eyes=it(eq.eyes),pet=it(eq.pet),fr=it(eq.frame);
   let o=`<svg class="accs" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rb" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#FF5A3C"/><stop offset=".33" stop-color="#FFD23F"/><stop offset=".66" stop-color="#1FAE62"/><stop offset="1" stop-color="#4F7DFF"/></linearGradient></defs>`;
-  if(fr)o+=`<circle cx="60" cy="60" r="57" fill="none" stroke="${fr.ring}" stroke-width="6"/>`;
-  if(hat)o+=`<text x="60" y="30" font-size="44" text-anchor="middle">${hat.e}</text>`;
-  if(eyes)o+=`<text x="60" y="70" font-size="38" text-anchor="middle">${eyes.e}</text>`;
-  if(pet)o+=`<text x="90" y="110" font-size="28" text-anchor="middle">${pet.e}</text>`;
+  if(fr)o+=`<circle cx="60" cy="60" r="56" fill="none" stroke="${fr.ring}" stroke-width="7"/>`;
+  if(eyes)o+=ACC[eyes.id]||"";
+  if(hat)o+=ACC[hat.id]||"";
+  if(pet)o+=ACC[pet.id]||"";
   return `<span class="accw"><span class="base">${inner}</span>${o}</svg></span>`;
 }
 let shopFor=null;
