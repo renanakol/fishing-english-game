@@ -26,6 +26,54 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.hearts{font-size:17px;letter-spacing:-2px;white-space:nowrap}
+.hearts.hit{animation:wiggle .4s ease 1}
+.powerbox{grid-column:1/-1;background:var(--paper);border:2.5px dashed var(--ink);border-radius:14px;padding:8px 12px;font-size:14px}
+.powerbox b{font-family:var(--f-display);font-weight:400;font-size:16px}
+.powerbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.powerbar .btn{flex:1 1 auto}
+.stages{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;grid-column:1/-1}
+.stg{background:var(--paper);border:2.5px solid var(--ink);border-radius:12px;padding:6px 4px;box-shadow:var(--sh-s);display:flex;flex-direction:column;align-items:center;font-family:var(--f-display);font-size:14px;line-height:1.2}
+.stg small{font-family:var(--f-body);font-size:11px;color:var(--muted)}
+.stg.done{background:#C9F5D9}
+.stg.next{background:var(--sun);animation:pulse 1.6s ease-in-out infinite}
+.stg.locked{opacity:.5}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.lvl{grid-template-columns:56px 1fr auto}
+.lesson{display:flex;flex-direction:column;gap:12px}
+.lesson .host{display:flex;gap:10px;align-items:flex-end}
+.lesson .host .av{width:92px;height:92px;flex:none}
+.lesson .host .bubble{margin:0;flex:1}
+.exs{display:grid;gap:8px}
+.ex{display:flex;gap:10px;align-items:center;background:#FFF6D6;border:2px solid var(--ink);border-radius:12px;padding:8px 10px}
+.ex .say{width:36px;height:36px;font-size:16px}
+.ex div{min-width:0;flex:1}
+.ex .en{font-weight:700;font-size:17px}
+.chat{background:#EAE6DF;border:3px solid var(--ink);border-radius:16px;overflow:hidden}
+.chat .top{display:flex;gap:10px;align-items:center;background:var(--ink);color:#fff;padding:8px 12px}
+.chat .top .ph{width:40px;height:40px;border-width:2px;box-shadow:none}
+.chat .top b{font-family:var(--f-display);font-weight:400;font-size:17px}
+.chat .top small{display:block;font-size:12px;opacity:.75}
+.msgs{display:flex;flex-direction:column;gap:8px;padding:12px;max-height:300px;overflow:auto}
+.msg{max-width:84%;padding:8px 12px;border-radius:14px;border:2px solid var(--ink);font-size:16px;direction:ltr;text-align:left;animation:pop .25s ease}
+.msg.them{align-self:flex-end;background:#fff;border-bottom-right-radius:4px}
+.msg.me{align-self:flex-start;background:#C9F5D9;border-bottom-left-radius:4px}
+.typing{align-self:flex-end;background:#fff;border:2px solid var(--ink);border-radius:14px;padding:6px 12px;font-size:20px;letter-spacing:2px}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.foodhost{display:flex;gap:10px;align-items:center}
+.foodhost .av{width:110px;height:110px;flex:none}
+.foodhost .bubble{flex:1;margin:0;font-size:18px}
+.whoopt{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;direction:rtl}
+.whoopt .av{width:72px;height:72px}
+.whoopt b{font-family:var(--f-display);font-weight:400;font-size:15px}
+.speed{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.timer{height:14px;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.timer i{display:block;height:100%;background:var(--tomato);width:100%;transition:width .25s linear}
+.scard{min-height:120px;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:500;padding:16px;background:#fff;border:3px solid var(--ink);border-radius:16px;direction:ltr}
+.tf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tf .btn{font-size:24px;padding:14px}
+.opt .pct{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-top:4px}
+.opt.gone{opacity:.2;pointer-events:none}
 html,body{height:100%}
 body{
   margin:0;font-family:var(--f-body);font-size:16px;color:var(--ink);line-height:1.45;
@@ -203,8 +251,8 @@ body.playing .app{padding-bottom:300px}
         <div class="bubble en" id="heroLine">Is there pizza in this lesson?</div>
         <div class="who" id="heroName"></div>
       </div>
+      <div class="powerbox" id="heroPower"></div>
       <div class="acts">
-        <button class="btn red small" id="feedBtn">🍪 תאכילו אותי</button>
         <button class="btn white small" id="talkBtn">💬 עוד שטות</button>
         <button class="btn white small" data-go="squad">🔄 החליפו דמות</button>
       </div>
@@ -218,10 +266,11 @@ body.playing .app{padding-bottom:300px}
     <div class="playbar">
       <button class="x" id="quit" aria-label="יציאה">✕</button>
       <div class="prog"><i id="progBar"></i></div>
-      <span class="streak" id="streak">🔥0</span>
+      <span class="hearts" id="hearts" aria-label="לבבות">❤️❤️❤️</span>
       <span class="stashpill"><b>🍬</b><span id="roundPts">0</span></span>
     </div>
     <div class="card qcard" id="q"></div>
+    <div class="powerbar" id="powerbar"></div>
   </section>
 
   <!-- RESULT -->
@@ -234,7 +283,8 @@ body.playing .app{padding-bottom:300px}
     <div class="sec-h"><h2>הנשנושייה שלי</h2><span class="muted">במקום מטבעות – אוכל!</span></div>
     <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:6px">
       <div class="row" style="justify-content:space-between"><b>שווי הנשנושים שהרווחתם</b><span class="logo" style="font-size:26px" id="pts2">0</span></div>
-      <div class="muted" style="font-size:14px">🍬 רגיל = 1 · 🍕 נדיר = 3 · 🎂 אפי = 10. תשובה נכונה = נשנוש. רצף של 3 = נשנוש נדיר. סיום שלב = עוגה אפית. הניקוד פותח דמויות חדשות.</div>
+      <div class="row" style="justify-content:space-between"><b>יתרה להאכלת הדמות</b><span class="logo" style="font-size:26px" id="bal">0</span></div>
+      <div class="muted" style="font-size:14px">🍬 רגיל = 1 · 🍕 נדיר = 3 · 🎂 אפי = 10. תשובה נכונה = נשנוש, רצף של 3 = נשנוש נדיר, סיום שלב = בונוס. <b>בזמן המשחק מאכילים את הדמות בנשנושים כדי להפעיל את הכוח המיוחד שלה.</b> סך כל מה שהרווחתם פותח דמויות חדשות (גם אם אכלו לכם אותו).</div>
     </div>
     <div class="stashgrid" id="stashGrid"></div>
   </section>
@@ -327,21 +377,28 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const INK="#211B33";
 
-/* ---------------- characters (SVG cartoons) ---------------- */
+/* ---------------- characters ---------------- */
 const CHARS=[
- {id:"itay",he:"איתי",en:"Itay",title:"The Snack Monster",g:"m",skin:"#C68642",hair:"#1B1B1B",hs:"curly",eyes:"big",mouth:"braces",shirt:"#F4A300",x:["freckles"],price:0,
-  lines:["Is there pizza in this lesson?","I'm not hungry. I'm just bored. And hungry.","Feed me snacks and nobody gets hurt.","I learned English from food labels."]},
- {id:"maya",he:"מאיה",en:"Maya",title:"The Influencer",g:"f",skin:"#FFDBAC",hair:"#D8962F",hs:"long",eyes:"lashes",mouth:"grin",shirt:"#FF5FA2",x:["blush","earring"],price:0,
-  lines:["OMG, this level is SO aesthetic ✨","Wait, let me take a selfie with this question.","Like and subscribe to my English skills.","My phone battery is 2%. My energy is 100%."]},
- {id:"noam",he:"נועם",en:"Noam",title:"The Gamer",g:"m",skin:"#F1C27D",hair:"#3B2A1E",hs:"messy",eyes:"sleepy",mouth:"smirk",shirt:"#2D6CDF",x:["headphones"],price:0,
-  lines:["Bro, just one more level.","I'm not addicted. I can stop any time. Probably.","My mom says games rot my brain. My thumbs disagree.","Respawning in 3... 2... 1..."]},
- {id:"shira",he:"שירה",en:"Shira",title:"The Drama Queen",g:"f",skin:"#E0AC69",hair:"#7A1F3D",hs:"bun",eyes:"normal",mouth:"open",shirt:"#9B5DE5",x:["sunglasses"],price:15,
-  lines:["This is LITERALLY the worst day of my life. Again.","Nobody understands me. Except Google Translate.","I'm not dramatic. I'm EXPRESSIVE.","If I fail this level, I'm moving to Antarctica."]},
- {id:"dor",he:"דור",en:"Dor",title:"The Lazy Genius",g:"m",skin:"#8D5524",hair:"#111111",hs:"cap",eyes:"sleepy",mouth:"smirk",shirt:"#3A3A4A",x:["glasses","hoodie"],price:35,
-  lines:["I studied for five minutes. New record.","I'm not lazy, I'm in energy-saving mode.","Work smart, not hard. Or don't work. Also fine.","Wake me up when it's the Bagrut."]},
- {id:"lia",he:"ליה",en:"Lia",title:"The Chaos Queen",g:"f",skin:"#FFE0BD",hair:"#21C7C0",hs:"short",eyes:"big",mouth:"grin",shirt:"#FF5A3C",x:["blush","freckles"],price:70,
+ {id:"itay",he:"איתי",en:"Itay",title:"The Snack Monster",g:"m",skin:"#C68642",hair:"#1B1B1B",hs:"curly",eyes:"big",mouth:"braces",shirt:"#F4A300",x:["freckles"],price:0,pitch:.8,
+  power:{ic:"🍽️",name:"אוכל תשובות",he:"איתי טורף 2 תשובות שגויות",cost:2,kind:"fifty"},
+  lines:["Is there pizza in this lesson?","I'm not hungry. I'm just bored. And hungry.","Feed me snacks and I'll eat your wrong answers.","I learned English from food labels."]},
+ {id:"maya",he:"מאיה",en:"Maya",title:"The Influencer",g:"f",skin:"#FFDBAC",hair:"#D8962F",hs:"long",eyes:"lashes",mouth:"grin",shirt:"#FF5FA2",x:["blush","earring"],price:0,pitch:1.35,
+  power:{ic:"📊",name:"סקר עוקבים",he:"מאיה שואלת את העוקבים ומראה מה רוב העולם בחר",cost:3,kind:"poll"},
+  lines:["OMG, this level is SO aesthetic ✨","Wait, let me take a selfie with this question.","My followers know all the answers. Just feed me first.","My phone battery is 2%. My energy is 100%."]},
+ {id:"noam",he:"נועם",en:"Noam",title:"The Gamer",g:"m",skin:"#F1C27D",hair:"#3B2A1E",hs:"messy",eyes:"sleepy",mouth:"smirk",shirt:"#2D6CDF",x:["headphones"],price:0,pitch:.95,
+  power:{ic:"🛡️",name:"מגן",he:"נועם מפעיל מגן: הטעות הבאה לא מורידה לב",cost:2,kind:"shield"},
+  lines:["Bro, just one more level.","I'm not addicted. I can stop any time. Probably.","Give me a snack and I'll give you a shield. Gamer rules.","Respawning in 3... 2... 1..."]},
+ {id:"shira",he:"שירה",en:"Shira",title:"The Drama Queen",g:"f",skin:"#E0AC69",hair:"#7A1F3D",hs:"bun",eyes:"normal",mouth:"open",shirt:"#9B5DE5",x:["sunglasses"],price:15,pitch:1.25,
+  power:{ic:"🎭",name:"עוד ניסיון",he:"אחרי טעות שירה עושה דרמה, והלב חוזר עם ניסיון נוסף",cost:3,kind:"retry"},
+  lines:["This is LITERALLY the worst day of my life. Again.","Nobody understands me. Except Google Translate.","I'm not dramatic. I'm EXPRESSIVE.","If you fail, I'll cry so hard they'll give you another chance."]},
+ {id:"dor",he:"דור",en:"Dor",title:"The Lazy Genius",g:"m",skin:"#8D5524",hair:"#111111",hs:"cap",eyes:"sleepy",mouth:"smirk",shirt:"#3A3A4A",x:["glasses","hoodie"],price:35,pitch:.7,
+  power:{ic:"💡",name:"רמז עצלני",he:"דור לוחש את הכלל בעברית לפני שעונים",cost:1,kind:"hint"},
+  lines:["I studied for five minutes. New record.","I'm not lazy, I'm in energy-saving mode.","One cookie, one hint. That's my business model.","Wake me up when it's the Bagrut."]},
+ {id:"lia",he:"ליה",en:"Lia",title:"The Chaos Queen",g:"f",skin:"#FFE0BD",hair:"#21C7C0",hs:"short",eyes:"big",mouth:"grin",shirt:"#FF5A3C",x:["blush","freckles"],price:70,pitch:1.5,
+  power:{ic:"🌀",name:"כאוס",he:"ליה מעיפה את השאלה והיא נחשבת נכונה",cost:5,kind:"skip"},
   lines:["Rules? I thought they were suggestions.","I dyed my hair blue by accident. On purpose.","Chaos is my cardio.","I put ketchup on ice cream. Don't judge."]}
 ];
+const CH=id=>CHARS.find(c=>c.id===id);
 
 function face(c,mood){
   const s=c.skin,h=c.hair,k=`stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
@@ -354,29 +411,24 @@ function face(c,mood){
   o+=`<circle cx="25" cy="59" r="7" fill="${s}" ${k}/><circle cx="95" cy="59" r="7" fill="${s}" ${k}/>`;
   if(c.x.includes("earring")) o+=`<circle cx="25" cy="69" r="3" fill="#FFD23F" stroke="${INK}" stroke-width="1.5"/><circle cx="95" cy="69" r="3" fill="#FFD23F" stroke="${INK}" stroke-width="1.5"/>`;
   o+=`<ellipse cx="60" cy="57" rx="35" ry="37" fill="${s}" ${k}/>`;
-  // hair front
   if(c.hs==="messy") o+=`<path d="M24 52 Q20 18 48 16 Q58 4 72 13 Q99 13 96 50 Q90 34 80 38 Q74 27 63 34 Q52 25 44 36 Q33 31 24 52Z" fill="${h}" ${k}/>`;
   else if(c.hs==="long"||c.hs==="bun") o+=`<path d="M25 54 Q23 18 60 18 Q97 18 95 54 Q86 34 66 30 Q52 40 25 54Z" fill="${h}" ${k}/>`;
   else if(c.hs==="short") o+=`<path d="M24 50 Q26 15 60 16 Q94 15 96 50 Q84 30 70 34 L66 24 L58 34 Q38 30 24 50Z" fill="${h}" ${k}/>`;
   else if(c.hs==="curly"){for(let i=0;i<8;i++){const x=28+i*9.2,y=26-Math.sin(i/7*Math.PI)*10;o+=`<circle cx="${x}" cy="${y}" r="10" fill="${h}" ${k}/>`;} o+=`<path d="M26 34 Q60 20 94 34 L94 40 Q60 30 26 40Z" fill="${h}"/>`;}
   else if(c.hs==="cap"){o+=`<path d="M25 44 Q26 14 60 14 Q94 14 95 44Z" fill="#FF5A3C" ${k}/><path d="M58 42 Q92 34 112 44 Q92 50 58 46Z" fill="#FF5A3C" ${k}/><circle cx="60" cy="15" r="3" fill="${INK}"/>`;}
   if(c.x.includes("headphones")) o+=`<path d="M20 58 Q18 10 60 12 Q102 10 100 58" fill="none" stroke="${INK}" stroke-width="7"/><path d="M20 58 Q18 10 60 12 Q102 10 100 58" fill="none" stroke="#FF5A3C" stroke-width="3"/><rect x="12" y="48" width="14" height="24" rx="6" fill="#FF5A3C" ${k}/><rect x="94" y="48" width="14" height="24" rx="6" fill="#FF5A3C" ${k}/>`;
-  // eyes
   const E=(cx)=>{let e="";
     if(c.eyes==="big"){e+=`<circle cx="${cx}" cy="56" r="10" fill="#fff" ${k}/><circle cx="${cx+1}" cy="57" r="5.5" fill="${INK}"/><circle cx="${cx+3}" cy="54" r="2" fill="#fff"/>`;}
     else {e+=`<circle cx="${cx}" cy="56" r="7.5" fill="#fff" ${k}/><circle cx="${cx+1}" cy="57" r="3.6" fill="${INK}"/>`;}
-    if(c.eyes==="sleepy") e+=`<path d="M${cx-9} 56 A9 9 0 0 1 ${cx+9} 56Z" fill="${s}" ${k}/>`;
+    if(c.eyes==="sleepy"&&mood!=="wow") e+=`<path d="M${cx-9} 56 A9 9 0 0 1 ${cx+9} 56Z" fill="${s}" ${k}/>`;
     if(c.eyes==="lashes") e+=`<path d="M${cx-7} 49 l-3 -4 M${cx} 47 l0 -5 M${cx+7} 49 l3 -4" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
     return e;};
   o+=E(45)+E(75);
   if(c.x.includes("sunglasses")) o+=`<rect x="32" y="47" width="25" height="17" rx="7" fill="${INK}"/><rect x="63" y="47" width="25" height="17" rx="7" fill="${INK}"/><path d="M57 53 H63" stroke="${INK}" stroke-width="4"/><path d="M36 51 l7 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>`;
   if(c.x.includes("glasses")) o+=`<circle cx="45" cy="56" r="11" fill="none" stroke="${INK}" stroke-width="3"/><circle cx="75" cy="56" r="11" fill="none" stroke="${INK}" stroke-width="3"/><path d="M56 55 H64" stroke="${INK}" stroke-width="3"/>`;
-  // brows
-  const angry=mood==="sad";
-  o+=angry?`<path d="M36 44 L53 41 M67 41 L84 44" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`:`<path d="M37 41 Q45 36 53 40 M67 40 Q75 36 83 41" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+  o+=mood==="sad"?`<path d="M36 44 L53 41 M67 41 L84 44" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`:`<path d="M37 41 Q45 36 53 40 M67 40 Q75 36 83 41" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
   if(c.x.includes("freckles")) o+=`<g fill="#8A4B2A" opacity=".6"><circle cx="38" cy="68" r="1.6"/><circle cx="43" cy="71" r="1.6"/><circle cx="34" cy="72" r="1.6"/><circle cx="82" cy="68" r="1.6"/><circle cx="77" cy="71" r="1.6"/><circle cx="86" cy="72" r="1.6"/></g>`;
   if(c.x.includes("blush")) o+=`<ellipse cx="35" cy="70" rx="6" ry="3.5" fill="#FF8FD2" opacity=".75"/><ellipse cx="85" cy="70" rx="6" ry="3.5" fill="#FF8FD2" opacity=".75"/>`;
-  // mouth
   let m=c.mouth; if(mood==="happy") m=(m==="braces")?"braces":"grin"; if(mood==="sad") m="sad"; if(mood==="wow") m="open";
   if(m==="grin") o+=`<path d="M45 73 Q60 92 75 73Z" fill="#fff" ${k}/><path d="M52 82 Q60 87 68 82" fill="#FF7A8A" stroke="none"/>`;
   else if(m==="braces") o+=`<path d="M44 72 Q60 92 76 72Z" fill="#fff" ${k}/><path d="M47 76 H73" stroke="#9AA3B5" stroke-width="2.5"/><g fill="#9AA3B5"><rect x="50" y="74" width="4" height="4"/><rect x="58" y="74" width="4" height="4"/><rect x="66" y="74" width="4" height="4"/></g>`;
@@ -386,7 +438,7 @@ function face(c,mood){
   return o+"</svg>";
 }
 
-/* ---------------- snacks (rewards instead of coins) ---------------- */
+/* ---------------- snacks ---------------- */
 const SNACKS={
  common:[["🍬","candy"],["🍪","cookie"],["🍟","fries"],["🍿","popcorn"],["🍭","lollipop"],["🧃","juice box"]],
  rare:[["🍕","pizza slice"],["🍩","donut"],["🍦","ice cream"],["🧋","bubble tea"],["🌮","taco"],["🍔","burger"]],
@@ -395,16 +447,28 @@ const SNACKS={
 const VAL={common:1,rare:3,epic:10};
 const ALLSNACKS=[].concat(...Object.entries(SNACKS).map(([t,a])=>a.map(x=>({e:x[0],n:x[1],t}))));
 
-/* ---------------- levels & content ----------------
- g = gap fill [sentence, [correct, ...wrong], tip]
- o = put words in order [sentence, hebrew]
- t = translate [hebrew, [correct, ...wrong]]
- m = meme caption with a friend [[correct, ...wrong]]
- i = irregular verb [base, past, [wrong...]]
- r = reading [title, passage, [[question,[correct,...wrong]],...]]
-*/
+/* ---------------- character games content ----------------
+ FOOD: a character orders food by describing it  [request, correct emoji, wrong emojis]
+ WHO:  "who said it?"  [quote, character id]                                       */
+const FOOD={
+ easy:[["I want something yellow. Monkeys love it.","🍌",["🍎","🍕","🧀"]],["I want a red fruit. It's round.","🍎",["🍌","🍩","🍟"]],["I want something white to drink. Cows make it.","🥛",["🧃","🍫","🍞"]],["I want something cold and sweet.","🍦",["🍟","🥚","🍞"]],["Chickens make this. I eat it for breakfast.","🥚",["🧀","🍌","🍿"]],["I want a snack for the movies.","🍿",["🥛","🍎","🥚"]],["I want something yellow from milk. Mice love it.","🧀",["🍌","🍪","🍦"]]],
+ mid:[["I'd like something round with a hole in the middle.","🍩",["🍪","🍕","🎂"]],["I want something Italian with cheese and tomato sauce.","🍕",["🍔","🌮","🍦"]],["Give me the thing we eat on birthdays. With candles!","🎂",["🍩","🍫","🍿"]],["I'd like long, thin, salty potatoes.","🍟",["🍿","🍞","🧀"]],["I want a Mexican snack with meat inside.","🌮",["🍔","🍕","🥞"]],["I want something flat that you eat with syrup for breakfast.","🥞",["🍕","🍪","🍞"]],["I'm thirsty. Give me a small box of apple juice.","🧃",["🥛","🧋","🍦"]]],
+ hard:[["I'm craving a drink with chewy pearls at the bottom.","🧋",["🥛","🧃","🍦"]],["I'd like something made from cocoa beans, preferably a huge bar.","🍫",["🍪","🍞","🥚"]],["I would love a beef patty between two buns, with extra pickles.","🍔",["🌮","🍕","🥞"]],["Bring me a creamy cake that, surprisingly, is made with cheese.","🍰",["🎂","🧀","🍩"]],["I need a sweet on a stick that lasts for ages if you don't bite it.","🍭",["🍫","🍦","🍬"]],["I'm in the mood for something baked, crunchy, and full of chocolate chips.","🍪",["🍞","🥞","🍩"]]]
+};
+const WHO={
+ easy:[["I always wear headphones. I say \"one more level\" a lot.","noam"],["I take selfies with everything. I have many followers.","maya"],["I am always hungry. I have braces.","itay"],["I wear sunglasses. Every day is a disaster for me.","shira"],["I wear a cap and glasses. I don't like working hard.","dor"],["My hair is blue. I don't like rules.","lia"]],
+ hard:[["Although I'm the laziest person in class, my grades are surprisingly good.","dor"],["If my phone died, I would probably cry for a week.","maya"],["I've eaten more pizza this week than most people eat in a year.","itay"],["Nobody has ever understood my feelings, which is why I'm so dramatic.","shira"],["I have never finished a game without saying \"just one more\".","noam"],["Despite what my parents say, ketchup on ice cream is delicious.","lia"]]
+};
+
+/* ---------------- levels ----------------
+ lesson: host, Hebrew explanation lines, examples [english, hebrew]
+ g = gap fill [sentence, [correct, ...wrong], tip] · o = word order [sentence, hebrew]
+ t = translate [hebrew, [correct,...]] · m = meme caption [[correct,...]]
+ r = reading [title, passage, [[question,[correct,...]],...]]
+ chats: [host, title, [[their message, correct reply, wrong, wrong], ...]] */
 const LEVELS=[
 {n:1,en:"Snack Attack",he:"מתקפת נשנושים",tag:"מתחילים",
+ lesson:{c:"itay",he:["יו! אני איתי, ואני מלמד את השלב הכי טעים.","לפני מילה שמתחילה בצליל תנועה (a, e, i, o, u) אומרים an. בכל השאר – a.","ברבים (יותר מאחד) מוסיפים s בסוף. ושם התואר בא לפני שם העצם!"],ex:[["an apple, an egg","תפוח, ביצה"],["a cookie → three cookies","עוגייה ← שלוש עוגיות"],["a big dog","כלב גדול (לא dog big)"]]},
  vocab:[["pizza","🍕","פיצה"],["burger","🍔","המבורגר"],["fries","🍟","צ'יפס"],["ice cream","🍦","גלידה"],["donut","🍩","סופגניה"],["apple","🍎","תפוח"],["banana","🍌","בננה"],["cookie","🍪","עוגייה"],["chocolate","🍫","שוקולד"],["popcorn","🍿","פופקורן"],["cake","🎂","עוגה"],["milk","🥛","חלב"],["egg","🥚","ביצה"],["cheese","🧀","גבינה"],["bread","🍞","לחם"],["cat","🐱","חתול"],["dog","🐶","כלב"],["phone","📱","טלפון"],["ball","⚽","כדור"],["book","📚","ספר"],["shoe","👟","נעל"],["bed","🛏️","מיטה"],["car","🚗","מכונית"],["house","🏠","בית"]],
  bank:[
   ["g","I want ___ apple, please.",["an","a","two","many"],"לפני מילה שמתחילה בצליל תנועה (a, e, i, o, u) אומרים an."],
@@ -412,14 +476,18 @@ const LEVELS=[
   ["g","{F} has a ___ dog. It eats shoes.",["crazy","crazys","a crazy","dog crazy"],"שם תואר בא לפני שם העצם ולא מקבל s."],
   ["g","I have three ___. Do you want one?",["cookies","cookie","a cookie","cookie's"],"אחרי מספר גדול מאחד – צורת רבים."],
   ["g","This is ___ phone. Don't touch it!",["my","I","me","mine phone"],"my = שלי, לפני שם עצם."],
+  ["g","I eat ___ egg every morning.",["an","a","two","the a"],"egg מתחיל ב-e ← an egg."],
   ["o","I love pizza and chocolate","אני אוהב/ת פיצה ושוקולד"],
   ["o","My cat is very fat","החתול שלי שמן מאוד"],
   ["o","This is my new phone","זה הטלפון החדש שלי"],
   ["t","יש לי כלב מצחיק",["I have a funny dog","I has a funny dog","I have a dog funny","I funny have a dog"]],
   ["t","אני רעב!",["I am hungry!","I hungry!","I is hungry!","Me am hungry!"]],
   ["m",["{F} after eating ten donuts 🍩","{F} after eat ten donut 🍩","{F} after eating ten donut 🍩","{F} after eats ten donuts 🍩"]]
- ]},
+ ],
+ chats:[["itay","Snack time",[["Hi! I'm sooo hungry. Do you have food?","Yes! I have a banana.","Yes! I have an banana.","Yes! I has a banana."],["A banana?! I want pizza! 🍕","Sorry, I don't have pizza.","Sorry, I not have pizza.","Sorry, I doesn't have pizza."],["OK... give me the banana. And two cookies.","Here you are! 🍌🍪🍪","Here you is! 🍌🍪🍪","Here are you! 🍌🍪🍪"]]],
+        ["maya","New phone",[["Look! This is my new phone 📱","Wow, it's a cool phone!","Wow, it's a phone cool!","Wow, it's an cool phone!"],["It has a pink cat on it. Do you like cats?","Yes, I love cats!","Yes, I love cat!","Yes, I loves cats!"],["What color is my phone?","It's pink.","It pink.","Its pinks."]]]]},
 {n:2,en:"Me & My Crew",he:"אני והחבר'ה",tag:"מתחילים +",
+ lesson:{c:"maya",he:["היי! מאיה כאן. היום: הפועל to be – להיות.","I am · you are · he / she / it is · we / they are.","ושייכות: my (שלי), your (שלך), our (שלנו). כשאין שם עצם אחריו: mine, yours, ours."],ex:[["I am tired. We are hungry.","אני עייפה. אנחנו רעבים."],["Is she your friend?","היא החברה שלך?"],["This pizza is mine!","הפיצה הזאת שלי!"]]},
  vocab:[["happy","😀","שמח"],["sad","😢","עצוב"],["angry","😠","כועס"],["tired","😴","עייף"],["scared","😱","מפוחד"],["bored","🥱","משועמם"],["hungry","🤤","רעב"],["cool","😎","מגניב"],["sick","🤒","חולה"],["in love","😍","מאוהב"],["confused","😕","מבולבל"],["surprised","😮","מופתע"],["nervous","😬","לחוץ"],["silly","🤪","מטופש"]],
  bank:[
   ["g","{F} ___ my best friend. Sadly.",["is","am","are","be"],"he / she / it / שם של אדם ← is."],
@@ -436,8 +504,11 @@ const LEVELS=[
   ["t","למה את עצובה?",["Why are you sad?","Why you are sad?","Why is you sad?","Why you sad?"]],
   ["m",["{F} when the Wi-Fi is down 😱","{F} when the Wi-Fi are down 😱","{F} when the Wi-Fi down 😱","{F} when the Wi-Fi be down 😱"]],
   ["m",["{F}: \"I am not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I is not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I not hungry.\" Also {F}: 🍕🍔🍟","{F}: \"I are not hungry.\" Also {F}: 🍕🍔🍟"]]
- ]},
+ ],
+ chats:[["shira","Bad day",[["I am SO sad today. 😭","Why are you sad?","Why you are sad?","Why is you sad?"],["My hamster is angry with me. He bit my finger!","Oh no! Are you OK?","Oh no! Is you OK?","Oh no! Am you OK?"],["I'm fine. But he is not my friend anymore.","Don't worry. I am your friend! 💜","Don't worry. I is your friend! 💜","Don't worry. Me am your friend! 💜"]]],
+        ["noam","The new girl",[["Hey! Who is that girl with the blue hair?","That's Lia. She is in my class.","That's Lia. She are in my class.","That's Lia. Her is in my class."],["Is she nice?","Yes, she is. She's crazy but nice.","Yes, she does.","Yes, she nice."],["Cool. Are her friends gamers?","No, they aren't. They are dancers.","No, they isn't. They are dancers.","No, they don't. They are dancers."]]]]},
 {n:3,en:"Daily Chaos",he:"כאוס יומיומי",tag:"חטיבה · הווה פשוט",
+ lesson:{c:"noam",he:["אחי, נועם פה. הווה פשוט = דברים שקורים תמיד, כל יום, כהרגל.","עם he / she / it מוסיפים s לפועל: he plays, she wakes up.","שלילה: don't / doesn't. שאלה: Do you…? / Does he…? ואחרי doesn't ו-does – בלי s!"],ex:[["I play games every day.","אני משחק כל יום."],["She doesn't like broccoli.","היא לא אוהבת ברוקולי."],["Does he wake up early?","הוא מתעורר מוקדם?"]]},
  vocab:[["run","🏃","לרוץ"],["swim","🏊","לשחות"],["dance","💃","לרקוד"],["sing","🎤","לשיר"],["read","📖","לקרוא"],["write","✍️","לכתוב"],["cook","🍳","לבשל"],["sleep","😴","לישון"],["take a shower","🚿","להתקלח"],["play video games","🎮","לשחק במשחקי וידאו"],["go to school","🏫","ללכת לבית הספר"],["do homework","📝","להכין שיעורים"],["wake up","⏰","להתעורר"],["listen to music","🎧","להקשיב למוזיקה"],["ride a bike","🚲","לרכוב על אופניים"]],
  bank:[
   ["g","{F} ___ up at noon every Saturday.",["wakes","wake","waking","is wake"],"הווה פשוט עם he / she / it ← מוסיפים s לפועל."],
@@ -456,8 +527,11 @@ const LEVELS=[
   ["m",["When {F} says \"I never eat junk food\" 🍟","When {F} say \"I never eat junk food\" 🍟","When {F} says \"I never eats junk food\" 🍟","When {F} says \"I eat never junk food\" 🍟"]],
   ["r","Itay's Morning","Itay wakes up at 7:45. School starts at 8:00. He doesn't take a shower. He doesn't brush his hair. He eats three pieces of toast in one minute and runs to the bus. Every day he says the same thing: \"Tomorrow I'm going to wake up early.\" He never does.",
    [["What time does school start?",["At 8:00","At 7:45","At 7:00","At noon"]],["What does Itay eat for breakfast?",["Toast","Pizza","Nothing","Cereal"]],["\"He never does\" means that Itay never...",["wakes up early","eats toast","goes to school","takes the bus"]]]]
- ]},
+ ],
+ chats:[["dor","Morning routine",[["What time do you wake up on school days?","I wake up at seven.","I wakes up at seven.","I waking up at seven."],["Seven?! I wake up at 7:55. School starts at 8.","Does your mom drive you?","Do your mom drive you?","Does your mom drives you?"],["No, she doesn't. I run. Every. Single. Day. 🏃","Wow! You are always late, right?","Wow! You always are late, right?","Wow! You is always late, right?"]]],
+        ["maya","After school",[["What do you do after school?","I usually play basketball.","I usually plays basketball.","I play usually basketball."],["Cool! My brother plays too. He hates losing 😅","Nobody likes losing!","Nobody like losing!","Nobody don't like losing!"],["Do you want to come to my live show?","Sure! When does it start?","Sure! When it starts?","Sure! When do it start?"]]]]},
 {n:4,en:"Right Now!",he:"ממש עכשיו!",tag:"חטיבה · הווה מתמשך",
+ lesson:{c:"shira",he:["זה הרגע הכי דרמטי בחיים שלי! וגם הנושא: מה קורה ממש עכשיו.","am / is / are + פועל עם ing: I am crying, she is laughing.","מילים שמסגירות את זה: now, right now, Look!, Listen!, today. אבל עובדות והרגלים – בהווה פשוט."],ex:[["Look! The cat is dancing!","תראו! החתול רוקד!"],["Why are you laughing?","למה אתה צוחק?"],["Water boils at 100 degrees.","עובדה ← הווה פשוט"]]},
  vocab:[["laughing","😂","צוחק"],["crying","😭","בוכה"],["sleeping","😴","ישן"],["eating","🍔","אוכל"],["running","🏃","רץ"],["dancing","💃","רוקד"],["singing","🎤","שר"],["swimming","🏊","שוחה"],["surfing","🏄","גולש"],["skateboarding","🛹","גולש בסקייטבורד"],["cooking","🍳","מבשל"],["texting","📱","מסמס"]],
  bank:[
   ["g","Shhh! I ___ a movie.",["am watching","watching","watch","is watching"],"משהו שקורה עכשיו: am / is / are + פועל עם ing."],
@@ -474,8 +548,12 @@ const LEVELS=[
   ["t","אני לא ישן, אני חושב",["I'm not sleeping, I'm thinking","I don't sleeping, I'm thinking","I'm not sleep, I'm think","I not sleeping, I thinking"]],
   ["m",["{F} is pretending to study 📚","{F} are pretending to study 📚","{F} pretending study is 📚","{F} is pretend to studying 📚"]],
   ["m",["POV: {F} is waiting for the pizza guy 🍕","POV: {F} waiting for the pizza guy 🍕","POV: {F} is wait for the pizza guy 🍕","POV: {F} are waiting for the pizza guy 🍕"]]
- ]},
+ ],
+ chats:[["itay","Pizza emergency",[["Where are you?! The pizza is here!","I'm coming! I'm putting on my shoes.","I'm come! I'm put on my shoes.","I coming! I putting on my shoes."],["Hurry! Noam is eating your slice right now!","What?! Why is he doing that?","What?! Why does he doing that?","What?! Why is he do that?"],["He says he is still growing. 🙄","I'm running there now!","I running there now!","I'm run there now!"]]],
+        ["shira","Video call",[["Why are you laughing at me?!","I'm not laughing at you, I'm laughing at the cat!","I don't laughing at you, I'm laughing at the cat!","I'm not laugh at you, I'm laugh at the cat!"],["What is the cat doing?","It's sleeping on your head! 😂","It's sleep on your head! 😂","It sleeping on your head! 😂"],["OMG. Is it still sleeping?","Yes, it is. And it's snoring.","Yes, it does. And it's snoring.","Yes, it is. And it snoring."]]]]},
 {n:5,en:"Yesterday's Disaster",he:"האסון של אתמול",tag:"3 יח״ל · עבר",
+ lesson:{c:"itay",he:["אתמול אכלתי 4 פיצות. בוא נדבר על עבר.","בעבר הרגיל מוסיפים ed: play → played. אבל יש פעלים חריגים שצריך לזכור: go → went, eat → ate.","שלילה ושאלה עם did: I didn't eat · Did you see? (אחרי did הפועל חוזר לבסיס!). ו-was / were לפועל להיות."],ex:[["I ate the whole pizza.","אכלתי את כל הפיצה."],["Did you see that?","ראית את זה?"],["I was watching TV when the lights went out.","פעולה שנמשכה ← was + ing"]]},
+ vocab:[["beach","🏖️","חוף"],["desert","🏜️","מדבר"],["bus","🚌","אוטובוס"],["rain","🌧️","גשם"],["camel","🐪","גמל"],["tent","⛺","אוהל"],["map","🗺️","מפה"],["camera","📷","מצלמה"],["suitcase","🧳","מזוודה"],["ticket","🎫","כרטיס"],["train","🚆","רכבת"],["airplane","✈️","מטוס"]],
  irr:[["go","went",["goed","gone","goes"]],["buy","bought",["buyed","brought","boughted"]],["eat","ate",["eated","eaten","eat"]],["see","saw",["seed","seen","sawed"]],["take","took",["taked","taken","tooked"]],["think","thought",["thinked","thank","taught"]],["catch","caught",["catched","cought","catch"]],["fall","fell",["falled","fallen","feel"]],["forget","forgot",["forgetted","forgotten","forgat"]],["bring","brought",["bringed","brang","bought"]],["sleep","slept",["sleeped","slep","slipt"]],["drink","drank",["drinked","drunk","drinken"]],["win","won",["winned","wan","wone"]],["lose","lost",["losed","loosed","losted"]],["break","broke",["breaked","broken","brake"]]],
  bank:[
   ["g","Yesterday {F} ___ my sandwich!",["ate","eat","eated","eaten"],"eat הוא פועל חריג: eat ← ate."],
@@ -493,8 +571,12 @@ const LEVELS=[
   ["m",["{F} after saying \"just one cookie\" 🍪🍪🍪","{F} after sayed \"just one cookie\" 🍪🍪🍪","{F} after say \"just one cookies\" 🍪🍪🍪","{F} after did said \"just one cookie\" 🍪🍪🍪"]],
   ["r","The Worst Field Trip Ever","Last year our class went on a trip to the desert. The bus broke down after ten minutes, so we waited on the road for two hours. Then it started to rain. In the desert! Noam lost his shoe in the mud, and Maya dropped her phone in a puddle. When we finally arrived, the guide said, \"Sorry, the park is closed today.\" We ate our sandwiches on the bus and went home. It was the best day of the year.",
    [["Why did the class wait on the road?",["The bus broke down","It was raining","The park was closed","Noam lost his shoe"]],["What happened to Maya?",["Her phone fell into water","She lost her shoe","She missed the bus","She ate Noam's sandwich"]],["The last sentence is...",["funny, because the day went badly","true, because the trip was perfect","about the guide","about the weather only"]]]]
- ]},
+ ],
+ chats:[["noam","Last night's game",[["Did you see the game last night?","No, I didn't. I was at my grandma's.","No, I didn't. I were at my grandma's.","No, I don't. I was at my grandma's."],["You missed it! The goalkeeper fell on the ball and broke it!","No way! What happened next?","No way! What did happened next?","No way! What happen next?"],["They played with a watermelon. 🍉 Just kidding. They brought a new ball.","Ha! You scared me.","Ha! You scareded me.","Ha! You did scared me."]]],
+        ["lia","The missing cake",[["Who ate the birthday cake?!","I didn't eat it! I promise!","I didn't ate it! I promise!","I not eat it! I promise!"],["Then why is there chocolate on your face?","Um... I was eating a chocolate bar?","Um... I were eating a chocolate bar?","Um... I was eat a chocolate bar?"],["Hmm. When did you buy it?","I bought it yesterday.","I buyed it yesterday.","I bought it tomorrow."]]]]},
 {n:6,en:"Plans & Predictions",he:"תוכניות ותחזיות",tag:"3 יח״ל · עתיד ומודאלים",
+ lesson:{c:"dor",he:["אני דור, ואני מתכנן לא לעשות כלום מחר. אז: עתיד.","going to = תוכנית שכבר החלטנו או סימן ברור עכשיו. will = ניחוש, החלטה של הרגע, הבטחה.","מודאלים: can (יכול), should (כדאי), must / have to (חייב), don't have to (לא חייב). אחריהם תמיד פועל בסיסי, בלי to (חוץ מ-have to)."],ex:[["I'm going to sleep until noon.","תוכנית ← going to"],["I think it will rain.","ניחוש ← will"],["You should go to bed. You have to study.","כדאי לך ללכת לישון. אתה חייב ללמוד."]]},
+ vocab:[["doctor","🧑‍⚕️","רופא"],["chef","🧑‍🍳","שף"],["pilot","🧑‍✈️","טייס"],["firefighter","🧑‍🚒","כבאי"],["scientist","🧑‍🔬","מדען"],["artist","🧑‍🎨","אמן"],["singer","🧑‍🎤","זמר"],["farmer","🧑‍🌾","חקלאי"],["astronaut","🧑‍🚀","אסטרונאוט"],["programmer","🧑‍💻","מתכנת"],["police officer","👮","שוטר"],["teacher","🧑‍🏫","מורה"]],
  bank:[
   ["g","Tomorrow I ___ sleep until noon. That's the plan.",["am going to","will going to","going","am go"],"תוכנית שכבר החלטנו עליה ← be going to."],
   ["g","Look at those black clouds! It ___ rain.",["is going to","will to","goes to","is go to"],"יש סימנים ברורים עכשיו ← going to."],
@@ -508,10 +590,15 @@ const LEVELS=[
   ["o","I am going to be a famous YouTuber","אני הולך/ת להיות יוטיובר/ית מפורסם/ת"],
   ["o","You should go to bed earlier","כדאי לך ללכת לישון מוקדם יותר"],
   ["t","אתה חייב לנסות את הפיצה הזאת",["You have to try this pizza","You have try this pizza","You must to try this pizza","You has to try this pizza"]],
+  ["t","היא תהיה רופאה מעולה",["She will be a great doctor","She will is a great doctor","She will being a great doctor","She wills be a great doctor"]],
   ["m",["{F}: \"I will start my diet tomorrow.\" 🍩🍩🍩","{F}: \"I will starting my diet tomorrow.\" 🍩🍩🍩","{F}: \"I will to start my diet tomorrow.\" 🍩🍩🍩","{F}: \"I am will start my diet tomorrow.\" 🍩🍩🍩"]],
   ["m",["{F} can't stop eating popcorn 🍿","{F} can't stops eating popcorn 🍿","{F} can't to stop eating popcorn 🍿","{F} don't can stop eating popcorn 🍿"]]
- ]},
+ ],
+ chats:[["maya","Weekend plans",[["What are you going to do this weekend?","I'm going to sleep a lot.","I'm going sleep a lot.","I will to sleep a lot."],["Boring! I'm going to film a cooking video. Will you help me?","Sure, I'll help you!","Sure, I'll helping you!","Sure, I helps you!"],["Great! Should I make sushi or pancakes?","You should make pancakes. Sushi is hard.","You should to make pancakes. Sushi is hard.","You should making pancakes. Sushi is hard."]]],
+        ["dor","The test",[["There's a test tomorrow. Do I have to study?","Yes, you have to study!","Yes, you has to study!","Yes, you must to study!"],["Ugh. Can you help me tonight?","I can't tonight, but I can help you tomorrow morning.","I don't can tonight, but I can help you tomorrow morning.","I can't tonight, but I can helping you tomorrow morning."],["Tomorrow morning is the test! 😱","Then you shouldn't play games tonight!","Then you shouldn't to play games tonight!","Then you don't should play games tonight!"]]]]},
 {n:7,en:"Since Forever",he:"מאז ומעולם",tag:"4 יח״ל · Present Perfect",
+ lesson:{c:"maya",he:["מאיה שוב! כבר הייתי ב-12 מדינות (טוב, ב-2). זה Present Perfect.","have / has + צורה שלישית (V3): I have eaten, she has seen. משתמשים כשהזמן לא מוגדר, או כשזה נמשך עד עכשיו.","since + נקודת זמן (since 2020), for + משך (for two hours). ever / never / already / yet. ואם יש yesterday או last year – זה עבר פשוט!"],ex:[["Have you ever been to London?","היית פעם בלונדון?"],["I've known her since first grade.","אני מכירה אותה מכיתה א'."],["This is the best pizza I've ever eaten.","הפיצה הכי טובה שאכלתי אי-פעם."]]},
+ vocab:[["mountain","⛰️","הר"],["volcano","🌋","הר געש"],["island","🏝️","אי"],["castle","🏰","טירה"],["stadium","🏟️","אצטדיון"],["museum","🏛️","מוזיאון"],["hospital","🏥","בית חולים"],["bridge","🌉","גשר"],["city","🏙️","עיר"],["forest","🌲","יער"],["tent","⛺","אוהל"],["passport","🛂","דרכון"]],
  bank:[
   ["g","I have never ___ sushi.",["eaten","ate","eat","eating"],"have / has + צורה שלישית (V3)."],
   ["g","{F} ___ this song 100 times today!",["has played","have played","played has","has play"],"he / she ← has + V3."],
@@ -528,8 +615,12 @@ const LEVELS=[
   ["o","This is the best pizza in the world","זאת הפיצה הכי טובה בעולם"],
   ["t","עוד לא ראיתי את הסרט",["I haven't seen the movie yet","I haven't see the movie yet","I haven't saw the movie yet","I don't have seen the movie yet"]],
   ["m",["{F} has been on the phone for six hours 📱","{F} have been on the phone for six hours 📱","{F} has been on the phone since six hours 📱","{F} is been on the phone for six hours 📱"]]
- ]},
+ ],
+ chats:[["shira","Famous people",[["Have you ever met a famous person?","Yes, I have! I met a singer last year.","Yes, I have! I have met a singer last year.","Yes, I have! I have meet a singer."],["Lucky! I've never met anyone famous.","Well, you've just met me! 😎","Well, you've just meet me! 😎","Well, you has just met me! 😎"],["Ha! How long have you been this funny?","Since I was born.","For I was born.","Since five years."]]],
+        ["itay","Best burger",[["This is the best burger I've ever eaten!","Is it better than the one from yesterday?","Is it more good than the one from yesterday?","Is it gooder than the one from yesterday?"],["Much better! It's bigger and juicier.","You've already eaten three of them!","You've already ate three of them!","You already have eat three of them!"],["I haven't finished yet. 🍔","You're the hungriest person I know.","You're the hungryest person I know.","You're the hungrier person I know."]]]]},
 {n:8,en:"If I Were Rich",he:"אם הייתי עשיר",tag:"4 יח״ל · תנאי ופסוקיות",
+ lesson:{c:"lia",he:["אם הייתי שולטת בעולם, כולם היו אוכלים קטשופ עם גלידה. ככה עובד תנאי:","אמיתי: If + הווה, will (If it rains, we will stay). דמיוני: If + עבר, would (If I had a dragon, I would fly). חרטה: If + had V3, would have V3.","ופסוקיות זיקה: who לאנשים, which לדברים, where למקום, whose = ש… שלו."],ex:[["If I were you, I would run.","אם הייתי במקומך, הייתי בורחת."],["If I had studied, I would have passed.","אם הייתי לומדת, הייתי עוברת."],["The girl whose dog bit the teacher.","הבת שהכלב שלה נשך את המורה."]]},
+ vocab:[["diamond","💎","יהלום"],["crown","👑","כתר"],["money","💰","כסף"],["dragon","🐉","דרקון"],["robot","🤖","רובוט"],["rocket","🚀","טיל"],["unicorn","🦄","חד-קרן"],["ghost","👻","רוח רפאים"],["alien","👽","חייזר"],["superhero","🦸","גיבור על"],["wizard","🧙","קוסם"],["treasure","🪙","אוצר"]],
  bank:[
   ["g","If it rains tomorrow, we ___ at home.",["will stay","would stay","stay will","stayed"],"תנאי אמיתי: If + הווה, will + פועל."],
   ["g","If I ___ a million dollars, I would buy a pizza factory.",["had","have","will have","would have"],"תנאי דמיוני: If + עבר, would + פועל."],
@@ -545,8 +636,12 @@ const LEVELS=[
   ["o","The phone that I bought is already broken","הטלפון שקניתי כבר שבור"],
   ["t","אם תאכל את כל העוגה, יכאב לך הבטן",["If you eat the whole cake, you will get a stomachache","If you will eat the whole cake, you get a stomachache","If you eat the whole cake, you would got a stomachache","If you ate the whole cake, you will get a stomachache"]],
   ["m",["If {F} had a dragon, {F} would fly to school 🐉","If {F} has a dragon, {F} would fly to school 🐉","If {F} had a dragon, {F} will fly to school 🐉","If {F} would have a dragon, {F} flew to school 🐉"]]
- ]},
+ ],
+ chats:[["lia","Superpowers",[["If you had a superpower, what would it be?","If I had a superpower, I would fly.","If I have a superpower, I would fly.","If I had a superpower, I will fly."],["Boring! I would turn my teacher into a frog. 🐸","If you did that, you would get in trouble!","If you do that, you would got in trouble!","If you did that, you will get in trouble!"],["Only if they caught me. Who would tell them?","The frog who used to be your teacher!","The frog where used to be your teacher!","The frog whose used to be your teacher!"]]],
+        ["noam","The lottery",[["If I win the lottery, I'll buy a gaming castle.","If you win, will you invite me?","If you will win, will you invite me?","If you won, will you invited me?"],["Of course! You're the friend who always brings snacks.","I wish I were rich too.","I wish I am rich too.","I wish I will be rich too."],["If you had bought a ticket, you could have won with me!","If I had known, I would have bought one!","If I knew, I would have buy one!","If I had known, I will buy one!"]]]]},
 {n:9,en:"The Passive Plot",he:"עלילה סבילה",tag:"5 יח״ל · סביל ודיבור עקיף",
+ lesson:{c:"dor",he:["בסביל לא חשוב מי עשה, חשוב מה נעשה. מושלם לעצלנים כמוני.","be + V3: is eaten (הווה), was eaten (עבר), will be eaten (עתיד), has been eaten.","דיבור עקיף: הזמן זז אחורה – \"I am tired\" ← She said she was tired. ופעלים שאחריהם ing (enjoy, look forward to) או to (decide, want)."],ex:[["The pizza was eaten by Itay.","הפיצה נאכלה על ידי איתי."],["He told me not to be late.","הוא אמר לי לא לאחר."],["I enjoy sleeping. I decided to rest.","enjoy + ing · decide + to"]]},
+ vocab:[["laptop","💻","מחשב נייד"],["headphones","🎧","אוזניות"],["battery","🔋","סוללה"],["satellite","🛰️","לוויין"],["microphone","🎙️","מיקרופון"],["newspaper","📰","עיתון"],["television","📺","טלוויזיה"],["keyboard","⌨️","מקלדת"],["key","🔑","מפתח"],["lock","🔒","מנעול"],["email","📧","דוא\"ל"],["calendar","📅","לוח שנה"]],
  bank:[
   ["g","The pizza ___ by Itay in three seconds.",["was eaten","ate","was ate","has eat"],"סביל בעבר: was / were + V3."],
   ["g","English ___ all over the world.",["is spoken","speaks","is speaking","spoken"],"סביל בהווה: is / are + V3."],
@@ -565,8 +660,12 @@ const LEVELS=[
   ["m",["{F} was caught eating in class 🍫","{F} was catched eating in class 🍫","{F} caught eating in class was 🍫","{F} was caught eat in class 🍫"]],
   ["r","A Strange Job","Have you ever heard of a professional sleeper? Some companies pay people to sleep in hotel beds and write reviews about them. The sleepers are asked to test the pillows, the noise and the temperature of the room. It sounds like a dream job, but it is not always easy. One sleeper said that she had been given a room next to a busy road, and she could not sleep at all. Still, most professional sleepers say they would never go back to an office job.",
    [["What does a professional sleeper do?",["Tests beds and writes reviews","Builds hotel beds","Teaches people to sleep","Cleans hotel rooms"]],["Why couldn't one sleeper sleep?",["Her room was near a noisy road","Her pillow was too hard","The room was too cold","She drank too much coffee"]],["In the second sentence, \"them\" refers to...",["hotel beds","companies","people","reviews"]]]]
- ]},
+ ],
+ chats:[["dor","The stolen sandwich",[["My sandwich has been stolen! 😡","Really? When was it taken?","Really? When was it took?","Really? When it was taken?"],["This morning. Itay says he didn't see anything.","He told me he was hungry this morning...","He said me he was hungry this morning...","He told that he was hungry this morning..."],["Suspicious. I'm used to losing food, but this is too much.","Let's ask him to give it back.","Let's ask him giving it back.","Let's ask him give it back."]]],
+        ["maya","The interview",[["A newspaper wants to interview me! What should I say?","Tell them your videos are watched by millions.","Tell them your videos are watching by millions.","Tell them your videos watched by millions."],["Ha, more like by twelve people. What if they ask about school?","Say that you enjoy learning English.","Say that you enjoy to learn English.","Say that you enjoy learn English."],["Good idea. I'm really looking forward to doing it!","You'll be great. Remember to smile!","You'll be great. Remember smile!","You'll be great. Remember smiling to!"]]]]},
 {n:10,en:"Bagrut Boss",he:"בוס הבגרות",tag:"5 יח״ל · רמת בגרות",boss:true,
+ lesson:{c:"shira",he:["זה הרגע. הבגרות. אני לא בוכה, אתם בוכים.","מילות קישור: although + משפט · despite + שם עצם / ing (בלי of!) · However, / Nevertheless, בתחילת משפט חדש · consequently = כתוצאה מכך.","בהבנת הנקרא: קראו קודם את השאלה, חפשו מילות מפתח בטקסט, ותמיד בדקו למי מתייחסות מילים כמו it / them / this."],ex:[["Although it was raining, we went out.","למרות שירד גשם, יצאנו."],["Despite the rain, we went out.","למרות הגשם, יצאנו."],["It was raining. However, we went out.","ירד גשם. עם זאת, יצאנו."]]},
+ vocab:[["planet","🌍","כדור הארץ"],["ocean","🌊","אוקיינוס"],["factory","🏭","מפעל"],["recycling","♻️","מיחזור"],["electricity","⚡","חשמל"],["temperature","🌡️","טמפרטורה"],["research","🔬","מחקר"],["agreement","🤝","הסכם"],["brain","🧠","מוח"],["election","🗳️","בחירות"],["medal","🏅","מדליה"],["warning","⚠️","אזהרה"]],
  bank:[
   ["g","___ it was raining, we went to the beach.",["Although","Because","Despite","However"],"although + משפט שלם = למרות ש…"],
   ["g","He was exhausted. ___, he finished the marathon.",["Nevertheless","Because","Although","Unless"],"Nevertheless, = אף על פי כן (בתחילת משפט, עם פסיק)."],
@@ -586,20 +685,33 @@ const LEVELS=[
    [["According to the study, teens who use phones a lot...",["sleep about an hour less","sleep more than others","do more homework","eat fewer snacks"]],["Why do the researchers say phones are \"not the only cause\"?",["Other things also affect sleep","Phones help teens sleep","The study was too short","Teens don't use phones at night"]],["In the second sentence, \"them\" refers to...",["phones","teenagers","researchers","hours"]],["What does Dr. Levi suggest?",["Setting clear rules at home","Banning all technology","Doing less homework","Eating snacks earlier"]]]],
   ["r","Ugly Food","Every year, millions of tons of fruit and vegetables are thrown away simply because they look strange. A carrot with two legs or a heart-shaped potato tastes exactly the same as a perfect one, yet supermarkets often refuse to sell them. A few years ago, a group of students decided to change this. They opened a small shop that sells only \"ugly\" food at half price. At first, people laughed at the idea. Today the shop has three branches, and the students have been invited to speak at schools about food waste.",
    [["Why is so much food thrown away?",["Because of the way it looks","Because it tastes bad","Because it is too expensive","Because students eat it"]],["What did the students do?",["Opened a shop for strange-looking food","Grew carrots with two legs","Bought a supermarket","Wrote a cookbook"]],["Which statement is TRUE?",["The shop has grown since it opened","People loved the idea from day one","Ugly food costs more","The students stopped visiting schools"]],["The word \"yet\" in the second sentence is closest in meaning to...",["but","so","because","also"]]]]
- ]}
+ ],
+ chats:[["shira","The Bagrut essay",[["I have to write an essay about technology. Any ideas?","Write about how teens rely on their phones.","Write about how teens rely at their phones.","Write about how teens relies on their phones."],["Good. But I want to show both sides.","Although phones are useful, they can be addictive.","Despite phones are useful, they can be addictive.","Although phones are useful, but they can be addictive."],["Nice! How do I end it?","In conclusion, we should use technology wisely.","In conclusion, we should use technology wise.","In conclude, we should use technology wisely."]]],
+        ["dor","Bagrut morning",[["The exam is in an hour and I'm not nervous at all. 😴","Despite being so relaxed, you should review the connectors.","Despite of being so relaxed, you should review the connectors.","Although being so relaxed, you should review the connectors."],["Fine. What's the difference between \"however\" and \"although\"?","\"Although\" joins two clauses; \"however\" starts a new sentence.","There is no difference at all.","\"However\" joins two clauses; \"although\" starts a new sentence."],["Wow, you're a genius. If I pass, I'll buy you pizza.","Deal! Not only will I help you, but I'll also eat the pizza.","Deal! Not only I will help you, but I'll also eat the pizza.","Deal! Not only will I helping you, but I'll also eat the pizza."]]]]}
 ];
+const STAGES=[{k:1,he:"שיעור וחימום",ic:"📖"},{k:2,he:"אימון",ic:"🏋️"},{k:3,he:"אתגר עם החבורה",ic:"💬"}];
 
 const GOOD=["Big brain energy! 🧠","Nailed it! 🔥","Your English teacher just cried happy tears.","Genius alert! 🚨","Too easy for you, huh?","Legend. Absolute legend.","Correct! Here, have a snack.","Somebody call Oxford. We have a new expert."];
 const BAD=["Oof. So close. Not really, but still.","Bro... no. 😅","Even Itay's hamster knew that one.","Plot twist: that was wrong.","Error 404: correct answer not found.","Nope! But you look cute trying.","That answer was so wrong it's almost art."];
-const FEED=["Yum! You are officially my favorite human.","Crunchy! 10/10, would eat again.","Is this a bribe? Because it's working.","My diet starts tomorrow. Again.","Thank you! I will share it with nobody.","Mmm... I can taste the grammar."];
+const YUM=["Yum! You are officially my favorite human.","Crunchy! 10 out of 10.","Is this a bribe? Because it's working.","Power activated! My diet starts tomorrow.","Mmm... I can taste the grammar."];
 
 /* ---------------- state ---------------- */
 const KEY="snacksquad-v1";
-let S={cur:"itay",best:{},stash:{},earned:0,friends:[],voice:"",rate:0.95,auto:true,fbVoice:true};
+let S={cur:"itay",best:{},st:{},stash:{},earned:0,friends:[],voice:"",rate:0.95,auto:true,fbVoice:true};
 try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+S.st=S.st||{};
+Object.keys(S.best||{}).forEach(n=>{if(S.best[n]>=.7)[1,2,3].forEach(k=>{if(!S.st[n+"."+k])S.st[n+"."+k]=1;});});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("לא הצלחתי לשמור (אולי אין מקום לעוד תמונות)");}}
-const curChar=()=>CHARS.find(c=>c.id===S.cur)||CHARS[0];
-const unlockedLevel=n=>n===1||(S.best[n-1]||0)>=0.7;
+const curChar=()=>CH(S.cur)||CHARS[0];
+const stars=(n,k)=>S.st[n+"."+k]||0;
+const isOpen=(n,k)=>(n===1&&k===1)||(k>1?stars(n,k-1)>0:stars(n-1,3)>0);
+const bal=()=>ALLSNACKS.reduce((a,s)=>a+(S.stash[s.e]||0)*VAL[s.t],0);
+function spend(cost){
+  if(bal()<cost)return false;
+  let left=cost;
+  for(const t of ["common","rare","epic"]){for(const s of ALLSNACKS.filter(x=>x.t===t)){while(left>0&&(S.stash[s.e]||0)>0){S.stash[s.e]--;left-=VAL[t];}}if(left<=0)break;}
+  save();return true;
+}
 
 /* ---------------- audio ---------------- */
 let AC=null;
@@ -622,10 +734,12 @@ function pickVoice(){try{
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice;setTimeout(pickVoice,800);}catch(e){}
 function clean(t){return t.replace(/___/g,"...").replace(/[^\w\s'.,!?:;"-]/g," ").replace(/\s+/g," ").trim();}
 function speak(t,opts){try{
-  if(!("speechSynthesis" in window)){toast("ההקראה לא זמינה בדפדפן הזה");return;}
-  if(!(opts&&opts.queue))speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(clean(t));u.lang=VOICE?VOICE.lang:"en-US";u.rate=S.rate||.95;u.pitch=1.02;if(VOICE)u.voice=VOICE;
+  if(!t||!("speechSynthesis" in window))return;
+  opts=opts||{};
+  if(!opts.queue)speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(clean(t));u.lang=VOICE?VOICE.lang:"en-US";u.rate=S.rate||.95;u.pitch=opts.pitch||1.02;if(VOICE)u.voice=VOICE;
   speechSynthesis.speak(u);}catch(e){}}
+const charSay=(c,t,q)=>speak(t,{pitch:c.pitch,queue:q});
 function fillVoiceUI(){const sel=document.getElementById("vSel");if(!sel)return;
   if(!VOICES.length){sel.innerHTML='<option>קול ברירת המחדל של המכשיר</option>';document.getElementById("vInfo").textContent="המכשיר לא מציג רשימת קולות באנגלית. נסו לרענן, או הורידו קול לפי ההוראות למטה.";return;}
   sel.innerHTML=VOICES.map((v,i)=>`<option value="${esc(v.name)}">${i<3&&vScore(v)>20?"⭐ ":""}${esc(v.name)} (${esc(v.lang)})</option>`).join("");
@@ -642,13 +756,13 @@ document.addEventListener("input",e=>{if(e.target.id==="vRate"){S.rate=+e.target
 document.addEventListener("click",e=>{if(e.target.id==="vTest")speak("Hey! Welcome to Snack Squad. Answer the questions, and I will give you pizza. Deal?");});
 
 /* ---------------- ui helpers ---------------- */
-function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2400);}
 function flySnack(e,from,toEl){
   const d=document.createElement("div");d.className="fly";d.textContent=e;document.body.appendChild(d);
   const r=from.getBoundingClientRect(),t=(toEl||$("#roundPts")).getBoundingClientRect();
   d.style.left=(r.left+r.width/2-22)+"px";d.style.top=(r.top+r.height/2-26)+"px";
   if(!d.animate){d.remove();return;}
-  const a=d.animate([{transform:"scale(.4)",opacity:0},{transform:"scale(1.4) translateY(-30px)",opacity:1,offset:.35},{transform:`translate(${t.left-r.left-r.width/2+10}px,${t.top-r.top-r.height/2+10}px) scale(.5)`,opacity:.9}],{duration:900,easing:"cubic-bezier(.5,-.2,.6,1)"});
+  const a=d.animate([{transform:"scale(.4)",opacity:0},{transform:"scale(1.4) translateY(-30px)",opacity:1,offset:.35},{transform:`translate(${t.left-r.left-r.width/2+t.width/2-22}px,${t.top-r.top-r.height/2+t.height/2-26}px) scale(.5)`,opacity:.9}],{duration:900,easing:"cubic-bezier(.5,-.2,.6,1)"});
   a.onfinish=()=>d.remove();
 }
 function rain(list){
@@ -662,10 +776,13 @@ function pickPerson(){
   const c=rnd(CHARS);return {name:c.en,char:c,g:c.g};
 }
 const fill=(s,p)=>s.replace(/\{F\}/g,p.name);
+const mix=t=>esc(t).replace(/([A-Za-z][A-Za-z0-9 '\/().,+→=…:·?!-]*[A-Za-z0-9)…?!])/g,m=>`<bdi dir="ltr"${m.length<=28?' style="white-space:nowrap"':""}>${m}</bdi>`);
+function wig(el){el.classList.remove("wiggle");void el.offsetWidth;el.classList.add("wiggle");}
 
 /* ---------------- navigation ---------------- */
 const SCREENS=["home","play","result","stash","squad","friends","voice"];
 function go(name){
+  stopTimer();
   SCREENS.forEach(s=>{const el=$("#s-"+s);if(s==="home"){el.style.display=name==="home"?"contents":"none";}else el.hidden=s!==name;});
   $("#nav").hidden=(name==="play");document.body.classList.toggle("playing",name==="play");
   document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===name?"true":"false"));
@@ -681,37 +798,38 @@ function renderHome(){
   $("#heroAv").innerHTML=face(c);
   $("#heroName").innerHTML=`${c.he}<span class="en" style="display:block;font-size:16px;text-align:right">${esc(c.title)}</span>`;
   $("#heroLine").textContent=rnd(c.lines);
-  $("#pts").textContent=S.earned;
-  const done=LEVELS.filter(l=>(S.best[l.n]||0)>=.7).length;
-  $("#progTxt").textContent=`${done}/${LEVELS.length} הושלמו`;
+  $("#heroPower").innerHTML=`<b>${c.power.ic} הכוח של ${c.he}: ${esc(c.power.name)}</b><br>${esc(c.power.he)}. מפעילים בזמן המשחק כשמאכילים ${c.g==="f"?"אותה":"אותו"} ב-🍬${c.power.cost}. יש לכם 🍬${bal()}.`;
+  $("#pts").textContent=bal();
+  const total=LEVELS.length*3,done=Object.keys(S.st).filter(k=>S.st[k]>0).length;
+  $("#progTxt").textContent=`${Math.min(done,total)}/${total} שלבונים`;
+  let nextMarked=false;
   $("#levels").innerHTML=LEVELS.map(l=>{
-    const open=unlockedLevel(l.n),b=S.best[l.n]||0,st=b>=.95?3:b>=.85?2:b>=.7?1:0;
-    return `<button class="card lvl ${open?"":"locked"} ${l.boss?"boss":""}" data-lvl="${l.n}" ${open?"":"aria-disabled=\"true\""}>
+    const open=isOpen(l.n,1);
+    const pills=STAGES.map(st=>{const o=isOpen(l.n,st.k),sr=stars(l.n,st.k);let cls=sr?"done":o?"":"locked";if(o&&!sr&&!nextMarked){cls="next";nextMarked=true;}
+      return `<button class="stg ${cls}" data-lvl="${l.n}" data-stg="${st.k}" ${o?"":'aria-disabled="true"'}>${o?st.ic:"🔒"} ${st.he}<small>${sr?"★".repeat(sr)+"☆".repeat(3-sr):o?"מוכן!":"נעול"}</small></button>`;}).join("");
+    return `<div class="card lvl ${open?"":"locked"} ${l.boss?"boss":""}">
       <span class="num">${open?l.n:"🔒"}</span>
       <span class="t"><b class="en">${esc(l.en)}</b><span>${esc(l.he)}</span></span>
-      <span class="side"><span class="tag">${esc(l.tag)}</span><span class="stars" aria-label="${st} כוכבים">${"★".repeat(st)}${"☆".repeat(3-st)}</span></span>
-    </button>`;}).join("");
+      <span class="side"><span class="tag">${esc(l.tag)}</span></span>
+      <div class="stages">${pills}</div>
+    </div>`;}).join("");
 }
-$("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-lvl]");if(!b)return;const n=+b.dataset.lvl;
-  if(!unlockedLevel(n)){toast("קודם תעברו את השלב הקודם עם 70% לפחות 💪");return;} startLevel(n);});
-$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=rnd(c.lines);speak($("#heroLine").textContent);wig();};
-$("#feedBtn").onclick=()=>{
-  const have=ALLSNACKS.filter(s=>(S.stash[s.e]||0)>0);
-  if(!have.length){$("#heroLine").textContent="My stash is empty! Answer some questions and bring me snacks. 😩";$("#heroAv").innerHTML=face(curChar(),"sad");wig();return;}
-  const s=rnd(have);S.stash[s.e]--;save();
-  flySnack(s.e,$("#feedBtn"),$("#heroAv"));
-  setTimeout(()=>{$("#heroAv").innerHTML=face(curChar(),"wow");$("#heroLine").textContent=`A ${s.n}! ${rnd(FEED)}`;wig();},700);
-};
-function wig(){const a=$("#heroAv");a.classList.remove("wiggle");void a.offsetWidth;a.classList.add("wiggle");}
+$("#levels").addEventListener("click",e=>{const b=e.target.closest("[data-stg]");if(!b)return;const n=+b.dataset.lvl,k=+b.dataset.stg;
+  if(!isOpen(n,k)){toast("קודם צריך לעבור את השלבון הקודם 💪");return;} startStage(n,k);});
+$("#talkBtn").onclick=()=>{const c=curChar();$("#heroLine").textContent=rnd(c.lines);charSay(c,$("#heroLine").textContent);wig($("#heroAv"));};
 
-/* ---------------- round building ---------------- */
-let R=null;
-function vocabQ(L){
-  const v=L.vocab;const pick=rnd(v);const others=shuffle(v.filter(x=>x!==pick)).slice(0,3);const opts=[pick,...others];
-  const types=["pic","rev","listen"]; if(!/\s/.test(pick[0])&&pick[0].length<=9) types.push("spell");
-  const t=rnd(types);
-  if(t==="spell") return {k:"spell",word:pick[0],emo:pick[1],he:pick[2]};
+/* ---------------- question builders ---------------- */
+function vocabQ(L,avoid){
+  const v=L.vocab;let pick;for(let i=0;i<20;i++){pick=rnd(v);if(!avoid.has(pick[0]))break;}avoid.add(pick[0]);
+  const others=shuffle(v.filter(x=>x!==pick)).slice(0,3);const opts=[pick,...others];
+  const t=rnd(["pic","rev","listen"]);
   return {k:t,word:pick[0],emo:pick[1],he:pick[2],opts:opts.map(o=>t==="pic"?o[0]:o[1]),ans:t==="pic"?pick[0]:pick[1],tip:`${pick[1]} = ${pick[0]} (${pick[2]})`};
+}
+function spellQ(L,avoid){
+  if(L.irr&&Math.random()<.5){const x=rnd(L.irr);return {k:"spell",word:x[1],base:x[0]};}
+  const v=(L.vocab||[]).filter(x=>!/\s/.test(x[0])&&x[0].length<=9&&!avoid.has(x[0]));
+  if(!v.length&&L.irr){const x=rnd(L.irr);return {k:"spell",word:x[1],base:x[0]};}
+  if(!v.length)return null;const p=rnd(v);avoid.add(p[0]);return {k:"spell",word:p[0],emo:p[1],he:p[2]};
 }
 function bankQ(it){
   const p=pickPerson();
@@ -722,33 +840,80 @@ function bankQ(it){
     case "m":{const o=it[1].map(x=>fill(x,p));return {k:"meme",p,opts:o,ans:o[0]};}
   }
 }
-function buildRound(L){
-  let qs=[];const bank=L.bank.filter(b=>b[0]!=="r");const reads=L.bank.filter(b=>b[0]==="r");
-  const seen=new Set();
-  if(L.vocab){for(let i=0,c=0;c<4&&i<30;i++){const q=vocabQ(L);if(seen.has(q.word))continue;seen.add(q.word);qs.push(q);c++;}}
-  if(L.irr){shuffle(L.irr).slice(0,3).forEach((x,i)=>{qs.push(i===2?{k:"spell",word:x[1],base:x[0]}:{k:"irr",base:x[0],opts:[x[1],...x[2]],ans:x[1],tip:`${x[0]} ← ${x[1]} (פועל חריג)`});});}
-  const need=(reads.length?8:10)-qs.length;
-  qs=qs.concat(shuffle(bank).slice(0,need).map(bankQ));
-  qs=shuffle(qs);
-  if(reads.length){const r=rnd(reads);shuffle(r[3]).slice(0,3).forEach(q=>qs.push({k:"read",title:r[1],text:r[2],q:q[0],opts:q[1].slice(),ans:q[1][0]}));}
+const byType=(L,t)=>L.bank.filter(b=>b[0]===t);
+function take(arr,n){return shuffle(arr).slice(0,n);}
+function foodQ(n){const tier=n<=2?"easy":n<=5?"mid":"hard";const it=rnd(FOOD[tier]);
+  const c=rnd(CHARS.filter(x=>x.id!==S.cur));return {k:"food",c,req:it[0],opts:[it[1],...it[2]],ans:it[1],tip:"הדמות תיארה את האוכל באנגלית – צריך להבין את התיאור."};}
+function whoQ(n){const it=rnd(WHO[n<=5?"easy":"hard"]);const others=take(CHARS.filter(c=>c.id!==it[1]),3).map(c=>c.id);
+  return {k:"who",text:it[0],opts:[it[1],...others],ans:it[1],tip:`${CH(it[1]).he} אמר/ה את זה.`};}
+function speedQ(L){
+  const pool=[];LEVELS.filter(l=>l.n<=L.n).forEach(l=>byType(l,"g").forEach(g=>pool.push({g,w:l.n===L.n?3:1})));
+  const weighted=[];pool.forEach(x=>{for(let i=0;i<x.w;i++)weighted.push(x.g);});
+  const used=new Set(),items=[];
+  let guard=0;
+  while(items.length<8&&guard++<500){const g=rnd(weighted);const good=Math.random()<.5;const key=g[1]+good;if(used.has(key))continue;used.add(key);
+    const p=pickPerson();
+    const word=good?g[2][0]:rnd(g[2].slice(1));items.push({s:fill(g[1],p).replace("___",word),ok:good,fix:fill(g[1],p).replace("___",g[2][0])});}
+  return {k:"speed",items:shuffle(items),c:rnd(CHARS)};
+}
+function buildStage(L,k){
+  const avoid=new Set();let qs=[];
+  if(k===1){
+    if(L.vocab)for(let i=0;i<5;i++)qs.push(vocabQ(L,avoid));
+    if(L.irr)take(L.irr,2).forEach(x=>qs.push({k:"irr",base:x[0],opts:[x[1],...x[2]],ans:x[1],tip:`${x[0]} ← ${x[1]} (פועל חריג)`}));
+    take(byType(L,"t"),1).forEach(t=>qs.push(bankQ(t)));
+    const need=8-qs.length;take(byType(L,"g"),Math.max(0,need)).forEach(g=>qs.push(bankQ(g)));
+    qs=shuffle(qs).slice(0,8);
+  } else if(k===2){
+    take(byType(L,"g"),4).forEach(g=>qs.push(bankQ(g)));
+    take(byType(L,"o"),2).forEach(o=>qs.push(bankQ(o)));
+    take(byType(L,"m"),1).forEach(m=>qs.push(bankQ(m)));
+    const sp=spellQ(L,avoid);if(sp)qs.push(sp);
+    take(byType(L,"t"),1).forEach(t=>qs.push(bankQ(t)));
+    qs=shuffle(qs).slice(0,9);
+  } else {
+    qs.push(whoQ(L.n));
+    const ch=rnd(L.chats),c=CH(ch[0]);const key="c"+Math.random();
+    ch[2].forEach((t,i)=>qs.push({k:"chat",c,title:ch[1],key,turn:i,msg:t[0],opts:t.slice(1,4),ans:t[1],tip:null,last:i===ch[2].length-1}));
+    qs.push(foodQ(L.n));
+    const reads=byType(L,"r");
+    if(reads.length){const r=rnd(reads);take(r[3],2).forEach(q=>qs.push({k:"read",title:r[1],text:r[2],q:q[0],opts:q[1].slice(),ans:q[1][0]}));}
+    else take(byType(L,"m").concat(byType(L,"g")),1).forEach(x=>qs.push(bankQ(x)));
+    qs.push(speedQ(L));
+  }
   return qs;
 }
 
 /* ---------------- play ---------------- */
-function startLevel(n){
+let R=null,TIMER=null;
+function stopTimer(){if(TIMER){clearInterval(TIMER);TIMER=null;}}
+function startStage(n,k){
   const L=LEVELS.find(l=>l.n===n);
-  R={L,qs:buildRound(L),i:0,right:0,streak:0,loot:[]};
-  go("play");$("#roundPts").textContent="0";renderQ();
+  R={L,k,qs:buildStage(L,k),i:0,right:0,streak:0,loot:[],hearts:3,shield:false,chat:{},lesson:k===1};
+  go("play");$("#roundPts").textContent=bal();drawHearts();
+  if(R.lesson)renderLesson();else renderQ();
 }
 $("#quit").onclick=()=>go("home");
+function drawHearts(hit){const h=$("#hearts");h.textContent="❤️".repeat(R.hearts)+"🤍".repeat(3-R.hearts)+(R.shield?"🛡️":"");if(hit)wig(h);}
+function renderLesson(){
+  const L=R.L,ls=L.lesson,c=CH(ls.c);
+  $("#progBar").style.width="0%";$("#powerbar").innerHTML="";
+  $("#q").innerHTML=`<div class="qtype"><span class="tag">📖 שיעור · שלב ${L.n}</span></div>
+    <div class="lesson"><div class="host"><div class="av">${face(c,"happy")}</div><div class="bubble">${ls.he.map(mix).map((t,i)=>i?`<p style="margin:.5em 0 0">${t}</p>`:`<b>${t}</b>`).join("")}</div></div>
+    <div class="exs">${ls.ex.map((x,i)=>`<div class="ex"><button class="say" data-ex="${i}" aria-label="הקראה">🔊</button><div><div class="en">${esc(x[0])}</div><div class="muted" style="font-size:14px">${mix(x[1])}</div></div></div>`).join("")}</div>
+    <button class="btn red" id="lessonGo">הבנתי, יאללה מתחילים! ←</button></div>`;
+  $("#q").querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>charSay(c,ls.ex[+b.dataset.ex][0]));
+  if(S.auto!==false)ls.ex.forEach((x,i)=>charSay(c,x[0],i>0));
+  $("#lessonGo").onclick=()=>{R.lesson=false;renderQ();};
+}
+const LABELS={pic:"מה זה?",rev:"איזו תמונה?",listen:"הקשיבו ובחרו",spell:"איות",gap:"השלימו את המשפט",order:"סדרו את המשפט",tr:"תרגום",meme:"מים ללא טעויות",irr:"פועל חריג",read:"הבנת הנקרא",chat:"צ'אט עם החבורה",food:"ההזמנה של החבורה",who:"מי אמר את זה?",speed:"סבב מהיר!"};
 function renderQ(){
-  const q=R.qs[R.i];$("#fbWrap").innerHTML="";
+  const q=R.qs[R.i];$("#fbWrap").innerHTML="";stopTimer();
   $("#progBar").style.width=(R.i/R.qs.length*100)+"%";
-  $("#streak").textContent="🔥"+R.streak;
-  const box=$("#q");let h="";const labels={pic:"מה זה?",rev:"איזו תמונה?",listen:"הקשיבו ובחרו",spell:"איות",gap:"השלימו את המשפט",order:"סדרו את המשפט",tr:"תרגום",meme:"מים ללא טעויות",irr:"פועל חריג",read:"הבנת הנקרא"};
-  const sayTxt={pic:q.word,rev:q.word,listen:q.word,spell:q.word,gap:q.s,order:q.s,tr:q.ans,meme:q.ans,irr:q.base,read:q.q}[q.k];
-  h+=`<div class="qtype"><span class="tag">${labels[q.k]} · ${R.i+1}/${R.qs.length}</span>${q.k==="listen"?"":`<button class="say" id="sayBtn" aria-label="הקראה">🔊</button>`}</div>`;
-  const opts=(arr,cls)=>`<div class="opts ${cls||""}">${shuffle(arr).map(o=>`<button class="opt ${cls==="grid2 emo"?"emo":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
+  const box=$("#q");let h="";
+  const sayTxt={pic:q.word,rev:q.word,listen:q.word,spell:q.word,gap:q.s,order:q.s,tr:q.ans,meme:q.ans,irr:q.base,read:q.q,chat:q.msg,food:q.req,who:q.text}[q.k];
+  h+=`<div class="qtype"><span class="tag">${LABELS[q.k]} · ${R.i+1}/${R.qs.length}</span>${q.k==="listen"||q.k==="speed"?"":`<button class="say" id="sayBtn" aria-label="הקראה">🔊</button>`}</div>`;
+  const opts=(arr,cls)=>`<div class="opts ${cls||""}">${shuffle(arr).map(o=>`<button class="opt ${/emo/.test(cls||"")?"emo":""}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
   if(q.k==="pic"){h+=`<div class="bigemoji">${q.emo}</div><div class="prompt en">What's this?</div>`+opts(q.opts);}
   else if(q.k==="rev"){h+=`<div class="bigword en">${esc(q.word)}</div><div class="hint">בחרו את התמונה הנכונה</div>`+opts(q.opts,"grid2 emo");}
   else if(q.k==="listen"){h+=`<button class="btn blue" id="sayBtn" style="align-self:center;font-size:22px">🔊 הקשיבו</button><div class="hint" style="text-align:center">איזו תמונה שמעתם?</div>`+opts(q.opts,"grid2 emo");}
@@ -758,6 +923,14 @@ function renderQ(){
   else if(q.k==="tr"){h+=`<div class="prompt">${esc(q.he)}</div><div class="hint">איך אומרים את זה באנגלית?</div>`+opts(q.opts);}
   else if(q.k==="meme"){h+=`<div class="meme">${personHTML(q.p)}<div class="cap top">ME TRYING TO FIND THE MISTAKE</div></div><div class="hint">רק כיתוב אחד כתוב באנגלית נכונה. איזה?</div>`+opts(q.opts);}
   else if(q.k==="read"){h+=`<h3 class="en">${esc(q.title)}</h3><div class="passage en">${esc(q.text)}</div><div class="prompt en" style="font-size:19px">${esc(q.q)}</div>`+opts(q.opts);}
+  else if(q.k==="chat"){
+    const hist=R.chat[q.key]||[];
+    h+=`<div class="chat"><div class="top"><div class="ph">${face(q.c,"happy")}</div><div><b>${q.c.he} · <span class="en">${esc(q.c.en)}</span></b><small class="en">${esc(q.title)} · online</small></div></div>
+      <div class="msgs" id="msgs">${hist.map(m=>`<div class="msg ${m.me?"me":"them"}">${esc(m.t)}</div>`).join("")}<div class="typing" id="typing">•••</div></div></div>
+      <div class="hint">בחרו את התשובה שלכם – בלי טעויות!</div>`+opts(q.opts);
+  }
+  else if(q.k==="food"){h+=`<div class="foodhost"><div class="av" id="foodAv">${face(q.c,"wow")}</div><div class="bubble en">${esc(q.req)}</div></div><div class="hint">${q.c.he} רעב/ה! תנו ${q.c.g==="f"?"לה":"לו"} בדיוק את מה ש${q.c.g==="f"?"היא":"הוא"} ביקש/ה:</div>`+opts(q.opts,"grid2 emo");}
+  else if(q.k==="who"){h+=`<div class="prompt en">"${esc(q.text)}"</div><div class="hint">מי מהחבורה אמר את זה?</div><div class="opts grid2">${shuffle(q.opts).map(id=>{const c=CH(id);return `<button class="opt whoopt" data-o="${id}"><span class="av">${face(c)}</span><b>${c.he}</b></button>`;}).join("")}</div>`;}
   else if(q.k==="spell"){
     const word=q.word;const letters=shuffle(word.split(""));
     h+=q.base?`<div class="prompt en">Past form of <b style="color:var(--tomato)">${esc(q.base)}</b>: spell it!</div>`:`<div class="bigemoji">${q.emo}</div><div class="hint">אייתו את המילה באנגלית (${esc(q.he)})</div>`;
@@ -770,14 +943,29 @@ function renderQ(){
     h+=`<div class="hint">${esc(q.he)}</div><div class="slots" id="slots"></div><div class="pool" id="pool">${sh.map((w,i)=>`<button class="chip" data-i="${i}">${esc(w)}</button>`).join("")}</div>`;
     h+=`<div class="row"><button class="btn" id="check" disabled>בדיקה ✔</button><button class="btn white small" id="reset">התחלה מחדש</button></div>`;
   }
+  else if(q.k==="speed"){
+    h+=`<div class="speed" id="speed"><div class="row" style="flex-wrap:nowrap"><div class="ph" style="width:56px;height:56px">${face(q.c,"wow")}</div><div><b>${q.c.he}:</b> <span class="en">"Quick! Is this sentence correct? 8 sentences, 40 seconds. GO!"</span></div></div>
+      <div class="timer"><i id="tbar"></i></div><div class="scard" id="scard">Ready?</div>
+      <div class="tf"><button class="btn" id="tfYes" style="background:var(--good);color:#fff">✔ נכון</button><button class="btn red" id="tfNo">✘ שגוי</button></div>
+      <div class="hint" style="text-align:center" id="sinfo">צריך לפחות 6 מתוך 8 כדי לעבור</div></div>`;
+  }
   box.innerHTML=h;
-  const sb=$("#sayBtn");if(sb)sb.onclick=()=>speak(q.k==="read"?q.text+" ... "+q.q:sayTxt);
-  const autoTxt={pic:"What's this?",rev:q.word,listen:q.word,gap:q.s,meme:"Which caption has no mistakes?",irr:"What is the past form of "+q.base+"?",read:q.q,spell:q.base?"Spell the past form of "+q.base:null}[q.k];
-  if(q.k==="listen")speak(q.word); else if(S.auto!==false&&autoTxt)speak(autoTxt);
+  const sb=$("#sayBtn");
+  if(sb)sb.onclick=()=>{if(q.k==="read")speak(q.text+" ... "+q.q);else if(q.c)charSay(q.c,sayTxt);else speak(sayTxt);};
+  // auto narration
+  const autoTxt={pic:"What's this?",rev:q.word,gap:q.s,meme:"Which caption has no mistakes?",irr:"What is the past form of "+q.base+"?",read:q.q,spell:q.base?"Spell the past form of "+q.base:null,who:q.text}[q.k];
+  if(q.k==="listen")speak(q.word);
+  else if(q.k==="chat"){setTimeout(()=>{const ty=$("#typing");if(!ty||R.qs[R.i]!==q)return;ty.outerHTML=`<div class="msg them">${esc(q.msg)}</div>`;const m=$("#msgs");m.scrollTop=m.scrollHeight;},650);if(S.auto!==false)charSay(q.c,q.msg);}
+  else if(q.k==="food"){if(S.auto!==false)charSay(q.c,q.req);}
+  else if(S.auto!==false&&autoTxt)speak(autoTxt);
+  if(q.k==="chat"){const m=$("#msgs");m.scrollTop=m.scrollHeight;}
+  renderPowers(q);
   box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
     const ok=b.dataset.o===q.ans;
     box.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.dataset.o===q.ans)x.classList.add("ok");});
     if(!ok)b.classList.add("no");
+    if(q.k==="chat"){const m=$("#msgs");const ty=$("#typing");if(ty)ty.outerHTML=`<div class="msg them">${esc(q.msg)}</div>`;m.insertAdjacentHTML("beforeend",`<div class="msg me">${esc(q.ans)}</div>`);m.scrollTop=m.scrollHeight;}
+    if(q.k==="food"&&ok){$("#foodAv").innerHTML=face(q.c,"happy");flySnack(q.ans,b,$("#foodAv"));}
     answer(ok,b,q.ans,q.tip);
   });
   if(q.k==="spell"){
@@ -786,6 +974,7 @@ function renderQ(){
     box.querySelectorAll(".letter").forEach(b=>b.onclick=()=>{if(typed.length>=q.word.length)return;typed.push({l:b.dataset.l,b});b.classList.add("used");upd();
       if(typed.length===q.word.length){const w=typed.map(t=>t.l).join("");const ok=w.toLowerCase()===q.word.toLowerCase();box.querySelectorAll(".letter,#undo").forEach(x=>x.disabled=true);answer(ok,$("#slots"),q.word,q.base?`${q.base} ← ${q.word}`:`${q.word} = ${q.he}`);}});
     $("#undo").onclick=()=>{const t=typed.pop();if(t){t.b.classList.remove("used");upd();}};
+    q._typed=typed;q._upd=upd;
   }
   if(q.k==="order"){
     const picked=[];const slots=$("#slots");
@@ -794,72 +983,139 @@ function renderQ(){
     slots.onclick=e=>{const c=e.target.closest("[data-j]");if(!c)return;const p=picked.splice(+c.dataset.j,1)[0];p.b.classList.remove("used");upd();};
     $("#reset").onclick=()=>{picked.splice(0).forEach(p=>p.b.classList.remove("used"));upd();};
     $("#check").onclick=()=>{const ok=picked.map(p=>p.w).join(" ")===q.s;box.querySelectorAll(".chip,#check,#reset").forEach(x=>x.disabled=true);answer(ok,slots,q.s,null);};
+    q._picked=picked;q._upd=upd;
   }
+  if(q.k==="speed")runSpeed(q);
 }
-function answer(ok,el,ans,tip){
-  beep(ok);
-  let snack=null;
+function runSpeed(q){
+  let i=-1,right=0,t0=Date.now();const LIM=40000;const card=$("#scard");
+  const show=()=>{i++;if(i>=q.items.length){end();return;}card.textContent=q.items[i].s;if(S.auto!==false)speak(q.items[i].s);};
+  const end=()=>{stopTimer();$("#tfYes").disabled=$("#tfNo").disabled=true;const ok=right>=6;
+    const wrong=q.items.filter(x=>!x.ok).map(x=>x.fix);
+    answer(ok,card,`${right}/8`,ok?null:`משפטים נכונים שכדאי לזכור: ${wrong.slice(0,2).join(" · ")}`,true);};
+  const pick=v=>{if(i<0||i>=q.items.length)return;const good=q.items[i].ok===v;if(good){right++;beep(true);}else beep(false);
+    card.style.background=good?"#C9F5D9":"#FFD5CF";setTimeout(()=>card.style.background="",250);$("#sinfo").textContent=`${right} נכונות · ${i+1}/8`;show();};
+  $("#tfYes").onclick=()=>pick(true);$("#tfNo").onclick=()=>pick(false);
+  TIMER=setInterval(()=>{const p=1-(Date.now()-t0)/LIM;$("#tbar").style.width=Math.max(0,p*100)+"%";if(p<=0)end();},200);
+  show();
+}
+
+/* ---------------- character powers (feeding = using snacks) ---------------- */
+function renderPowers(q){
+  const pb=$("#powerbar");const c=curChar(),pw=c.power;
+  const mc=!!$("#q .opt");
+  const usable={fifty:mc,poll:mc,hint:q.k!=="speed",shield:!R.shield,skip:q.k!=="speed",retry:false}[pw.kind];
+  if(pw.kind==="retry"){pb.innerHTML=`<div class="muted" style="font-size:14px">${pw.ic} ${c.he} תציע עוד ניסיון אם תטעו (🍬${pw.cost})</div>`;return;}
+  if(!usable){pb.innerHTML="";return;}
+  pb.innerHTML=`<button class="btn white small" id="powBtn">${pw.ic} האכילו את ${c.he} · ${esc(pw.name)} (🍬${pw.cost})</button><span class="muted" style="font-size:13px">יש לכם 🍬${bal()}</span>`;
+  $("#powBtn").onclick=()=>usePower(q);
+}
+function usePower(q){
+  const c=curChar(),pw=c.power;
+  if(!spend(pw.cost)){toast(`אין מספיק נשנושים (צריך 🍬${pw.cost}). עונים נכון ← מרוויחים נשנושים.`);return;}
+  $("#roundPts").textContent=bal();
+  const msg=`${c.en}: ${rnd(YUM)}`;toast(`${c.he} אכל/ה ונטען/ה! ${pw.ic}`);charSay(c,msg.split(": ")[1]);
+  const box=$("#q");const opts=[...box.querySelectorAll(".opt:not([disabled])")];
+  if(pw.kind==="fifty"){shuffle(opts.filter(o=>o.dataset.o!==q.ans)).slice(0,2).forEach(o=>o.classList.add("gone"));}
+  else if(pw.kind==="poll"){const wrong=opts.filter(o=>o.dataset.o!==q.ans);let left=100-(55+Math.floor(Math.random()*25));const shares=wrong.map(()=>Math.random());const sum=shares.reduce((a,b)=>a+b,0)||1;
+    opts.forEach(o=>{const v=o.dataset.o===q.ans?100-left:Math.round(left*shares[wrong.indexOf(o)]/sum);o.insertAdjacentHTML("beforeend",`<span class="pct">📊 ${v}% מהעוקבים</span>`);});}
+  else if(pw.kind==="shield"){R.shield=true;drawHearts();}
+  else if(pw.kind==="hint"){
+    let t=q.tip;
+    if(q.k==="order"){t=`המילה הראשונה: ${q.s.split(" ")[0]}`;}
+    else if(q.k==="spell"){t=`האות הראשונה: ${q.word[0]} · יש ${q.word.length} אותיות`;}
+    else if(q.k==="read"){t="חפשו בטקסט את המילים מהשאלה – התשובה קרובה אליהן.";}
+    else if(q.k==="chat"){t="שימו לב לזמן של הפועל ולהתאמה בין הנושא לפועל.";}
+    else if(!t){shuffle(opts.filter(o=>o.dataset.o!==q.ans)).slice(0,1).forEach(o=>o.classList.add("gone"));t="דור מחק תשובה אחת שגויה.";}
+    box.insertAdjacentHTML("beforeend",`<div class="note">💡 <b>דור לוחש:</b> ${esc(t)}</div>`);}
+  else if(pw.kind==="skip"){box.querySelectorAll("button").forEach(b=>b.disabled=true);answer(true,$("#powerbar"),q.ans||"",null,false,true);}
+  $("#powerbar").innerHTML=pw.kind==="shield"?`<span class="muted">🛡️ המגן פעיל</span>`:"";
+}
+
+/* ---------------- answering ---------------- */
+function answer(ok,el,ans,tip,isSpeed,skipped){
+  if(!isSpeed)beep(ok);
+  $("#powerbar").innerHTML="";
+  const q=R.qs[R.i];let snack=null,saved=false;
   if(ok){R.right++;R.streak++;
     const tier=R.streak%3===0?"rare":"common";const s=rnd(SNACKS[tier]);snack={e:s[0],n:s[1],t:tier};
-    R.loot.push(snack);S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL[tier];save();
-    flySnack(s[0],el);$("#roundPts").textContent=R.loot.reduce((a,x)=>a+VAL[x.t],0);
-  } else R.streak=0;
-  $("#streak").textContent="🔥"+R.streak;
-  const c=curChar();
+    if(!skipped){R.loot.push(snack);S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL[tier];save();flySnack(s[0],el);}
+    else snack=null;
+  } else {R.streak=0;
+    if(R.shield){R.shield=false;saved=true;}else R.hearts--;
+    drawHearts(!saved);
+  }
+  $("#roundPts").textContent=bal();drawHearts();
+  if(q.k==="chat"){R.chat[q.key]=(R.chat[q.key]||[]).concat([{t:q.msg},{t:q.ans,me:true}]);}
+  const c=curChar();const line=skipped?"Chaos mode! Question deleted. 🌀":ok?rnd(GOOD):rnd(BAD);
+  const dead=R.hearts<=0;
+  const canRetry=!ok&&c.power.kind==="retry"&&!isSpeed&&q.k!=="chat";
   const html=`<div class="fb ${ok?"good":"bad"}" role="status"><div class="in">
     <div class="row" style="flex-wrap:nowrap;align-items:center"><div class="ph" style="width:58px;height:58px">${face(c,ok?"happy":"sad")}</div>
-    <div style="min-width:0"><h3 class="en">${esc(ok?rnd(GOOD):rnd(BAD))}</h3>${ok&&snack?`<div>קיבלתם <b>${snack.e} <span class="en">${esc(snack.n)}</span></b>${snack.t==="rare"?" · רצף של 3! נשנוש נדיר 🔥":""}</div>`:""}</div></div>
-    ${!ok?`<div>התשובה הנכונה: <span class="ans en">${esc(ans)}</span></div>`:""}
-    ${tip?`<div class="muted" style="font-size:15px">💡 ${esc(tip)}</div>`:""}
-    <button class="btn ${ok?"":"red"}" id="next">${R.i+1<R.qs.length?"הבא ←":"לתוצאות 🏁"}</button></div></div>`;
+    <div style="min-width:0"><h3 class="en">${esc(line)}</h3>${snack?`<div>קיבלתם <b>${snack.e} <span class="en">${esc(snack.n)}</span></b>${snack.t==="rare"?" · רצף של 3! נשנוש נדיר 🔥":""}</div>`:""}
+    ${!ok?`<div>${saved?"🛡️ המגן של נועם הציל לכם את הלב!":dead?"💔 נגמרו הלבבות…":"💔 הפסדתם לב"}</div>`:""}</div></div>
+    ${!ok&&ans?`<div>${isSpeed?"התוצאה":"התשובה הנכונה"}: <span class="ans en">${esc(ans)}</span></div>`:""}
+    ${tip?`<div class="muted" style="font-size:15px">💡 ${mix(tip)}</div>`:""}
+    <div class="row">
+    ${canRetry?`<button class="btn pink" id="retry">🎭 שירה עושה דרמה: עוד ניסיון (🍬${c.power.cost})</button>`:""}
+    <button class="btn ${ok?"":"red"}" id="next">${dead?"לתוצאות 💔":R.i+1<R.qs.length?"הבא ←":"לתוצאות 🏁"}</button></div></div></div>`;
   $("#fbWrap").innerHTML=html;
-  if(S.fbVoice!==false){const q=R.qs[R.i];const full=q.k==="gap"?q.s.replace("___",ans):ans;
-    speak(ok?($(".fb h3").textContent):($(".fb h3").textContent+" The correct answer is: "+full));}
+  if(S.fbVoice!==false&&!skipped){const full=q.k==="gap"?q.s.replace("___",ans):ans;speak(ok||isSpeed?line:(line+" The correct answer is: "+full),{queue:false});}
   $("#next").focus({preventScroll:true});
-  $("#next").onclick=()=>{R.i++;if(R.i<R.qs.length)renderQ();else finish();};
+  $("#next").onclick=()=>{if(dead){finish();return;}R.i++;if(R.i<R.qs.length)renderQ();else finish();};
+  const rt=$("#retry");if(rt)rt.onclick=()=>{
+    if(!spend(c.power.cost)){toast(`אין מספיק נשנושים (צריך 🍬${c.power.cost})`);return;}
+    if(!saved)R.hearts++;drawHearts();toast("שירה: \"NOOO! This is so unfair! Try again!\" 🎭");charSay(c,"No! This is so unfair! Try again!");
+    renderQ();};
 }
 function finish(){
-  const pct=R.right/R.qs.length,pass=pct>=.7;const L=R.L;
-  const prev=S.best[L.n]||0;if(pct>prev)S.best[L.n]=pct;
-  let epic=null;
-  if(pass){const s=rnd(SNACKS.epic);epic={e:s[0],n:s[1]};S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL.epic;R.loot.push({e:s[0],n:s[1],t:"epic"});}
+  stopTimer();
+  const L=R.L,k=R.k,pass=R.hearts>0;
+  const st=pass?R.hearts:0;
+  if(st>stars(L.n,k))S.st[L.n+"."+k]=st;
+  let bonus=null;
+  if(pass){const tier=k===3?"epic":"rare";const s=rnd(SNACKS[tier]);bonus={e:s[0],n:s[1],t:tier};S.stash[s[0]]=(S.stash[s[0]]||0)+1;S.earned+=VAL[tier];R.loot.push(bonus);}
   save();
-  const c=curChar();const st=pct>=.95?3:pct>=.85?2:pct>=.7?1:0;
-  const next=LEVELS.find(l=>l.n===L.n+1);
-  const newly=CHARS.filter(ch=>ch.price>0&&S.earned>=ch.price&&S.earned-R.loot.reduce((a,x)=>a+VAL[x.t],0)<ch.price);
+  const c=curChar();
+  const next=k<3?{n:L.n,k:k+1}:LEVELS.find(l=>l.n===L.n+1)?{n:L.n+1,k:1}:null;
+  const gained=R.loot.reduce((a,x)=>a+VAL[x.t],0);
+  const newly=CHARS.filter(ch=>ch.price>0&&S.earned>=ch.price&&S.earned-gained<ch.price);
+  const lastOfAll=pass&&L.boss&&k===3;
   $("#res").innerHTML=`
     <div class="av">${face(c,pass?"happy":"sad")}</div>
-    <h2>${pass?(L.boss?"You beat the Bagrut Boss! 👑":"Level complete!"):"Almost! Try again"}</h2>
+    <h2>${lastOfAll?"You beat the Bagrut Boss! 👑":pass?"Stage complete!":"Game over! Try again"}</h2>
+    <div class="muted">שלב ${L.n} · ${STAGES[k-1].ic} ${STAGES[k-1].he}</div>
     <div class="score en">${R.right}/${R.qs.length}</div>
     <div class="stars" style="font-size:30px">${"★".repeat(st)}${"☆".repeat(3-st)}</div>
-    <div class="bubble en" style="margin:0">${esc(pass?rnd(["Sharing is caring. But not these snacks.","I'm so proud I could eat a whole pizza.","Next level? Let's gooo!"]):rnd(["It's fine. I'm fine. Everything is fine. 🙃","Even legends fail sometimes. Then they eat a cookie.","Again! I believe in you. And in snacks."]))}</div>
+    <div class="bubble en" style="margin:0">${esc(pass?rnd(["Sharing is caring. But not these snacks.","I'm so proud I could eat a whole pizza.","Next stage? Let's gooo!"]):rnd(["It's fine. I'm fine. Everything is fine. 🙃","Even legends fail sometimes. Then they eat a cookie.","Again! I believe in you. And in snacks."]))}</div>
     ${R.loot.length?`<div><b>השלל שלכם:</b></div><div class="loot">${R.loot.map(x=>`<span title="${esc(x.n)}">${x.e}</span>`).join("")}</div>`:`<div class="muted">הפעם בלי נשנושים… 😢</div>`}
-    ${epic?`<div class="tag" style="background:var(--sun);font-size:14px">בונוס סיום שלב: ${epic.e} ${esc(epic.n)}</div>`:`<div class="muted">צריך 70% (${Math.ceil(R.qs.length*.7)} תשובות נכונות) כדי לפתוח את השלב הבא.</div>`}
-    ${newly.map(ch=>`<div class="note">🎉 דמות חדשה נפתחה: <b>${ch.he}</b> · <span class="en">${esc(ch.title)}</span></div>`).join("")}
+    ${bonus?`<div class="tag" style="background:var(--sun);font-size:14px">בונוס סיום: ${bonus.e} ${esc(bonus.n)}</div>`:`<div class="muted">נגמרו 3 הלבבות. טיפ: האכילו את ${c.he} כדי להשתמש בכוח (${c.power.ic} ${esc(c.power.name)}).</div>`}
+    ${newly.map(ch=>`<div class="note">🎉 דמות חדשה נפתחה: <b>${ch.he}</b> · <span class="en">${esc(ch.title)}</span> · ${ch.power.ic} ${esc(ch.power.name)}</div>`).join("")}
     <div class="row" style="justify-content:center">
-      ${pass&&next?`<button class="btn red" id="rNext">לשלב ${next.n} ←</button>`:""}
+      ${pass&&next?`<button class="btn red" id="rNext">${next.k===1?`לשלב ${next.n} ←`:`ל${STAGES[next.k-1].he} ←`}</button>`:""}
       <button class="btn ${pass?"white":""}" id="rAgain">🔁 שוב</button>
       <button class="btn white" data-go="home">🏠 שלבים</button>
     </div>`;
   go("result");
   if(pass) rain(R.loot.map(x=>x.e).concat(["🎉","🍬","🍩"]));
-  const rn=$("#rNext");if(rn)rn.onclick=()=>startLevel(next.n);
-  $("#rAgain").onclick=()=>startLevel(L.n);
+  const rn=$("#rNext");if(rn)rn.onclick=()=>startStage(next.n,next.k);
+  $("#rAgain").onclick=()=>startStage(L.n,k);
 }
 
 /* ---------------- stash & squad ---------------- */
 function renderStash(){
-  $("#pts2").textContent=S.earned;
+  $("#pts2").textContent=S.earned;$("#bal").textContent=bal();
   $("#stashGrid").innerHTML=ALLSNACKS.map(s=>{const n=S.stash[s.e]||0;return `<div class="card snack ${n?"":"empty"}"><span class="e">${s.e}</span><span class="n">${esc(s.n)}</span><span class="c">×${n}</span><span class="tag" style="font-size:10px">${{common:"רגיל",rare:"נדיר",epic:"אפי"}[s.t]}</span></div>`;}).join("");
 }
 function renderSquad(){
   $("#chars").innerHTML=CHARS.map(c=>{const open=S.earned>=c.price;return `<button class="card ch ${S.cur===c.id?"sel":""} ${open?"":"lock"}" data-ch="${c.id}">
     <span class="av">${face(c)}</span><b>${c.he}</b><span class="sub">${esc(c.en)} · ${esc(c.title)}</span>
-    ${open?(S.cur===c.id?`<span class="tag">נבחר/ה ✔</span>`:`<span class="tag">בחירה</span>`):`<span class="tag">🔒 ${c.price} נשנושים</span>`}</button>`;}).join("");
+    <span style="font-size:13px">${c.power.ic} ${esc(c.power.name)} · 🍬${c.power.cost}</span>
+    ${open?(S.cur===c.id?`<span class="tag">נבחר/ה ✔</span>`:`<span class="tag">בחירה</span>`):`<span class="tag">🔒 צריך ${c.price} נשנושים שהורווחו</span>`}</button>`;}).join("");
 }
-$("#chars").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(!b)return;const c=CHARS.find(x=>x.id===b.dataset.ch);
-  if(S.earned<c.price){toast(`צריך עוד ${c.price-S.earned} נשנושים כדי לפתוח את ${c.he}`);return;}
-  S.cur=c.id;save();renderSquad();toast(`${c.he}: "${rnd(c.lines)}"`);});
+$("#chars").addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(!b)return;const c=CH(b.dataset.ch);
+  if(S.earned<c.price){toast(`צריך להרוויח עוד ${c.price-S.earned} נשנושים כדי לפתוח את ${c.he}`);return;}
+  S.cur=c.id;save();renderSquad();toast(`${c.he}: ${c.power.ic} ${c.power.he}`);charSay(c,rnd(c.lines));});
 
 /* ---------------- friends ---------------- */
 let pendingImg=null;
@@ -879,7 +1135,7 @@ $("#ffile").addEventListener("change",e=>loadImage(e.target.files[0]));
 document.addEventListener("paste",e=>{if($("#s-friends").hidden)return;const it=[...(e.clipboardData||{}).items||[]].find(i=>i.type.startsWith("image/"));if(it){loadImage(it.getAsFile());toast("התמונה הודבקה 👍");}});
 $("#gq").addEventListener("input",e=>{$("#gLink").href="https://www.google.com/search?tbm=isch&q="+encodeURIComponent(e.target.value.trim()||"funny face");});
 $("#fform").addEventListener("submit",e=>{e.preventDefault();
-  const name=$("#fname").value.trim().replace(/[^\p{L}\p{N} '-]/gu,"");
+  const name=$("#fname").value.trim();
   if(!name){toast("כתבו שם באנגלית");return;}
   if(!/^[A-Za-z][A-Za-z '-]*$/.test(name)){toast("השם צריך להיות באותיות באנגלית (למשל Yoav)");return;}
   S.friends.push({id:Date.now().toString(36),name:name.charAt(0).toUpperCase()+name.slice(1),g:$("#fgender").value,img:pendingImg});
