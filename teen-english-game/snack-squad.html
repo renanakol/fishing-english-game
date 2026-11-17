@@ -271,8 +271,9 @@ html{color-scheme:light}
 .fr .ph{width:90px;height:90px}
 .fr b{font-family:var(--f-word);font-weight:400;font-size:20px;direction:ltr}
 .note{font-size:14px;background:#FFF6D6;border:2px dashed var(--ink);border-radius:12px;padding:10px 12px}
-.filebtn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center}
-.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.inapp{background:#FFF6D6;border:3px solid var(--tomato);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--sh-s)}
+.inapp b{font-family:var(--f-display);font-weight:400;font-size:17px}
 
 .fly{position:fixed;z-index:60;font-size:44px;pointer-events:none}
 .toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:70;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:500;max-width:90vw;text-align:center}
@@ -288,6 +289,7 @@ html{color-scheme:light}
 
   <!-- HOME -->
   <section id="s-home" style="display:contents">
+    <div class="inapp" data-inapp hidden></div>
     <header class="brand">
       <div class="logo">Snack<span>Squad</span><small>אנגלית לנוער · מהבסיס ועד הבגרות</small></div>
       <div class="row" style="flex-wrap:nowrap;gap:8px"><button class="stashpill" data-go="voice" aria-label="הגדרות קול"><b>🔊</b></button><button class="stashpill" data-go="stash" aria-label="הנשנושייה שלי"><b>🍩</b><span id="pts">0</span></button></div>
@@ -349,6 +351,7 @@ html{color-scheme:light}
 
   <!-- VOICE -->
   <section id="s-voice" hidden>
+    <div class="inapp" data-inapp hidden></div>
     <div class="sec-h"><h2>הקול של המשחק</h2></div>
     <div class="card form">
       <div class="note" id="vClaude" hidden><label style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="vClaudeOn" style="width:22px;height:22px" checked> ✨ להשתמש בקול הטבעי של Claude (זמין כשפותחים דרך הקישור)</label></div>
@@ -400,6 +403,7 @@ html{color-scheme:light}
 
   <!-- FRIENDS -->
   <section id="s-friends" hidden>
+    <div class="inapp" data-inapp hidden></div>
     <div class="sec-h"><h2>החברים שלי במשחק</h2></div>
     <p class="muted" style="margin:0">החברים שתוסיפו יופיעו בתוך השאלות, במימים ובמשפטים המצחיקים. "{שם} אכל 20 סופגניות" זה הרבה יותר מצחיק כשזה החבר שלכם.</p>
     <form class="card form" id="fform" autocomplete="off">
@@ -424,7 +428,8 @@ html{color-scheme:light}
       </div>
       <div class="preview">
         <div class="ph" id="fprev">🙂</div>
-        <span class="btn pink small filebtn">🖼️ בחירת תמונה מהגלריה<input type="file" id="ffile" accept="image/*" aria-label="בחירת תמונה"></span>
+        <input type="file" id="ffile" accept="image/*" class="vh" aria-label="בחירת תמונה">
+        <label for="ffile" class="btn pink small" id="ffileBtn">🖼️ בחירת תמונה מהגלריה</label>
       </div>
       <div class="muted" style="font-size:13px">אפשר גם להעתיק תמונה ולהדביק כאן (Ctrl+V). התמונות נשמרות רק במכשיר הזה. העלו רק תמונות של חברים שמסכימים לזה 🙏</div>
       <button class="btn" type="submit">➕ הוסיפו לחבורה</button>
@@ -1703,6 +1708,27 @@ async function olLeave(){if(OL){clearInterval(OL.timer);try{await OL.room.leave(
   const [t,r,dl]=await Promise.all([window.claude.use("tts").catch(()=>null),window.claude.use("room").catch(()=>null),window.claude.use("downloads").catch(()=>null)]);TTS=t;ROOM=r;DL=dl;
   if(!$("#s-party").hidden)renderOnlineBox(); fillVoiceUI();}}catch(e){}})();
 
+
+/* ---------------- opened inside an app (no voice, no photo picker) ---------------- */
+const GAME_URL="https://claude.ai/artifact/1kuTMYGEtwpHQTDtKnsrnC";
+const IN_WEBVIEW=/; wv\)/.test(navigator.userAgent)||/\bClaude\b/i.test(navigator.userAgent);
+const IS_FILE=/^(file|content):/.test(location.protocol);
+function deviceVoiceOK(){try{return "speechSynthesis" in window&&speechSynthesis.getVoices().length>0;}catch(e){return false;}}
+function checkInApp(){
+  const noVoice=!TTS&&!deviceVoiceOK();
+  if(!(IN_WEBVIEW||noVoice))return;
+  const html=`<b>📱 ${IN_WEBVIEW?"פתחתם את המשחק בתוך אפליקציה":"לא נמצא קול במכשיר הזה"}</b>
+    <div style="font-size:15px">${IN_WEBVIEW?"בתוך אפליקציה (כמו Claude או וואטסאפ) אין קול ואי אפשר להעלות תמונות.":"אין כאן קול לקריינות."} כדי ליהנות מהכול, פתחו את המשחק בדפדפן <b style="font-size:15px">Chrome</b> (באייפון: Safari).</div>
+    ${IS_FILE?`<div class="muted" style="font-size:14px">בקובץ: פותחים את הקובץ מתיקיית ההורדות ובוחרים "פתיחה באמצעות Chrome".</div>`:
+    `<div class="row"><a class="btn red small" href="${GAME_URL}" target="_blank" rel="noopener">🌐 פתיחה בכרום</a><button class="btn white small" type="button" data-copylink>📋 העתקת הקישור</button></div>
+     <div class="muted" style="font-size:13px">אם הכפתור פותח שוב את האפליקציה: מעתיקים את הקישור, פותחים את Chrome ומדביקים בשורת הכתובת. צריך להיות מחוברים ל-Claude גם בכרום.</div>`}`;
+  document.querySelectorAll("[data-inapp]").forEach(el=>{el.innerHTML=html;el.hidden=false;});
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-copylink]");if(!b)return;
+  const done=()=>toast("הקישור הועתק ✔ עכשיו פותחים את Chrome ומדביקים");
+  try{navigator.clipboard.writeText(GAME_URL).then(done).catch(()=>toast(GAME_URL));}catch(err){toast(GAME_URL);}});
+$("#ffileBtn").addEventListener("click",()=>{if(IN_WEBVIEW)setTimeout(()=>{if(!pendingImg)toast("אם לא נפתחה הגלריה – זו מגבלה של האפליקציה. פתחו את המשחק בכרום 🌐");},1500);});
+setTimeout(checkInApp,1800);
 go("home");
 })();
 </script>
