@@ -397,7 +397,7 @@ function applyHit(att,tgt,A,mult=1){
   if(att.combo>=3){comic(att.combo+' HIT COMBO!',att.x,groundY-scaleOf(att)*300,'#ff6fd8',.9,.9);if(att.combo===3){att.power=Math.min(100,att.power+15);sfx('combo');}}
   const dir=Math.sign(tgt.x-att.x)||att.face;
   if(A.stun){tgt.state='stun';tgt.t=0;tgt.stunT=A.stun;tgt.vx=dir*(A.kb||60)*.4;}
-  else{tgt.state='hurt';tgt.t=0;tgt.vx=dir*(A.kb||150);if(A.kb>=240)tgt.vy=-420;}
+  else{tgt.state='hurt';tgt.t=0;tgt.hurtPose=Math.random()<.5?tgt.K.stun:tgt.K.hit;tgt.vx=dir*(A.kb||150);if(A.kb>=240)tgt.vy=-420;}
   if(tgt.y<0&&!A.stun){tgt.vy=Math.min(tgt.vy,-300);}
   G.freeze=A.dmg>=10?.09:.05; // hit-stop: a tiny pause makes hits feel strong
   G.shake=Math.max(G.shake,A.dmg>10?.28:.14);
@@ -408,7 +408,7 @@ function applyHit(att,tgt,A,mult=1){
 }
 function hurtByWorld(f,dmg,vy,txt){if(f.state==='ko'||G.over)return;f.hp=Math.max(0,f.hp-dmg);f.flash=.12;f.state='hurt';f.t=0;f.vy=vy;f.vx=rand(-200,200);f.combo=0;G.shake=.2;sfx('hit');comic(txt,f.x,groundY-260,'#fff',1,.7);burst(f.x,groundY-80,'#ffd23f',8,300,'star');if(f.hp<=0)ko(f,opponent(f));}
 function ko(loser,winner){loser.state='ko';loser.t=0;loser.vx=Math.sign(loser.x-winner.x)*320;loser.vy=-520;G.over=true;G.slow=1.2;sfx('ko');comic('K.O.!',VW/2,VH*.4,'#ff5a4e',2.2,1.6);setTimeout(()=>roundOver(winner),2300);}
-function special(f){if(f.power<100||!canAct(f))return;f.power=0;sfx('special');G.shake=.5;
+function special(f){if(f.power<100||!canAct(f))return;f.power=0;opponent(f).shockT=1;sfx('special');G.shake=.5;
   if(f.kind==='cat'){f.giant=6;comic(f.K.special,f.x,groundY-330,'#ff6fd8',1.6,1.3);burst(f.x,groundY-100,'#ff6fd8',26,600,'star');}
   else{f.state='attack';f.atk={pose:'bark',wind:.15,act:.5,rec:.4,range:9999,dmg:18,stun:1.6,air:true,snd:'bark',fx:'tornado',kb:300};f.atkName='tornado';f.t=0;f.hitDone=false;comic(f.K.special,f.x,groundY-330,'#ffd23f',1.6,1.3);}
   banner(f.K.special);
@@ -422,8 +422,9 @@ function comic(txt,x,y,color,size=1,life=.8){G.texts.push({txt,x:clamp(x,160,VW-
 function banner(txt){const b=$('banner');b.textContent=txt;b.classList.remove('show');void b.offsetWidth;b.classList.add('show');}
 
 /* ---------------- items & surprises ---------------- */
+function shock(t){for(const f of [G.me,G.cpu])f.shockT=t;}
 function spawnItem(type){type=type||(Math.random()<.5?'fish':'bone');G.items.push({type,x:rand(VW*.12,VW*.88),y:-VH*.9,vy:0,life:9,t:0,landed:false});}
-function openBox(by){const b=G.box;G.box=null;sfx('box');burst(b.x,groundY-60,'#ffd23f',24,500,'star');
+function openBox(by){const b=G.box;G.box=null;shock(.8);sfx('box');burst(b.x,groundY-60,'#ffd23f',24,500,'star');
   const r=pick(['heal','power','speed','boom','rain','giant']);const y=groundY-280;
   if(r==='heal'){by.hp=Math.min(by.maxhp,by.hp+25);comic('+25 HEALTH!',b.x,y,'#7bdc3a',1.2,1.2);}
   else if(r==='power'){by.power=100;comic('FULL POWER!',b.x,y,'#3fe0d0',1.2,1.2);}
@@ -434,8 +435,8 @@ function openBox(by){const b=G.box;G.box=null;sfx('box');burst(b.x,groundY-60,'#
   banner(r==='heal'?'+25 HEALTH':r==='power'?'FULL POWER':r==='speed'?'SUPER SPEED':r==='giant'?'GROW!':r==='boom'?'BOOM!':'FOOD RAIN');
 }
 function startEvent(){const e=pick(['vacuum','vacuum','sprinkler']);
-  if(e==='vacuum'){const dir=Math.random()<.5?1:-1;G.vac={x:dir>0?-160:VW+160,dir,t:0,warn:1.1,hit:new Set()};banner('ROBO VACUUM!');sfx('vacuum');}
-  else{G.rain=6;banner('SPRINKLERS! SLIPPERY!');sfx('splash');}}
+  if(e==='vacuum'){const dir=Math.random()<.5?1:-1;G.vac={x:dir>0?-160:VW+160,dir,t:0,warn:1.1,hit:new Set()};banner('ROBO VACUUM!');sfx('vacuum');shock(1);}
+  else{G.rain=6;banner('SPRINKLERS! SLIPPERY!');sfx('splash');shock(.9);}}
 
 /* ---------------- AI ---------------- */
 function aiThink(f){const o=G.me,A=f.K.attacks,dx=o.x-f.x,dist=Math.abs(dx),ai=f.ai;ai.think=rand(.24,.46);ai.move=0;
@@ -458,7 +459,7 @@ function aiThink(f){const o=G.me,A=f.K.attacks,dx=o.x-f.x,dist=Math.abs(dx),ai=f
 /* ---------------- update ---------------- */
 function updFighter(f,dt){const K=f.K,o=opponent(f);f.t+=dt;
   for(const k in f.cds)f.cds[k]=Math.max(0,f.cds[k]-dt);
-  f.giant=Math.max(0,f.giant-dt);f.speedUp=Math.max(0,f.speedUp-dt);f.flash=Math.max(0,f.flash-dt);f.shake=Math.max(0,f.shake-dt);f.comboT=Math.max(0,f.comboT-dt);
+  f.giant=Math.max(0,f.giant-dt);f.speedUp=Math.max(0,f.speedUp-dt);f.flash=Math.max(0,f.flash-dt);f.shake=Math.max(0,f.shake-dt);f.comboT=Math.max(0,f.comboT-dt);f.shockT=Math.max(0,(f.shockT||0)-dt);
   if(f.ghost>f.hp)f.ghost=Math.max(f.hp,f.ghost-dt*30);
   const spd=K.speed*f.B.spd*(f.speedUp>0?1.55:1)*(f.giant>0?.85:1);
   if(f.state==='idle'||f.state==='walk'){
@@ -552,14 +553,14 @@ function updateHUD(force){if(!G)return;const me=G.me,cp=G.cpu;
 /* ---------------- render ---------------- */
 function poseOf(f){const K=f.K;
   switch(f.state){
-    case 'walk': return Math.floor(f.walkT*7)%2?K.walk:K.idle;
+    case 'walk': return f.shockT>0?K.stun:Math.floor(f.walkT*7)%2?K.walk:K.idle;
     case 'attack': return f.t<f.atk.wind?K.idle:f.atk.pose;
     case 'jump': return 'jump';
-    case 'hurt': return K.hit;
+    case 'hurt': return f.hurtPose||K.hit;
     case 'stun': return K.stun;
     case 'ko': return K.ko;
     case 'win': return K.win;
-    default: return K.idle;}}
+    default: return f.shockT>0?K.stun:K.idle;}}
 function drawFighter(c,f,t,gx,gy,baseSc){
   let key=f.kind+'_'+poseOf(f);if(!META[key])key=f.kind+'_stand';
   const m=META[key],img=f.skin[key]||IMG[key];if(!img)return;
