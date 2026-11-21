@@ -124,6 +124,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-of
 .seg{display:flex;flex-wrap:wrap;gap:6px;}
 .seg button{border:3px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink);font-size:clamp(12px,3.4vh,16px);padding:4px 10px;box-shadow:0 3px 0 var(--ink);}
 .seg button.sel{background:var(--sun);}
+.breeds button{display:flex;align-items:center;gap:6px;padding:2px 12px 2px 6px;}
+.breeds img{height:clamp(26px,8vh,40px);}
 .dstats{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;align-items:center;font-size:clamp(10px,2.8vh,13px);font-weight:700;}
 .dstats u{display:block;height:8px;border-radius:9px;background:rgba(29,18,48,.15);overflow:hidden;text-decoration:none;}
 .dstats u i{display:block;height:100%;background:var(--ink);border-radius:9px;transition:width .25s;}
@@ -187,6 +189,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-of
       <div class="small">Tap your fighter to see a move</div>
     </div>
     <div class="panel opts">
+      <div class="lbl">Breed</div><div class="seg breeds" id="breeds"></div>
       <div class="lbl">Fur color</div><div class="sw" id="swatches"></div>
       <div class="lbl">Body</div><div class="seg" id="bodies"></div>
       <div class="dstats" id="dStats"></div>
@@ -237,7 +240,10 @@ const rand=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>Math.max(a,Math.min(b,v)
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
 
 /* ---------------- assets ---------------- */
-const META={"cat_stand":{"w":257,"h":233,"ax":134},"cat_walk":{"w":256,"h":184,"ax":117},"cat_scratch":{"w":290,"h":223,"ax":130},"cat_jump":{"w":289,"h":185,"ax":121},"cat_bite":{"w":301,"h":210,"ax":161},"cat_hiss":{"w":257,"h":233,"ax":133},"cat_ready":{"w":251,"h":219,"ax":122},"cat_surprised":{"w":247,"h":230,"ax":116},"cat_hit":{"w":262,"h":229,"ax":143},"cat_sleep":{"w":272,"h":205,"ax":141},"dog_stand":{"w":223,"h":201,"ax":105},"dog_walk":{"w":219,"h":165,"ax":91},"dog_bite":{"w":283,"h":191,"ax":102},"dog_bark":{"w":261,"h":205,"ax":99},"dog_charge":{"w":300,"h":167,"ax":128},"dog_ready":{"w":235,"h":223,"ax":100},"dog_surprised":{"w":217,"h":192,"ax":99},"dog_tongue":{"w":242,"h":184,"ax":107},"dog_hit":{"w":216,"h":201,"ax":109},"dog_sleep":{"w":292,"h":181,"ax":145}};
+const META={"cat_stand":{"w":257,"h":233,"ax":134},"cat_walk":{"w":256,"h":184,"ax":117},"cat_scratch":{"w":290,"h":223,"ax":130},"cat_jump":{"w":289,"h":185,"ax":121},"cat_bite":{"w":301,"h":210,"ax":161},"cat_hiss":{"w":257,"h":233,"ax":133},"cat_ready":{"w":251,"h":219,"ax":122},"cat_surprised":{"w":247,"h":230,"ax":116},"cat_hit":{"w":262,"h":229,"ax":143},"cat_sleep":{"w":272,"h":205,"ax":141},"dog_stand":{"w":223,"h":201,"ax":105},"dog_walk":{"w":219,"h":165,"ax":91},"dog_bite":{"w":283,"h":191,"ax":102},"dog_bark":{"w":261,"h":205,"ax":99},"dog_charge":{"w":300,"h":167,"ax":128},"dog_ready":{"w":235,"h":223,"ax":100},"dog_surprised":{"w":217,"h":192,"ax":99},"dog_tongue":{"w":242,"h":184,"ax":107},"dog_hit":{"w":216,"h":201,"ax":109},"dog_sleep":{"w":292,"h":181,"ax":145},"siamese_stand":{"w":234,"h":224,"ax":112},"siamese_walk":{"w":254,"h":170,"ax":117},"siamese_scratch":{"w":272,"h":206,"ax":115},"siamese_jump":{"w":270,"h":183,"ax":112},"siamese_bite":{"w":286,"h":196,"ax":146},"siamese_hiss":{"w":242,"h":229,"ax":127},"siamese_ready":{"w":236,"h":214,"ax":114},"siamese_surprised":{"w":237,"h":215,"ax":107},"siamese_hit":{"w":256,"h":222,"ax":143},"siamese_sleep":{"w":255,"h":197,"ax":120},"husky_stand":{"w":228,"h":192,"ax":102},"husky_walk":{"w":243,"h":181,"ax":95},"husky_bite":{"w":280,"h":187,"ax":99},"husky_bark":{"w":272,"h":191,"ax":97},"husky_charge":{"w":313,"h":179,"ax":142},"husky_ready":{"w":241,"h":202,"ax":103},"husky_surprised":{"w":231,"h":203,"ax":101},"husky_tongue":{"w":248,"h":201,"ax":100},"husky_hit":{"w":224,"h":212,"ax":111},"husky_sleep":{"w":292,"h":188,"ax":150}};
+const BREEDS={cat:[{id:'cat',n:'Tabby'},{id:'siamese',n:'Siamese'}],dog:[{id:'dog',n:'Bulldog'},{id:'husky',n:'Husky'}]};
+const BREED_MOD={cat:{hp:1,spd:1,dmg:1},siamese:{hp:.92,spd:1.1,dmg:1},dog:{hp:1,spd:1,dmg:1},husky:{hp:.92,spd:1.12,dmg:.95}};
+const POSE_FOR={slash:'scratch',jump:'jump',bite:'bite',hiss:'hiss',bark:'bark',charge:'charge'};
 const ICONS=['atk_cat_slash','atk_cat_jump','atk_cat_bite','atk_cat_hiss','atk_dog_bite','atk_dog_bark','atk_dog_charge'];
 const IMG={}, WHITE={};
 function load(key,src){return new Promise(r=>{const i=new Image();i.onload=()=>{IMG[key]=i;r();};i.onerror=()=>r();i.src=src;});}
@@ -248,9 +254,11 @@ const ready=Promise.all(loads).then(()=>{for(const k in META){const i=IMG[k];if(
 
 /* ---------------- fur colors (recolor the drawings) ---------------- */
 // Only the fur hues are shifted: purple for the cat, orange for the dog. Outlines, cream belly, eyes, bandana and collar stay.
-const FUR={cat:{lo:250,hi:336,minS:.17,guard:318,base:[200,105,220]},dog:{lo:8,hi:44,minS:.28,guard:999,base:[246,156,52]}};
+const FUR={cat:{lo:250,hi:336,minS:.17,guard:318,base:[200,105,220]},dog:{lo:8,hi:44,minS:.28,guard:999,base:[246,156,52]},siamese:{lo:0,hi:22,minS:.3,guard:-1,base:[110,62,48]},husky:{lo:205,hi:250,minS:.1,guard:999,base:[112,120,150]}};
 const COLORS={
   cat:[{n:'Purple',dh:0,s:1,v:1},{n:'Ginger',dh:100,s:1,v:1.05},{n:'Sky',dh:-85,s:.9,v:1.05},{n:'Mint',dh:-130,s:.8,v:1.05},{n:'Lemon',dh:130,s:.9,v:1.15},{n:'Rose',dh:45,s:1,v:1.05},{n:'Smoke',dh:0,s:.12,v:.95},{n:'Midnight',dh:-30,s:.35,v:.45}],
+  siamese:[{n:'Seal',dh:0,s:1,v:1},{n:'Chocolate',dh:10,s:.9,v:1.35},{n:'Blue',dh:210,s:.45,v:1.2},{n:'Lilac',dh:270,s:.3,v:1.45},{n:'Flame',dh:15,s:1.5,v:1.7},{n:'Mint',dh:150,s:.7,v:1.4}],
+  husky:[{n:'Grey',dh:0,s:1,v:1},{n:'Black',dh:0,s:.4,v:.45},{n:'Copper',dh:155,s:2.2,v:1.1},{n:'Sable',dh:160,s:1.2,v:.75},{n:'Ice',dh:0,s:2.4,v:1.1},{n:'Grape',dh:50,s:2,v:1.1}],
   dog:[{n:'Orange',dh:0,s:1,v:1},{n:'Choco',dh:-4,s:.85,v:.6},{n:'Golden',dh:14,s:.75,v:1.12},{n:'Silver',dh:0,s:.1,v:.85},{n:'Night',dh:220,s:.3,v:.42},{n:'Blue',dh:185,s:.8,v:1},{n:'Bubblegum',dh:300,s:.75,v:1.1},{n:'Lime',dh:70,s:.85,v:1}]};
 function rgb2hsv(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360;}return[h,mx?d/mx:0,mx];}
 function hsv2rgb(h,s,v){const c=v*s,x=c*(1-Math.abs((h/60)%2-1)),m=v-c;let r,g,b;if(h<60)[r,g,b]=[c,x,0];else if(h<120)[r,g,b]=[x,c,0];else if(h<180)[r,g,b]=[0,c,x];else if(h<240)[r,g,b]=[0,x,c];else if(h<300)[r,g,b]=[x,0,c];else[r,g,b]=[c,0,x];return[(r+m)*255,(g+m)*255,(b+m)*255];}
@@ -261,9 +269,17 @@ function recolorImg(img,kind,col){const c=document.createElement('canvas');c.wid
   if(col.dh===0&&col.s===1&&col.v===1)return c;
   try{const d=g.getImageData(0,0,c.width,c.height),a=d.data;for(let i=0;i<a.length;i+=4){if(a[i+3]<8)continue;const p=shiftPix(kind,col,a[i],a[i+1],a[i+2]);if(p){a[i]=p[0];a[i+1]=p[1];a[i+2]=p[2];}}g.putImageData(d,0,0);}catch(e){}
   return c;}
-function skin(kind,ci){const key=kind+ci;if(recolorCache[key])return recolorCache[key];const col=COLORS[kind][ci],set={};
-  for(const k in META)if(k.startsWith(kind+'_')&&IMG[k])set[k]=recolorImg(IMG[k],kind,col);
-  for(const k of ICONS)if(k.includes('_'+kind+'_')&&IMG[k]){const c=recolorImg(IMG[k],kind,col);set[k]=c;set[k+'_url']=c.toDataURL();}
+const BREED_KIND={cat:'cat',siamese:'cat',dog:'dog',husky:'dog'};
+function poseIcon(spr,kind){const c=document.createElement('canvas');c.width=c.height=160;const g=c.getContext('2d');
+  const gr=g.createRadialGradient(80,70,10,80,80,90);gr.addColorStop(0,kind==='cat'?'#e9d3ff':'#ffe2b8');gr.addColorStop(1,kind==='cat'?'#9b62d8':'#f0902a');g.fillStyle=gr;g.fillRect(0,0,160,160);
+  if(spr){const s=150/Math.max(spr.width,spr.height);g.drawImage(spr,80-spr.width*s/2,150-spr.height*s,spr.width*s,spr.height*s);}return c.toDataURL();}
+function headUrl(spr,kind){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle=kind==='cat'?'#efe0ff':'#ffecd2';g.fillRect(0,0,128,128);
+  if(spr){const sz=Math.min(spr.width*.6,spr.height*.62);g.drawImage(spr,spr.width-sz*1.02,0,sz,sz,4,10,120,120);}return c.toDataURL();}
+function skin(breed,ci){const key=breed+ci;if(recolorCache[key])return recolorCache[key];const col=COLORS[breed][ci]||COLORS[breed][0],set={},kind=BREED_KIND[breed];
+  for(const k in META)if(k.startsWith(breed+'_')&&IMG[k])set[k]=recolorImg(IMG[k],breed,col);
+  if(breed===kind){for(const k of ICONS)if(k.includes('_'+kind+'_')&&IMG[k]){const c=recolorImg(IMG[k],kind,col);set[k]=c;set[k+'_url']=c.toDataURL();}}
+  else for(const [n,icon] of KIND[kind].buttons)if(icon)set[icon+'_url']=poseIcon(set[breed+'_'+POSE_FOR[n]],kind);
+  set.portrait=headUrl(set[breed+'_stand'],kind);
   return recolorCache[key]=set;}
 
 /* ---------------- body shapes ---------------- */
@@ -333,19 +349,19 @@ function resize(){DPR=Math.min(window.devicePixelRatio||1,2.5);const w=cv.client
   sizePrev();}
 window.addEventListener('resize',resize);
 
-let G=null, player={kind:'cat',color:0,body:2,name:''}, paused=false, phase='title';
-Object.assign(player,store.get('cvd-fighter',{}));
-function makeFighter(cfg,x,face,isAI){const K=KIND[cfg.kind],B=BODIES[cfg.body]||BODIES[2],hp=Math.round(K.hp*B.hp);
-  return{kind:cfg.kind,K,B,skin:skin(cfg.kind,cfg.color),name:(cfg.name||K.name).toUpperCase(),x,y:0,vx:0,vy:0,face,hp,maxhp:hp,ghost:hp,power:0,state:'idle',t:0,atk:null,atkName:'',hitDone:false,
+let G=null, player={kind:'cat',breed:'cat',color:0,body:2,name:''}, paused=false, phase='title';
+Object.assign(player,store.get('cvd-fighter',{}));if(BREED_KIND[player.breed]!==player.kind)player.breed=player.kind;
+function makeFighter(cfg,x,face,isAI){const K=KIND[cfg.kind],br=cfg.breed||cfg.kind,BM=BREED_MOD[br],B0=BODIES[cfg.body]||BODIES[2],B=Object.assign({},B0,{hp:B0.hp*BM.hp,spd:B0.spd*BM.spd,dmg:B0.dmg*BM.dmg}),hp=Math.round(K.hp*B.hp);
+  return{kind:cfg.kind,breed:br,K,B,skin:skin(br,cfg.color),name:(cfg.name||K.name).toUpperCase(),x,y:0,vx:0,vy:0,face,hp,maxhp:hp,ghost:hp,power:0,state:'idle',t:0,atk:null,atkName:'',hitDone:false,
   cds:{},giant:0,speedUp:0,flash:0,shake:0,ai:isAI?{think:0,move:0}:null,pounced:false,walkT:0,stunT:0,combo:0,comboT:0,wins:0};}
 const scaleOf=f=>f.K.scale*f.B.sc;
 
 /* ---------------- match / rounds ---------------- */
 function newMatch(){
   const other=player.kind==='cat'?'dog':'cat';
-  const cpuCfg={kind:other,color:Math.floor(Math.random()*COLORS[other].length),body:Math.floor(Math.random()*BODIES.length),name:pick(CPU_NAMES[other])};
+  const cpuBreed=pick(BREEDS[other]).id;const cpuCfg={kind:other,breed:cpuBreed,color:Math.floor(Math.random()*COLORS[cpuBreed].length),body:Math.floor(Math.random()*BODIES.length),name:pick(CPU_NAMES[other])};
   G={round:1,me:makeFighter(player,0,1,false),cpu:makeFighter(cpuCfg,0,-1,true)};
-  $('pL').style.backgroundImage=`url(${G.me.skin[KIND[player.kind].portrait+'_url']})`;$('pR').style.backgroundImage=`url(${G.cpu.skin[KIND[other].portrait+'_url']})`;
+  $('pL').style.backgroundImage=`url(${G.me.skin.portrait})`;$('pR').style.backgroundImage=`url(${G.cpu.skin.portrait})`;
   $('nL').textContent=G.me.name;$('nR').textContent=G.cpu.name;
   $('fL').src=`assets/ui/${KIND[player.kind].food}.png`;$('fR').src=`assets/ui/${KIND[other].food}.png`;
   buildButtons();
@@ -562,7 +578,7 @@ function poseOf(f){const K=f.K;
     case 'win': return K.win;
     default: return f.shockT>0?K.stun:K.idle;}}
 function drawFighter(c,f,t,gx,gy,baseSc){
-  let key=f.kind+'_'+poseOf(f);if(!META[key])key=f.kind+'_stand';
+  const br=f.breed||f.kind;let key=br+'_'+poseOf(f);if(!META[key])key=br+'_stand';
   const m=META[key],img=f.skin[key]||IMG[key];if(!img)return;
   let sc=(baseSc||scaleOf(f))*(f.giant>0?1+.55*Math.min(1,f.giant):1);
   let sx=f.B.sx,sy=f.B.sy,ox=0,oy=0,rot=0;
@@ -625,20 +641,25 @@ function drawWarn(x){ctx.save();ctx.translate(x,groundY-60);ctx.font='90px "Lili
 const pcv=$('pcv'),pctx=pcv.getContext('2d');let prev=null;
 function sizePrev(){const r=pcv.getBoundingClientRect();if(!r.width)return;pcv.width=Math.round(r.width*DPR);pcv.height=Math.round(r.height*DPR);}
 function openDesigner(kind){
-  if(kind&&kind!==player.kind){player.kind=kind;player.color=0;player.body=2;}
+  if(kind&&kind!==player.kind){player.kind=kind;player.breed=kind;player.color=0;player.body=2;}
   phase='design';['title','result','pause'].forEach(id=>$(id).hidden=true);$('design').hidden=false;
   $('prevPanel').classList.toggle('dog',player.kind==='dog');
   $('nameIn').value=player.name||'';$('nameIn').placeholder=player.kind==='cat'?'Cat name':'Dog name';
-  const sw=$('swatches');sw.innerHTML='';COLORS[player.kind].forEach((c,i)=>{const b=document.createElement('button');b.style.background=swatchCss(player.kind,c);b.title=c.n;b.setAttribute('aria-label',c.n);b.onclick=()=>{player.color=i;sfx('tap');refreshDesigner();};sw.appendChild(b);});
+  const br=$('breeds');br.innerHTML='';BREEDS[player.kind].forEach(B=>{const b=document.createElement('button');b.innerHTML=`<img src="assets/sprites/${B.id}_stand.png" alt="">${B.n}`;b.dataset.id=B.id;b.onclick=()=>{if(player.breed!==B.id){player.breed=B.id;player.color=0;sfx('tap');buildSwatches();refreshDesigner();}};br.appendChild(b);});
+  buildSwatches();
   const bd=$('bodies');bd.innerHTML='';BODIES.forEach((B,i)=>{const b=document.createElement('button');b.textContent=B.n;b.onclick=()=>{player.body=i;sfx('tap');refreshDesigner();};bd.appendChild(b);});
   requestAnimationFrame(()=>{sizePrev();});
   refreshDesigner();
 }
+function buildSwatches(){
+  const sw=$('swatches');sw.innerHTML='';COLORS[player.breed].forEach((c,i)=>{const b=document.createElement('button');b.style.background=swatchCss(player.breed,c);b.title=c.n;b.setAttribute('aria-label',c.n);b.onclick=()=>{player.color=i;sfx('tap');refreshDesigner();};sw.appendChild(b);});
+}
 function refreshDesigner(){
   [...$('swatches').children].forEach((b,i)=>b.classList.toggle('sel',i===player.color));
   [...$('bodies').children].forEach((b,i)=>b.classList.toggle('sel',i===player.body));
-  const K=KIND[player.kind],B=BODIES[player.body];
-  prev={kind:player.kind,K,B,skin:skin(player.kind,player.color),state:'idle',t:0,face:1,y:0,giant:0,speedUp:0,flash:0,shake:0,walkT:0};
+  [...$('breeds').children].forEach(b=>b.classList.toggle('sel',b.dataset.id===player.breed));
+  const K=KIND[player.kind],BM=BREED_MOD[player.breed],B0=BODIES[player.body],B=Object.assign({},B0,{hp:B0.hp*BM.hp,spd:B0.spd*BM.spd,dmg:B0.dmg*BM.dmg});
+  prev={kind:player.kind,breed:player.breed,K,B,skin:skin(player.breed,player.color),state:'idle',t:0,face:1,y:0,giant:0,speedUp:0,flash:0,shake:0,walkT:0};
   const hp=K.hp*B.hp,spd=K.speed*B.spd,pw=(player.kind==='cat'?60:85)*B.dmg;
   $('dStats').innerHTML=`<span>Health</span><u><i style="width:${Math.min(100,hp/1.5)}%"></i></u><span>Speed</span><u><i style="width:${Math.min(100,spd/6)}%"></i></u><span>Power</span><u><i style="width:${Math.min(100,pw)}%"></i></u>`;
   store.set('cvd-fighter',player);
@@ -657,7 +678,7 @@ function endMatch(){phase='result';
   $('controls').classList.remove('on');input.left=input.right=false;
   const stars=meWon?(G.cpu.wins===0?(G.me.hp/G.me.maxhp>.5?3:2):1):0;
   const rt=$('resTitle');rt.textContent=draw?'DRAW!':meWon?'YOU WIN!':'YOU LOSE!';rt.classList.toggle('lose',!meWon&&!draw);
-  resPose={kind:player.kind,K:G.me.K,B:G.me.B,skin:G.me.skin,state:meWon?'win':draw?'stun':'ko',t:0,face:1,y:0,giant:0,speedUp:0,flash:0,shake:0,walkT:0,stunT:99};
+  resPose={kind:player.kind,breed:G.me.breed,K:G.me.K,B:G.me.B,skin:G.me.skin,state:meWon?'win':draw?'stun':'ko',t:0,face:1,y:0,giant:0,speedUp:0,flash:0,shake:0,walkT:0,stunT:99};
   [...$('resStars').children].forEach((s,i)=>s.classList.toggle('off',i>=stars));
   $('resText').textContent=meWon?(stars===3?`Purr-fect! ${G.me.name} won without a scratch.`:`${G.me.name} won ${G.me.wins}–${G.cpu.wins}!`):draw?'Nobody won this time.':`${G.cpu.name} won ${G.cpu.wins}–${G.me.wins}. Rematch?`;
   sfx(meWon?'win':'lose');
@@ -669,7 +690,7 @@ function toTitle(){phase='title';G=null;['result','pause','design'].forEach(id=>
 function setPause(p){if(phase!=='fight'&&phase!=='count')return;paused=p;$('pause').hidden=!p;input.left=input.right=false;}
 document.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>{audio();sfx('tap');ready.then(()=>openDesigner(c.dataset.k));}));
 $('backBtn').addEventListener('click',toTitle);
-$('randBtn').addEventListener('click',()=>{player.color=Math.floor(Math.random()*COLORS[player.kind].length);player.body=Math.floor(Math.random()*BODIES.length);sfx('tap');refreshDesigner();});
+$('randBtn').addEventListener('click',()=>{player.breed=pick(BREEDS[player.kind]).id;buildSwatches();player.color=Math.floor(Math.random()*COLORS[player.breed].length);player.body=Math.floor(Math.random()*BODIES.length);sfx('tap');refreshDesigner();});
 $('fightBtn').addEventListener('click',()=>{audio();$('nameIn').blur();try{const el=document.documentElement;if(el.requestFullscreen&&!document.fullscreenElement)el.requestFullscreen().then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})).catch(()=>{});}catch(e){}ready.then(newMatch);});
 $('againBtn').addEventListener('click',()=>{audio();newMatch();});
 $('editBtn').addEventListener('click',()=>{G=null;$('hud').hidden=true;$('pauseBtn').hidden=true;openDesigner();});
